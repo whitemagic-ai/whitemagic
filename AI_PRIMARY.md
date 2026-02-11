@@ -76,7 +76,10 @@ source .venv/bin/activate
 # Run MCP server in PRAT mode (recommended — 28 Gana meta-tools)
 WM_MCP_PRAT=1 python -m whitemagic.run_mcp
 
-# Or classic mode (181 individual tools)
+# Or lean mode (28 Gana meta-tools, recommended for new clients)
+python -m whitemagic.run_mcp_lean
+
+# Or classic mode (208 individual tools)
 python -m whitemagic.run_mcp
 
 # Or lite mode (92 core tools)
@@ -112,7 +115,7 @@ cd whitemagic-mojo && mojo build src/satkona_yang.mojo  # Mojo 0.26+ — batch e
 
 Primary:
 - **MCP server (stdio):** `WM_MCP_PRAT=1 python -m whitemagic.run_mcp` (28 Gana meta-tools)
-- **MCP server (classic):** `python -m whitemagic.run_mcp` (181 individual tools)
+- **MCP server (classic):** `python -m whitemagic.run_mcp` (208 individual tools)
 
 Secondary:
 - **In-process Python:** `from whitemagic.tools.unified_api import call_tool`
@@ -129,7 +132,7 @@ On first connection, read these resources before tool calls:
 
 ## PRAT Mode — 28 Gana Meta-Tools
 
-The Polymorphic Resonant Adaptive Tools (PRAT) router maps all 181 tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions (Xiu 宿). Each Gana:
+The Polymorphic Resonant Adaptive Tools (PRAT) router maps all 208 tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions (Xiu 宿). Each Gana:
 
 1. **Has a domain** — a specific operational concern (session, memory, health, ethics, etc.)
 2. **Supports 4 polymorphic operations** — search / analyze / transform / consolidate
@@ -579,7 +582,7 @@ For Whitemagic to be release-ready (v14.0), the following must be verified:
 WhiteMagic now supports multiple "galaxies" — separate memory databases for different projects or domains. Each galaxy has its own SQLite database, holographic index, and association graph. Tools: `galaxy.create`, `galaxy.switch`, `galaxy.list`, `galaxy.status`, `galaxy.ingest`, `galaxy.delete`. The `default` galaxy ships with quickstart guide memories.
 
 ### Ollama Agent Loop
-`ollama.agent` runs an agentic loop where a local LLM autonomously calls WhiteMagic tools. It injects relevant memories as context, parses tool-call blocks from model output, executes them, and feeds results back. Up to 10 iterations. Works with any Ollama-hosted model (llama3.2, phi4, qwen2.5, etc.).
+`ollama.agent` runs an agentic loop where a local LLM autonomously calls WhiteMagic's 208 tools, experiences real value, uses relevant memories as context, parses tool-call blocks from model output, executes them, and feeds results back. Up to 10 iterations. Works with any Ollama-hosted model (llama3.2, phi4, qwen2.5, etc.).
 
 ### Edgerunner Violet Security Layer
 15 new security tools: MCP Integrity (SHA-256 schema fingerprinting), Model Signing (OMS-compatible manifests with trust levels), Engagement Tokens (HMAC-SHA256 scoped authorization for offensive security), Security Monitor (anomaly detection for rapid-fire, lateral movement, privilege escalation). Violet Dharma profile adds 5 security rules. Karma ledger now has ops_class field for dual-log transparency.
@@ -593,10 +596,16 @@ Server Instructions (4,858 chars auto-injected at init), Streamable HTTP transpo
 ### Auto-Context Injection
 `session_bootstrap` now auto-loads quickstart guides and recent memories, providing immediate orientation for new sessions.
 
+### Cognitive Enrichment (Phase 2)
+- **HNSW Indexing** — O(log N) approximate nearest-neighbor search via `hnswlib` 0.8.0 in `EmbeddingEngine`. Hot + cold DB indexes. Fallback to numpy brute-force.
+- **Entropy & Abstraction Scoring** (`core/memory/entropy_scorer.py`) — Shannon entropy, abstraction detection, vocabulary richness. `RetentionEngine` plugin.
+- **Causal Edge Mining** (`core/memory/causal_miner.py`) — Directed edges (led_to, influenced, preceded) blending semantic similarity, temporal proximity, and tag overlap.
+- **UMAP Visualization** (`core/memory/umap_projection.py`) — 2D/3D embedding projection with optional k-means clustering and metadata hydration.
+
 ### Metrics
 - **208 MCP tools** (was 186) across **28 Gana meta-tools**
 - **180 nested tool enums** in the lean MCP server
-- **1,605 tests passing**, 0 consistent failures
+- **1,656 tests passing**, 0 failures
 - **58/58 benchmarks** (36 gauntlet + 22 MCP)
 
 ---

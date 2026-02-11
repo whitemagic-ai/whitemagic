@@ -8,7 +8,7 @@
 
 | Language | LOC | Build Status | Location | Integration |
 |----------|-----|-------------|----------|-------------|
-| **Python** | ~141K | ✅ Active | `whitemagic/` | Core (181 MCP tools, 26 domain files) |
+| **Python** | ~141K | ✅ Active | `whitemagic/` | Core (208 MCP tools, 30+ domain files) |
 | **Rust** | ~11.1K | ✅ `maturin develop --release` | `whitemagic-rust/` | PyO3 — 64+ Python-callable functions |
 | **Zig** | ~2.2K | ✅ `zig build` | `whitemagic-zig/` | 17 exported symbols, static + shared libs |
 | **Haskell** | ~2.8K | ✅ `cabal build` | `haskell/` | FFI — foreign-library .so, `hs_init()` bridge |
@@ -21,7 +21,7 @@
 ## Detailed Breakdown
 
 ### 1. Python (The Body) — ~168K LOC
-The core runtime: 181 MCP tools across 26 domain files, composable dispatch pipeline, tiered memory with 5D holographic coordinates, Galactic Map lifecycle, 28 Gana architecture, ethical governance. Active code is well-separated from `_archived/` legacy.
+The core runtime: 208 MCP tools across 30+ domain files, composable dispatch pipeline, tiered memory with 5D holographic coordinates, Galactic Map lifecycle, 28 Gana architecture, ethical governance. Active code is well-separated from `_archived/` legacy.
 
 ### 2. Rust (The Muscle) — ~10.2K LOC
 **Build:** `cd whitemagic-rust && maturin develop --release`

@@ -15,6 +15,7 @@ Snapshot date: 2026-02-11
 | 2026-02-11 (later) | 0 | `no-untyped-def` wave reduced from 288 → 0 (targeted annotations + module-level overrides) |
 | 2026-02-11 (quality pass) | 0 | Replaced overrides with real annotations in 14 files (override markers: 60 → 46) |
 | 2026-02-11 (release-ready) | 0 | Revalidated full strict profile at 0; override markers currently 46 |
+| 2026-02-11 (final memory tail) | 0 | Closed last 5 issues in memory modules (`hnswlib`/`umap` import-typing + entropy scorer annotations) |
 
 ## What remains
 No remaining mypy errors in this profile.

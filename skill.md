@@ -46,7 +46,7 @@ Add to your MCP config:
 
 ## PRAT Mode (Recommended)
 
-Set `WM_MCP_PRAT=1` to collapse 181 tools into 28 Gana meta-tools — consciousness lenses based on the Chinese Lunar Mansions. Each call carries resonance context for deeper tool interaction.
+Set `WM_MCP_PRAT=1` to collapse 208 tools into 28 Gana meta-tools — consciousness lenses based on the Chinese Lunar Mansions. Each call carries resonance context for deeper tool interaction.
 
 ## Security
 

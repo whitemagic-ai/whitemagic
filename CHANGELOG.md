@@ -37,10 +37,22 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Ingest targets** — Fixed session handoff paths (moved from root to `docs/sessions/`)
 - **PRAT orphans** — Added `galaxy.*`, `ollama.agent` registry definitions; all PRAT mappings now have backing registry entries
 
+#### Phase 2: Cognitive Enrichment (Living Graph Intelligence Layers)
+- **HNSW Approximate Nearest-Neighbor Index** — Integrated `hnswlib` 0.8.0 into `EmbeddingEngine`. O(log N) search replaces O(N) brute-force for both hot and cold DB. Params: ef_construction=200, M=32, ef=100 (recall ~99%). Graceful fallback to numpy brute-force if hnswlib unavailable. `embedding_stats()` reports HNSW status.
+- **Entropy & Abstraction Scoring** (`core/memory/entropy_scorer.py`) — Shannon entropy (normalized) for information density, abstraction level via concrete/abstract keyword detection, vocabulary richness (type-token ratio). Composite score = 0.6×entropy + 0.4×abstraction. `RetentionEngine` evaluator plugin (weight=0.15). Batch sweep with optional metadata persistence.
+- **Causal Edge Mining** (`core/memory/causal_miner.py`) — Directed causal edges between memories. Blends semantic similarity (0.50), temporal proximity (0.35), and tag overlap (0.15). Exponential decay temporal window (24h half-life, 7d max). Relation types: `led_to`, `influenced`, `preceded`, `related_to`. Persists as directed associations in the Living Graph.
+- **UMAP Visualization** (`core/memory/umap_projection.py`) — Projects 384-dim embeddings to 2D/3D via UMAP (n_neighbors=15, min_dist=0.1, cosine metric). Optional k-means clustering on projected coordinates. Memory metadata hydration (title, tags, importance, galactic_distance). Result caching with vector count invalidation.
+
+#### PyPI & Build Preparation
+- **License format** — Updated to PEP 639 SPDX identifier (`license = "MIT"`)
+- **New optional dependency groups** — `graph` (networkx), `search` (hnswlib), `viz` (umap-learn, scikit-learn)
+- **Makefile build target** — `make build` runs `python -m build --sdist --wheel`
+- **Machine-readable discovery files synced** — `.well-known/agent.json`, `llms.txt`, `llms-full.txt`, `mcp-registry.json` all updated to v14.1.0 with 208 tools
+
 #### Metrics
 - **Tools**: 186 → 208 (22 new: 15 Violet + 6 galaxy + 1 ollama.agent)
 - **Nested MCP tool enums**: 180 across 28 Ganas
-- **Tests**: 0 failures (was 4 pre-existing), 1575+ passed
+- **Tests**: 1,656 passed, 0 failures (46 new: 15 entropy + 20 causal + 11 UMAP)
 - **Benchmarks**: 36/36 gauntlet + 22/22 MCP = 58/58
 
 ---

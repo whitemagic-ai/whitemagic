@@ -1,6 +1,6 @@
 # MCP Integration Cookbook
 
-WhiteMagic exposes its 181 tools (or 28 PRAT Gana meta-tools) via the Model Context Protocol (MCP) over stdio. This guide covers configuration for all major MCP clients.
+WhiteMagic exposes its 208 tools (or 28 PRAT Gana meta-tools) via the Model Context Protocol (MCP) over stdio. This guide covers configuration for all major MCP clients.
 
 ---
 
@@ -9,7 +9,7 @@ WhiteMagic exposes its 181 tools (or 28 PRAT Gana meta-tools) via the Model Cont
 | Mode | Tools | Env Var | Best For |
 |------|-------|---------|----------|
 | **PRAT** | 28 Gana meta-tools | `WM_MCP_PRAT=1` | AI agents (recommended) |
-| **Classic** | 181 individual tools | _(default)_ | Power users |
+| **Classic** | 208 individual tools | _(default)_ | Power users |
 | **Lite** | 92 core tools | `WM_MCP_LITE=1` | Fast startup |
 
 ---
@@ -187,7 +187,7 @@ pip install fastmcp
 
 ### Too many tools / client timeout
 
-Use PRAT mode (`WM_MCP_PRAT=1`) to reduce from 181 → 28 tools, or Lite mode (`WM_MCP_LITE=1`) for 92 tools.
+Use PRAT mode (`WM_MCP_PRAT=1`) to reduce from 208 → 28 tools, or Lite mode (`WM_MCP_LITE=1`) for 92 tools.
 
 ### Tools not responding
 

@@ -366,7 +366,7 @@ class EmbeddingEngine:
         if self._hnsw_available is not None:
             return self._hnsw_available
         try:
-            import hnswlib  # noqa: F401
+            import hnswlib  # type: ignore[import-untyped]  # noqa: F401
             self._hnsw_available = True
         except ImportError:
             self._hnsw_available = False
@@ -380,7 +380,7 @@ class EmbeddingEngine:
           - M=32: connections per node (good for 384-dim, default 16)
           - ef=100: search-time beam width (recall ~99% at this level)
         """
-        import hnswlib
+        import hnswlib  # type: ignore[import-untyped]
         n, dim = vectors.shape
         index = hnswlib.Index(space="cosine", dim=dim)
         # max_elements with 20% headroom for incremental adds

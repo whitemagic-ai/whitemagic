@@ -1,14 +1,14 @@
 # WhiteMagic Strategic Roadmap — v13.4 → v14.0+
 
-**Last Updated:** February 10, 2026
-**Current Version:** 13.6.0
-**Target:** v14.0.0 Public Release → v15.0 Autonomous Horizon
+**Last Updated:** February 11, 2026
+**Current Version:** 14.1.0
+**Target:** v14.2 Autonomous Horizon → v15.0 Trust & Distribution
 
 ---
 
 ## Executive Summary
 
-WhiteMagic is a 9-language polyglot tool substrate for agentic AI — 181 MCP tools, tiered memory with 5D holographic coordinates, ethical governance, and compiled accelerators in Rust, Zig, Haskell, Elixir, Mojo, Go, Julia, and TypeScript. The system is functionally complete. What remains is making the memory system truly semantic, hardening for public consumption, building the economic layer, and shipping.
+WhiteMagic is a 9-language polyglot tool substrate for agentic AI — 208 MCP tools, tiered memory with 5D holographic coordinates, ethical governance, and compiled accelerators in Rust, Zig, Haskell, Elixir, Mojo, Go, Julia, and TypeScript. The system is functionally complete. What remains is making the memory system truly semantic, hardening for public consumption, building the economic layer, and shipping.
 
 The path to release is organized as **7 leaps** (6 technical + 1 economic), each a focused session producing a versioned milestone. Beyond v14.0, the roadmap extends into the **Autonomous Horizon** (v15.0+) — WASM capability distribution, cryptographically signed tool manifests, and static binary agents — informed by the rapid maturation of the Molt ecosystem, PRAT compute economics, and the shift from DevOps to AgentOps.
 
@@ -89,7 +89,7 @@ The embedding layer (v13.4) gave us 384-dim vectors for 5,547 memories. Now we w
 
 ## Leap 3 — Test Fortress & Type Safety (v13.7)
 
-**Status:** 🔧 ~70% Complete
+**Status:** ✅ ~85% Complete (0 mypy errors on public surface, 1,656 tests, CI workflows defined)
 **Theme:** Make it safe to ship to strangers.
 
 ### Objectives
@@ -119,7 +119,7 @@ The embedding layer (v13.4) gave us 384-dim vectors for 5,547 memories. Now we w
 
 ## Leap 4 — Developer Experience & Documentation (v13.8)
 
-**Status:** ⬜ Pending
+**Status:** 🔧 ~60% Complete (README, AI_PRIMARY, SYSTEM_MAP, CHANGELOG current; MCP config examples exist; Quickstart guides seeded)
 **Theme:** Make it approachable to someone who's never seen the codebase.
 
 ### Objectives
@@ -142,7 +142,7 @@ The embedding layer (v13.4) gave us 384-dim vectors for 5,547 memories. Now we w
 
 ## Leap 5 — Packaging & Distribution (v13.9)
 
-**Status:** ⬜ Pending
+**Status:** 🔧 ~70% Complete (pyproject.toml ready, license PEP 639, extras groups, Makefile build target; pending: TestPyPI upload, Docker image)
 **Theme:** Make it installable by the world.
 
 ### Objectives
@@ -166,7 +166,7 @@ The embedding layer (v13.4) gave us 384-dim vectors for 5,547 memories. Now we w
 
 ## Leap 5.5 — The Gratitude Architecture (Economic Layer)
 
-**Status:** ⬜ Pending
+**Status:** 🔧 Phase 5.5a Complete (llms.txt, A2A Agent Card, MCP Registry, skill.md, README polish). Phases 5.5b-5.5d pending.
 **Theme:** Build the economic engine — free by default, pay if grateful.
 
 This is the layer that transforms WhiteMagic from an open-source project into a sustainable ecosystem. The core insight: **forced payments don't work in the agent economy** (ClawTasks already pivoted to free-only). WhiteMagic uses a gratitude-first model with dual payment channels.
@@ -298,7 +298,7 @@ Inject these as `_prat_economics` in every Gana resonance response, making every
 
 ## Leap 6 — v14.0 Ship Day
 
-**Status:** ⬜ Pending
+**Status:** ✅ Complete (v14.0.0 shipped, v14.1.0 current)
 **Theme:** Final polish and the push of the button.
 
 ### Objectives
@@ -325,7 +325,7 @@ Inject these as `_prat_economics` in every Gana resonance response, making every
 
 ## Leap 7 — The Nervous System (v14.1)
 
-**Status:** 🔧 In Progress
+**Status:** ⬜ Deferred to v14.2+
 **Theme:** Separate Control Plane from Data Plane. Replace message-passing with shared-memory resonance.
 
 Informed by research into LMAX Disruptor architecture, Iceoryx2 shared-memory middleware, and Apache Arrow zero-copy formats. The core insight: MCP handles tool discovery (slow path), but inter-tool state synchronization must bypass JSON serialization entirely.
@@ -603,22 +603,18 @@ WhiteMagic tools priced in PRAT cycles on decentralized compute marketplaces:
 
 ---
 
-## Current Metrics (v13.6.0)
+## Current Metrics (v14.1.0)
 
 | Metric | Value |
 |--------|-------|
-| **Python** | 763 files, ~141K LOC |
-| **Polyglot** | 24,694 LOC, 8 languages, 14.9% |
-| **MCP Tools** | 181 (or 28 PRAT Gana meta-tools) |
-| **Tests** | 1,367 passed, 9 skipped |
-| **Hot DB** | 1.48 GB, 5,623 memories |
-| **Cold DB** | 5.05 GB, 105,194 memories |
-| **Embeddings** | 5,562 vectors (384 dims, MiniLM-L6-v2) |
+| **Python** | ~770 files, ~170K LOC |
+| **Polyglot** | ~25K LOC, 9 languages |
+| **MCP Tools** | 208 (or 28 PRAT Gana meta-tools) |
+| **Tests** | 1,656 passed, 0 failed |
+| **Embeddings** | 384 dims, MiniLM-L6-v2, HNSW indexed |
 | **Constellations** | 19 detected |
-| **Associations** | 19.0M (pruned from 27.8M) |
 | **Active Fusions** | 28 cross-system |
 | **Engines** | 28 (mapped to Gardens/Ganas/Grimoire) |
-| **Protected Memories** | 164 |
 | **Accelerators** | Rust ✅, Zig ✅, Haskell ❌ (runtime), Julia ❌ (runtime) |
 
 ---

@@ -109,7 +109,7 @@ pytest tests/ --cov=whitemagic --cov-report=term
 # Specific test
 pytest tests/unit/test_fusions.py -v
 
-# Smoke test (all 181 tools)
+# Smoke test (all 208 tools)
 python audit/tool_smoke.py
 ```
 

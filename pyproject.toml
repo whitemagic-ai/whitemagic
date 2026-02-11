@@ -8,7 +8,7 @@ version = "14.1.0"
 description = "The Tool Substrate for Agentic AI — 208 MCP tools, tiered memory, ethical governance, polyglot accelerators"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "WhiteMagic Contributors"}
 ]
@@ -131,6 +131,22 @@ numeric = [
     "scipy>=1.10.0",
 ]
 
+# Graph topology (networkx for graph engine)
+graph = [
+    "networkx>=3.0",
+]
+
+# Search acceleration (HNSW approximate nearest neighbor)
+search = [
+    "hnswlib>=0.8.0",
+]
+
+# Visualization (UMAP projection, clustering)
+viz = [
+    "umap-learn>=0.5.0",
+    "scikit-learn>=1.3.0",
+]
+
 opt = [
     "cvxpy>=1.4.0",
 ]
@@ -220,6 +236,10 @@ full = [
     "watchdog>=3.0.0",
     "websockets>=12.0",
     "python-multipart>=0.0.6",
+    "networkx>=3.0",
+    "hnswlib>=0.8.0",
+    "umap-learn>=0.5.0",
+    "scikit-learn>=1.3.0",
 ]
 
 [project.scripts]
@@ -319,6 +339,13 @@ module = [
     "tiktoken",
     "watchdog",
     "watchdog.*",
+    "hnswlib",
+    "umap",
+    "umap.*",
+    "sklearn",
+    "sklearn.*",
+    "networkx",
+    "networkx.*",
 ]
 ignore_missing_imports = true
 

@@ -115,7 +115,7 @@ class UMAPProjector:
         if self._umap_available is not None:
             return self._umap_available
         try:
-            import umap  # noqa: F401
+            import umap  # type: ignore[import-untyped]  # noqa: F401
             self._umap_available = True
         except ImportError:
             self._umap_available = False
@@ -272,7 +272,7 @@ class UMAPProjector:
             return 0
 
         try:
-            from sklearn.cluster import KMeans
+            from sklearn.cluster import KMeans  # type: ignore[import-untyped]
         except ImportError:
             # Fallback: simple grid-based clustering
             return 0

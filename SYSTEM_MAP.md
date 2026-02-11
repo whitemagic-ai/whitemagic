@@ -126,6 +126,28 @@ CORE (0.0-0.15) → INNER_RIM (0.15-0.40) → MID_BAND (0.40-0.65) → OUTER_RIM
 
 Tests: `tests/unit/test_galactic_map.py` (21) + `tests/unit/test_galactic_improvements.py` (22) = 43 tests
 
+## Cognitive Enrichment (v14.1)
+
+Intelligence layers built on top of the Living Graph and semantic embedding infrastructure.
+
+### HNSW Approximate Nearest-Neighbor Index
+Integrated into `whitemagic/core/memory/embeddings.py`. Uses `hnswlib` 0.8.0 for O(log N) embedding search on both hot and cold DBs. Parameters: ef_construction=200, M=32, ef=100 (~99% recall). Graceful fallback to numpy brute-force when hnswlib is not installed. `embedding_stats()` reports HNSW status.
+
+### Entropy & Abstraction Scoring
+- `whitemagic/core/memory/entropy_scorer.py`: **EntropyScorer** — Shannon entropy (normalized) for information density, abstraction level via concrete/abstract keyword detection, vocabulary richness (type-token ratio). Composite score = 0.6×entropy + 0.4×abstraction. Plugs into `RetentionEngine` as an evaluator (weight=0.15). Batch sweep with optional metadata persistence.
+
+Tests: `tests/unit/test_entropy_scorer.py` (15 tests)
+
+### Causal Edge Mining
+- `whitemagic/core/memory/causal_miner.py`: **CausalMiner** — discovers directed causal edges between memories. Blends semantic similarity (0.50), temporal proximity (0.35), and tag overlap (0.15). Exponential decay temporal window (24h half-life, 7d max). Relation types: `led_to`, `influenced`, `preceded`, `related_to`. Persists as directed associations in the Living Graph.
+
+Tests: `tests/unit/test_causal_miner.py` (20 tests)
+
+### UMAP Visualization
+- `whitemagic/core/memory/umap_projection.py`: **UMAPProjector** — projects 384-dim embeddings to 2D/3D via UMAP (n_neighbors=15, min_dist=0.1, cosine metric). Optional k-means clustering on projected coordinates. Memory metadata hydration (title, tags, importance, galactic_distance). Result caching with vector count invalidation.
+
+Tests: `tests/unit/test_umap_projection.py` (11 tests)
+
 ## MandalaOS-Inspired Modules (v11.2)
 
 Ethical governance, harmony monitoring, and resilience subsystems inspired by MandalaOS:

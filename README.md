@@ -9,8 +9,8 @@ If you're integrating Whitemagic into an agent runtime, start with `AI_PRIMARY.m
 ## Core Features
 
 1.  **Memory Substrate**: Tiered memory management with native SQLite backing, 5D holographic coordinates (XYZWV), a Galactic Map lifecycle (no memory is ever deleted — only rotated outward), constellation detection, and association mining.
-2.  **181 MCP Tools** exposed via a unified interface (`whitemagic.tools.unified_api`) with a composable middleware pipeline (input sanitizer → circuit breaker → rate limiter → RBAC → maturity gate → governor → core router → compact response).
-3.  **PRAT Mode (28 Gana Meta-Tools)**: The Polymorphic Resonant Adaptive Tools router maps all tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions. Every call carries resonance context (predecessor output, lunar phase, Harmony Vector, Wu Xing boost, Guna adaptation). Enable with `WM_MCP_PRAT=1`.
+2.  **208 MCP Tools** exposed via a unified interface (`whitemagic.tools.unified_api`) with a composable middleware pipeline (input sanitizer → circuit breaker → rate limiter → RBAC → maturity gate → governor → core router → compact response).
+3.  **PRAT Mode (28 Gana Meta-Tools)**: The Polymorphic Resonant Adaptive Tools router maps all 208 tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions. Every call carries resonance context (predecessor output, lunar phase, Harmony Vector, Wu Xing boost, Guna adaptation). Enable with `WM_MCP_PRAT=1`.
 4.  **Capability Matrix**: 25 subsystems, 28 active cross-system fusions, 0 unexplored — all queryable via `capability.matrix` MCP tool.
 5.  **MCP Native**: Built from the ground up to be served via the Model Context Protocol (MCP).
 6.  **Self-Regulating**: Harmony Vector (7-dimension health), Dharma Rules Engine (ethical governance with YAML hot-reload), Homeostatic Loop (auto-correction), Karma Ledger (side-effect auditing), Circuit Breakers, Maturity Gates, Agent Trust scoring.
@@ -138,6 +138,7 @@ out = call_tool("gnosis", compact=True)
 *   `whitemagic/tools/prat_router.py`: PRAT router — maps 208 tools → 28 Gana meta-tools.
 *   `whitemagic/tools/`: Canonical tool registry, dispatch pipeline, and handler modules.
 *   `whitemagic/core/ganas/`: 28 Gana architecture (4 quadrant files + chain + base + karma + lunar + swarm).
+*   `whitemagic/core/memory/`: Memory substrate — embeddings (HNSW), entropy scoring, causal mining, UMAP projection, graph walker, surprise gate, lifecycle, galactic map.
 *   `whitemagic-rust/`: Rust accelerator (~8.5K LOC) — galactic batch scoring, association mining, 5D KD-tree, SIMD search.
 *   `haskell/`: Haskell accelerator (~1.7K LOC) — algebraic Dharma rules, dependency graph planner, FFI bridge.
 *   `elixir/`: Elixir OTP (~1.4K LOC) — actor-model Gan Ying event bus, dream scheduler, supervision trees.

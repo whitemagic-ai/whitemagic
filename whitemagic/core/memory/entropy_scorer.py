@@ -37,7 +37,7 @@ import threading
 import time
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -286,7 +286,7 @@ class EntropyScorer:
     # Retention evaluator plugin
     # ------------------------------------------------------------------
 
-    def as_retention_evaluator(self):
+    def as_retention_evaluator(self) -> Callable[[Any], object]:
         """Return a callable compatible with RetentionEngine evaluators.
 
         Entropy contributes to retention: high-entropy memories are more
@@ -294,7 +294,7 @@ class EntropyScorer:
         """
         from whitemagic.core.memory.mindful_forgetting import RetentionSignal
 
-        def _entropy_evaluator(mem) -> RetentionSignal:
+        def _entropy_evaluator(mem: Any) -> RetentionSignal:
             content_str = str(mem.content) if mem.content else ""
             if mem.title:
                 content_str = f"{mem.title} {content_str}"

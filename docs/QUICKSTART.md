@@ -30,7 +30,7 @@ Expected output:
 ```
 ✅ Core: OK
 ✅ Memory DB: OK
-✅ Tools: 181 registered
+✅ Tools: 208 registered
 ✅ MCP: fastmcp available
 ```
 
@@ -124,7 +124,7 @@ Add to your `.mcp.json`:
 
 ### Option B: Classic Mode
 
-All 181 individual tools:
+All 208 individual tools:
 
 ```bash
 python -m whitemagic.run_mcp

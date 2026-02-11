@@ -3,7 +3,7 @@ WM_STATE_ROOT ?= /tmp/whitemagic_eval
 WM_DB_PATH ?=
 WM_SILENT_INIT ?= 1
 
-.PHONY: install test smoke ship clean format eval lint typecheck clippy
+.PHONY: install test smoke ship clean format eval lint typecheck clippy build
 
 install:
 	pip install -e ".[dev,mcp,cli]"
@@ -33,6 +33,10 @@ typecheck:
 
 clippy:
 	cd whitemagic-rust && cargo clippy -- -W clippy::unwrap_used
+
+build:
+	rm -rf dist/
+	python -m build --sdist --wheel
 
 format:
 	black .
