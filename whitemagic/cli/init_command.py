@@ -4,11 +4,14 @@ Creates the minimal files an AI agent (or human) needs to understand,
 configure, and launch WhiteMagic from a fresh install.
 
 Generated files:
+    .mcp.json        — MCP client config (works with Windsurf, Claude Desktop, etc.)
     README.md        — AI-readable orientation and quickstart
-    run.sh           — One-line launcher for MCP server
+    run.sh           — One-line launcher for MCP server (auto-activates venv)
     playground.py    — Interactive demo: capabilities, memory round-trip, gnosis
     .env             — Default environment configuration
     .gitignore       — Sensible defaults for a WM project
+    data/            — Runtime data directory
+    logs/            — Log output directory
 """
 from __future__ import annotations
 
@@ -34,7 +37,7 @@ to start using WhiteMagic as an AI agent or human operator.
 
 WhiteMagic is a **cognitive scaffolding layer** for AI agents. It provides:
 
-- **181 MCP tools** organized into 28 Ganas (Polymorphic Resonant Adaptive Tools)
+- **285 MCP tools** organized into 28 Ganas (Polymorphic Resonant Adaptive Tools)
 - **Persistent memory** with semantic search, embeddings, and galactic lifecycle
 - **Ethical governance** via Dharma rules, Karma ledger, and Harmony Vector
 - **Self-awareness** through Gnosis introspection, Self-Model forecasting, and Homeostasis
@@ -69,7 +72,7 @@ from whitemagic.tools.unified_api import call_tool
 result = call_tool("gnosis", compact=True)
 
 # Store a memory
-call_tool("remember", text="Important finding", tags=["research"])
+call_tool("remember", content="Important finding", title="Research note", tags=["research"])
 
 # Recall it later
 results = call_tool("recall", query="important finding")
@@ -87,7 +90,18 @@ python playground.py
 
 ## MCP Configuration
 
-Add to your MCP client config (e.g. `.mcp.json`, Claude Desktop, Windsurf):
+A ready-to-use `.mcp.json` was generated in this directory. To use it with your
+MCP client (Windsurf, Claude Desktop, Cursor, etc.), copy or symlink it:
+
+```bash
+# Windsurf / Cursor — project-level config (already in place)
+cat .mcp.json
+
+# Claude Desktop — copy to global config
+cp .mcp.json ~/.claude/mcp.json
+```
+
+Or add manually to any MCP client config:
 
 ```json
 {{
@@ -109,8 +123,8 @@ Add to your MCP client config (e.g. `.mcp.json`, Claude Desktop, Windsurf):
 | Mode | Env Var | Tools | Best For |
 |------|---------|-------|----------|
 | **PRAT** | `WM_MCP_PRAT=1` | 28 Gana meta-tools | Advanced agents (recommended) |
-| **Lite** | `WM_MCP_LITE=1` | ~87 core tools | Simple integrations |
-| **Full** | *(default)* | 181 tools | Maximum capability |
+| **Lite** | `WM_MCP_LITE=1` | ~92 core tools | Simple integrations |
+| **Full** | *(default)* | 285 tools | Maximum capability |
 
 ## Starter Packs
 
@@ -166,20 +180,30 @@ _RUN_SH = """\
 #
 # Modes:
 #   --prat  (default) 28 Gana meta-tools — recommended for advanced agents
-#   --lite  ~87 core tools — simpler integration
-#   --full  All 181 tools — maximum capability
+#   --lite  ~92 core tools — simpler integration
+#   --full  All 285 tools — maximum capability
 
 set -euo pipefail
+
+# Auto-activate venv if not already active
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -z "${VIRTUAL_ENV:-}" ]; then
+    if [ -f "$SCRIPT_DIR/venv/bin/activate" ]; then
+        source "$SCRIPT_DIR/venv/bin/activate"
+    elif [ -f "$SCRIPT_DIR/.venv/bin/activate" ]; then
+        source "$SCRIPT_DIR/.venv/bin/activate"
+    fi
+fi
 
 MODE="${1:---prat}"
 
 case "$MODE" in
     --full)
-        echo "Starting WhiteMagic MCP Server (full mode — 181 tools)..."
+        echo "Starting WhiteMagic MCP Server (full mode — 285 tools)..."
         exec python -m whitemagic.run_mcp
         ;;
     --lite)
-        echo "Starting WhiteMagic MCP Server (lite mode — ~87 tools)..."
+        echo "Starting WhiteMagic MCP Server (lite mode — ~92 tools)..."
         WM_MCP_LITE=1 exec python -m whitemagic.run_mcp
         ;;
     --prat|*)
@@ -275,7 +299,7 @@ def main() -> None:
             tools = list(tools.values())
         print(f"  Available tools: {len(tools)}")
         categories = {}
-        for t_info in tools[:200]:
+        for t_info in tools[:300]:
             if isinstance(t_info, dict):
                 cat = t_info.get("category", "unknown")
             elif isinstance(t_info, str):
@@ -295,7 +319,8 @@ def main() -> None:
     print("  Storing a test memory...")
     store_result = call_tool(
         "remember",
-        text="WhiteMagic playground test: the answer to everything is 42.",
+        content="WhiteMagic playground test: the answer to everything is 42.",
+        title="Playground Test Memory",
         tags=["test", "playground"],
     )
     if store_result.get("status") == "success":
@@ -381,8 +406,8 @@ _ENV = """\
 
 # MCP Server Mode (set ONE of these)
 # WM_MCP_PRAT=1       # 28 Gana meta-tools (recommended)
-# WM_MCP_LITE=1       # ~87 core tools
-# (neither)            # Full mode — all 181 tools
+# WM_MCP_LITE=1       # ~92 core tools
+# (neither)            # Full mode — all 285 tools
 
 # MCP Client Adapter (adjusts schema for specific AI clients)
 # WM_MCP_CLIENT=gemini   # Options: gemini, deepseek, qwen, kimi
@@ -391,7 +416,7 @@ _ENV = """\
 # WM_SILENT_INIT=1
 
 # Dharma profile (ethical governance strictness)
-# WM_DHARMA_PROFILE=default   # Options: default, creative, secure
+# WM_DHARMA_PROFILE=default   # Options: default, creative, secure, violet
 
 # Ollama endpoint for local LLM inference
 # OLLAMA_HOST=http://localhost:11434
@@ -410,6 +435,21 @@ venv/
 logs/
 tmp/
 .whitemagic/
+"""
+
+_MCP_JSON = """\
+{
+  "mcpServers": {
+    "whitemagic": {
+      "command": "python",
+      "args": ["-m", "whitemagic.run_mcp"],
+      "env": {
+        "WM_MCP_PRAT": "1",
+        "WM_SILENT_INIT": "1"
+      }
+    }
+  }
+}
 """
 
 
@@ -443,6 +483,7 @@ def init_command(directory: str, force: bool, minimal: bool) -> None:
     target.mkdir(parents=True, exist_ok=True)
 
     files: dict[str, str] = {
+        ".mcp.json": _MCP_JSON,
         "README.md": _README.format(version=__version__),
         "run.sh": _RUN_SH,
     }
@@ -467,6 +508,10 @@ def init_command(directory: str, force: bool, minimal: bool) -> None:
         # Make .sh and .py files executable
         if filename.endswith(".sh") or filename.endswith(".py"):
             filepath.chmod(filepath.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+
+    # Create runtime directories
+    for dirname in ("data", "logs", "tmp"):
+        (target / dirname).mkdir(exist_ok=True)
 
     # Print results
     click.echo(f"\n  WhiteMagic v{__version__} — Project initialized at {target}\n")
