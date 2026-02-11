@@ -1,4 +1,4 @@
-"""Semantic Embedding Layer (v13.6).
+"""Semantic Embedding Layer (v14.1).
 =================================
 Provides sentence-level semantic embeddings for memory search and
 association mining. Replaces keyword-overlap Jaccard with true
@@ -8,7 +8,8 @@ Design:
   - Lazy-loaded model (MiniLM-L6-v2, 384 dims, ~100MB)
   - Embeddings cached in `memory_embeddings` table (SQLite)
   - Batch encode via model.encode() with progress
-  - Cosine similarity for nearest-neighbor search
+  - HNSW approximate nearest-neighbor index (O(log N) queries)
+  - Falls back to brute-force numpy cosine when hnswlib not available
   - Graceful fallback when sentence-transformers not installed
 
 Usage:
@@ -146,6 +147,15 @@ class EmbeddingEngine:
         self._vec_cache_vecs: np.ndarray | None = None  # shape (N, EMBEDDING_DIM), float32, PRE-NORMALIZED
         self._vec_cache_lock = threading.Lock()
         self._vec_cache_count: int = 0  # DB count at cache time
+        # HNSW index (optional, O(log N) search)
+        self._hnsw_index: Any | None = None
+        self._hnsw_ids: list[str] | None = None
+        self._hnsw_count: int = 0
+        self._hnsw_available: bool | None = None  # None = unchecked
+        # Cold HNSW index
+        self._cold_hnsw_index: Any | None = None
+        self._cold_hnsw_ids: list[str] | None = None
+        self._cold_hnsw_count: int = 0
         # Separate vector cache for cold DB
         self._cold_vec_cache_ids: list[str] | None = None
         self._cold_vec_cache_vecs: np.ndarray | None = None  # shape (N, EMBEDDING_DIM), float32
@@ -342,11 +352,101 @@ class EmbeddingEngine:
             return False
 
     def _invalidate_vec_cache(self) -> None:
-        """Invalidate the in-memory vector cache."""
+        """Invalidate the in-memory vector cache and HNSW index."""
         with self._vec_cache_lock:
             self._vec_cache_ids = None
             self._vec_cache_vecs = None
             self._vec_cache_count = 0
+            self._hnsw_index = None
+            self._hnsw_ids = None
+            self._hnsw_count = 0
+
+    def _hnsw_is_available(self) -> bool:
+        """Check if hnswlib is installed."""
+        if self._hnsw_available is not None:
+            return self._hnsw_available
+        try:
+            import hnswlib  # noqa: F401
+            self._hnsw_available = True
+        except ImportError:
+            self._hnsw_available = False
+        return self._hnsw_available
+
+    def _build_hnsw_index(self, ids: list[str], vectors: np.ndarray) -> Any:
+        """Build an HNSW index from vectors.
+
+        Parameters tuned for memory workloads:
+          - ef_construction=200: higher quality graph (default 100)
+          - M=32: connections per node (good for 384-dim, default 16)
+          - ef=100: search-time beam width (recall ~99% at this level)
+        """
+        import hnswlib
+        n, dim = vectors.shape
+        index = hnswlib.Index(space="cosine", dim=dim)
+        # max_elements with 20% headroom for incremental adds
+        index.init_index(max_elements=max(n + 100, int(n * 1.2)), ef_construction=200, M=32)
+        index.add_items(vectors, list(range(n)))
+        index.set_ef(100)
+        return index
+
+    def _get_hnsw_index(self) -> tuple[Any, list[str]] | None:
+        """Get or build the hot HNSW index. Returns (index, id_list) or None."""
+        if not self._hnsw_is_available():
+            return None
+        ids, vectors = self._load_vec_cache()
+        if not ids or not hasattr(vectors, 'shape') or vectors.shape[0] < 5:
+            return None  # Too few vectors for HNSW to be useful
+        with self._vec_cache_lock:
+            if (self._hnsw_index is not None
+                    and self._hnsw_ids is not None
+                    and self._hnsw_count == len(ids)):
+                return self._hnsw_index, self._hnsw_ids
+        try:
+            index = self._build_hnsw_index(ids, vectors)
+            self._hnsw_index = index
+            self._hnsw_ids = ids
+            self._hnsw_count = len(ids)
+            logger.debug(f"HNSW index built: {len(ids)} vectors, dim={vectors.shape[1]}")
+            return index, ids
+        except Exception as e:
+            logger.debug(f"HNSW build failed: {e}")
+            self._hnsw_available = False
+            return None
+
+    def _get_cold_hnsw_index(self) -> tuple[Any, list[str]] | None:
+        """Get or build the cold HNSW index. Returns (index, id_list) or None."""
+        if not self._hnsw_is_available():
+            return None
+        cold_ids, cold_vectors = self._load_cold_vec_cache()
+        if not cold_ids or not hasattr(cold_vectors, 'shape') or cold_vectors.shape[0] < 5:
+            return None
+        if (self._cold_hnsw_index is not None
+                and self._cold_hnsw_ids is not None
+                and self._cold_hnsw_count == len(cold_ids)):
+            return self._cold_hnsw_index, self._cold_hnsw_ids
+        try:
+            index = self._build_hnsw_index(cold_ids, cold_vectors)
+            self._cold_hnsw_index = index
+            self._cold_hnsw_ids = cold_ids
+            self._cold_hnsw_count = len(cold_ids)
+            logger.debug(f"Cold HNSW index built: {len(cold_ids)} vectors")
+            return index, cold_ids
+        except Exception as e:
+            logger.debug(f"Cold HNSW build failed: {e}")
+            return None
+
+    def _hnsw_search(self, query_vec: np.ndarray, index: Any, ids: list[str],
+                     limit: int, min_similarity: float) -> list[dict[str, Any]]:
+        """Search an HNSW index. Returns list of {memory_id, similarity, source}."""
+        q = np.asarray(query_vec, dtype=np.float32).reshape(1, -1)
+        k = min(limit * 3, len(ids))  # Over-fetch then filter
+        labels, distances = index.knn_query(q, k=k)
+        results = []
+        for idx, dist in zip(labels[0], distances[0]):
+            sim = 1.0 - dist  # hnswlib cosine returns distance = 1 - similarity
+            if sim >= min_similarity:
+                results.append({"memory_id": ids[idx], "similarity": round(float(sim), 4)})
+        return results
 
     def _load_vec_cache(self) -> tuple[list[str], np.ndarray]:
         """Load or return cached vectors as contiguous numpy array.
@@ -380,12 +480,16 @@ class EmbeddingEngine:
             except Exception:
                 return [], np.empty((0, EMBEDDING_DIM), dtype=np.float32)
 
+            if not rows:
+                return [], np.empty((0, EMBEDDING_DIM), dtype=np.float32)
             ids = [r[0] for r in rows]
             # Unpack all blobs into a single contiguous float32 array
             vecs = np.array(
                 [_unpack_embedding(r[1]) for r in rows],
                 dtype=np.float32,
             )
+            if vecs.ndim == 1:
+                vecs = vecs.reshape(-1, EMBEDDING_DIM)
             # Pre-normalize: each row becomes unit-length
             # This saves ~30% FLOPS per search (no per-row norm at query time)
             norms = np.linalg.norm(vecs, axis=1, keepdims=True)
@@ -496,39 +600,61 @@ class EmbeddingEngine:
 
         # --- Hot DB search ---
         results = []
-        ids, vectors = self._load_vec_cache()
-        if ids:
+
+        # HNSW fast path (O(log N) per query)
+        hnsw_result = self._get_hnsw_index()
+        if hnsw_result is not None:
             q_np = np.asarray(query_vec, dtype=np.float32)
-            # Hot cache is pre-normalized at load time — use fast path
-            scores = _batch_cosine_similarity_numpy(q_np, vectors, pre_normalized=True)
-            # Vectorized threshold filter
-            if isinstance(scores, np.ndarray):
-                mask = scores >= min_similarity
-                for idx in np.where(mask)[0]:
-                    results.append({"memory_id": ids[idx], "similarity": round(float(scores[idx]), 4), "source": "hot"})
-            else:
-                for mid, sim in zip(ids, scores):
-                    if sim >= min_similarity:
-                        results.append({"memory_id": mid, "similarity": round(sim, 4), "source": "hot"})
+            hnsw_index, hnsw_ids = hnsw_result
+            hits = self._hnsw_search(q_np, hnsw_index, hnsw_ids, limit, min_similarity)
+            for hit in hits:
+                hit["source"] = "hot"
+                results.append(hit)
+        else:
+            # Brute-force fallback (O(N) per query)
+            ids, vectors = self._load_vec_cache()
+            if ids:
+                q_np = np.asarray(query_vec, dtype=np.float32)
+                scores = _batch_cosine_similarity_numpy(q_np, vectors, pre_normalized=True)
+                if isinstance(scores, np.ndarray):
+                    mask = scores >= min_similarity
+                    for idx in np.where(mask)[0]:
+                        results.append({"memory_id": ids[idx], "similarity": round(float(scores[idx]), 4), "source": "hot"})
+                else:
+                    for mid, sim in zip(ids, scores):
+                        if sim >= min_similarity:
+                            results.append({"memory_id": mid, "similarity": round(sim, 4), "source": "hot"})
 
         # --- Cold DB search (optional) ---
         if include_cold:
-            cold_ids, cold_vectors = self._load_cold_vec_cache()
-            if cold_ids:
-                q_np = np.asarray(query_vec, dtype=np.float32) if not isinstance(query_vec, np.ndarray) else query_vec
-                cold_scores = _batch_cosine_similarity(q_np, cold_vectors)
-                # Collect cold results, avoiding duplicates with hot
-                hot_id_set = {r["memory_id"] for r in results}
-                if isinstance(cold_scores, np.ndarray):
-                    mask = cold_scores >= min_similarity
-                    for idx in np.where(mask)[0]:
-                        mid = cold_ids[idx]
-                        if mid not in hot_id_set:
-                            results.append({"memory_id": mid, "similarity": round(float(cold_scores[idx]), 4), "source": "cold"})
-                else:
-                    for mid, sim in zip(cold_ids, cold_scores):
-                        if sim >= min_similarity and mid not in hot_id_set:
-                            results.append({"memory_id": mid, "similarity": round(sim, 4), "source": "cold"})
+            hot_id_set = {r["memory_id"] for r in results}
+
+            # HNSW fast path for cold
+            cold_hnsw = self._get_cold_hnsw_index()
+            if cold_hnsw is not None:
+                q_np = np.asarray(query_vec, dtype=np.float32)
+                cold_index, cold_hnsw_ids = cold_hnsw
+                cold_hits = self._hnsw_search(q_np, cold_index, cold_hnsw_ids, limit, min_similarity)
+                for hit in cold_hits:
+                    if hit["memory_id"] not in hot_id_set:
+                        hit["source"] = "cold"
+                        results.append(hit)
+            else:
+                # Brute-force fallback for cold
+                cold_ids, cold_vectors = self._load_cold_vec_cache()
+                if cold_ids:
+                    q_np = np.asarray(query_vec, dtype=np.float32) if not isinstance(query_vec, np.ndarray) else query_vec
+                    cold_scores = _batch_cosine_similarity(q_np, cold_vectors)
+                    if isinstance(cold_scores, np.ndarray):
+                        mask = cold_scores >= min_similarity
+                        for idx in np.where(mask)[0]:
+                            mid = cold_ids[idx]
+                            if mid not in hot_id_set:
+                                results.append({"memory_id": mid, "similarity": round(float(cold_scores[idx]), 4), "source": "cold"})
+                    else:
+                        for mid, sim in zip(cold_ids, cold_scores):
+                            if sim >= min_similarity and mid not in hot_id_set:
+                                results.append({"memory_id": mid, "similarity": round(sim, 4), "source": "cold"})
 
         # Sort by similarity descending
         results.sort(key=lambda r: r["similarity"], reverse=True)
@@ -615,6 +741,9 @@ class EmbeddingEngine:
                     cold_total = cold_db.execute("SELECT COUNT(*) FROM memory_embeddings").fetchone()[0]
                 except Exception:
                     pass
+            hnsw_status = "active" if self._hnsw_index is not None else (
+                "available" if self._hnsw_is_available() else "not_installed"
+            )
             return {
                 "status": "ok",
                 "hot_embeddings": hot_total,
@@ -623,6 +752,9 @@ class EmbeddingEngine:
                 "model": MODEL_NAME,
                 "dims": EMBEDDING_DIM,
                 "engine_available": self.available(),
+                "hnsw_index": hnsw_status,
+                "hnsw_hot_count": self._hnsw_count,
+                "hnsw_cold_count": self._cold_hnsw_count,
             }
         except Exception as e:
             return {"status": "error", "error": str(e)}
