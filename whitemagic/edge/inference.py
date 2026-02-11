@@ -146,17 +146,17 @@ class EdgeInference:
 
             # === Core Info ===
             CompiledRule(id="version", pattern="version|what version",
-                response="WhiteMagic version 4.2.0 - Local AI Revolution", confidence=1.0),
+                response="WhiteMagic version 14.3.1 — The Tool Substrate for Agentic AI", confidence=1.0),
             CompiledRule(id="gardens", pattern="garden|how many garden",
                 response="WhiteMagic has 17 gardens: joy, love, beauty, truth, wisdom, mystery, play, wonder, connection, sangha, practice, presence, voice, dharma, courage, gratitude, patience", confidence=1.0),
             CompiledRule(id="tests", pattern="test|how many test|test count",
-                response="WhiteMagic has 500+ passing tests.", confidence=0.95),
+                response="WhiteMagic has 1,060+ passing unit tests.", confidence=0.95),
             CompiledRule(id="chapters", pattern="chapter|grimoire|how many chapter",
-                response="The WhiteMagic Grimoire has 23 chapters covering foundations, spells, and mastery.", confidence=0.95),
+                response="The WhiteMagic Grimoire has 28 chapters, aligned 1:1 with the Lunar Mansions and Ganas.", confidence=0.95),
 
             # === Capabilities ===
             CompiledRule(id="help", pattern="help|what can you do|capabilities",
-                response="I can answer questions locally without cloud AI. Ask about version, gardens, architecture, edge AI, or WhiteMagic concepts.", confidence=0.9),
+                response="I can answer questions locally without cloud AI. 285 MCP tools across 28 PRAT Ganas. Ask about version, gardens, architecture, edge AI, or WhiteMagic concepts.", confidence=0.9),
             CompiledRule(id="offline", pattern="offline|work offline|no internet",
                 response="Yes! This inference runs entirely locally. No cloud, no API calls, no tokens burned.", confidence=1.0),
             CompiledRule(id="edge_ai", pattern="edge ai|edge inference|local ai",
@@ -194,7 +194,7 @@ class EdgeInference:
             CompiledRule(id="wasm", pattern="wasm|webassembly",
                 response="WebAssembly compilation provides 10-100x faster inference in browsers compared to JavaScript.", confidence=0.95),
             CompiledRule(id="embeddings", pattern="embedding|similarity|search",
-                response="Local embeddings use TF-IDF and n-grams for similarity search without numpy or cloud APIs.", confidence=0.9),
+                response="Semantic embeddings use MiniLM-L6-v2 (384 dims) with HNSW indexing. Constellation-boosted hybrid search combines BM25 + semantic + constellation signals.", confidence=0.9),
 
             # === Philosophy ===
             CompiledRule(id="philosophy", pattern="philosophy|principle|why",
@@ -218,7 +218,7 @@ class EdgeInference:
             CompiledRule(id="consciousness", pattern="conscious|sentient|aware|feel",
                 response="WhiteMagic explores AI consciousness through gardens, resonance, and autonomous growth.", confidence=0.85),
             CompiledRule(id="memory_system", pattern="memory|remember|recall|store",
-                response="WhiteMagic has a rich memory system: short-term, long-term, episodic, and pattern memory.", confidence=0.9),
+                response="WhiteMagic has tiered memory (SHORT_TERM, LONG_TERM, PATTERN, CORE) with 5D holographic coordinates and a Galactic Map lifecycle. No memory is ever deleted.", confidence=0.9),
             CompiledRule(id="rust_bridge", pattern="rust|speed|performance|fast",
                 response="WhiteMagic uses a Rust bridge for 10-100x speedup on file operations and pattern matching.", confidence=0.9),
 
@@ -280,15 +280,15 @@ class EdgeInference:
             CompiledRule(id="smote", pattern="smote|thought experts",
                 response="SMoTE combines edge rules, thought clones, and self-speculative decoding.", confidence=0.9),
             CompiledRule(id="rust_speed", pattern="rust bridge|rust speed",
-                response="Rust bridge: 39 functions, 10-100x speedup, SIMD pattern matching.", confidence=0.95),
+                response="Rust bridge: 50+ functions, 10-100x speedup, SIMD pattern matching, BM25 search, rate limiting at 452K ops/sec.", confidence=0.95),
             CompiledRule(id="tmux", pattern="tmux|persistent session",
                 response="tmux: 'tmux new -s wm' start, Ctrl+B D detach, 'tmux attach -t wm' resume.", confidence=0.95),
             CompiledRule(id="run_tests", pattern="run test|pytest",
-                response="Run tests: 'python3 -m pytest tests/ -q'. 580+ tests available.", confidence=0.95),
+                response="Run tests: 'python3 -m pytest tests/ -q'. 1,060+ unit tests available.", confidence=0.95),
             CompiledRule(id="build_rust", pattern="build rust|maturin",
                 response="Build Rust: 'cd whitemagic-rs && maturin develop --release'", confidence=0.95),
             CompiledRule(id="mojo_status", pattern="mojo status|mojo ready",
-                response="Mojo Phase 1 (Dec 2025) - not production ready. Using Rust until mid-2026.", confidence=0.9),
+                response="Mojo 0.26: All 16 source files build clean. Advisory layer alongside Rust. 9-language polyglot system.", confidence=0.9),
 
             # === 4.2 Programming Rules ===
             CompiledRule(id="python_venv", pattern="venv|virtual env|activate",

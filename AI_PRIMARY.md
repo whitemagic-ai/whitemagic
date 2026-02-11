@@ -45,7 +45,7 @@ The agentic ecosystem has exploded. As of February 2026:
 ### Whitemagic's Position
 
 Whitemagic is the **cognitive scaffolding layer** — the Hands, Memory, and Conscience for any AI agent, regardless of which LLM is the Brain. Agents bring their own reasoning; Whitemagic provides:
-- **Hands** — 208 MCP tools (or 28 in PRAT mode) for acting on the world
+- **Hands** — 285 MCP tools (or 28 in PRAT mode) for acting on the world
 - **Memory** — Tiered, persistent, semantic, with galactic lifecycle and no-delete policy
 - **Conscience** — Dharma rules, Karma ledger, Harmony Vector, Homeostatic Loop
 
@@ -79,7 +79,7 @@ WM_MCP_PRAT=1 python -m whitemagic.run_mcp
 # Or lean mode (28 Gana meta-tools, recommended for new clients)
 python -m whitemagic.run_mcp_lean
 
-# Or classic mode (208 individual tools)
+# Or classic mode (285 individual tools)
 python -m whitemagic.run_mcp
 
 # Or lite mode (92 core tools)
@@ -115,7 +115,7 @@ cd whitemagic-mojo && mojo build src/satkona_yang.mojo  # Mojo 0.26+ — batch e
 
 Primary:
 - **MCP server (stdio):** `WM_MCP_PRAT=1 python -m whitemagic.run_mcp` (28 Gana meta-tools)
-- **MCP server (classic):** `python -m whitemagic.run_mcp` (208 individual tools)
+- **MCP server (classic):** `python -m whitemagic.run_mcp` (285 individual tools)
 
 Secondary:
 - **In-process Python:** `from whitemagic.tools.unified_api import call_tool`
@@ -132,7 +132,7 @@ On first connection, read these resources before tool calls:
 
 ## PRAT Mode — 28 Gana Meta-Tools
 
-The Polymorphic Resonant Adaptive Tools (PRAT) router maps all 208 tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions (Xiu 宿). Each Gana:
+The Polymorphic Resonant Adaptive Tools (PRAT) router maps all 285 tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions (Xiu 宿). Each Gana:
 
 1. **Has a domain** — a specific operational concern (session, memory, health, ethics, etc.)
 2. **Supports 4 polymorphic operations** — search / analyze / transform / consolidate
@@ -582,7 +582,7 @@ For Whitemagic to be release-ready (v14.0), the following must be verified:
 WhiteMagic now supports multiple "galaxies" — separate memory databases for different projects or domains. Each galaxy has its own SQLite database, holographic index, and association graph. Tools: `galaxy.create`, `galaxy.switch`, `galaxy.list`, `galaxy.status`, `galaxy.ingest`, `galaxy.delete`. The `default` galaxy ships with quickstart guide memories.
 
 ### Ollama Agent Loop
-`ollama.agent` runs an agentic loop where a local LLM autonomously calls WhiteMagic's 208 tools, experiences real value, uses relevant memories as context, parses tool-call blocks from model output, executes them, and feeds results back. Up to 10 iterations. Works with any Ollama-hosted model (llama3.2, phi4, qwen2.5, etc.).
+`ollama.agent` runs an agentic loop where a local LLM autonomously calls WhiteMagic's 285 tools, experiences real value, uses relevant memories as context, parses tool-call blocks from model output, executes them, and feeds results back. Up to 10 iterations. Works with any Ollama-hosted model (llama3.2, phi4, qwen2.5, etc.).
 
 ### Edgerunner Violet Security Layer
 15 new security tools: MCP Integrity (SHA-256 schema fingerprinting), Model Signing (OMS-compatible manifests with trust levels), Engagement Tokens (HMAC-SHA256 scoped authorization for offensive security), Security Monitor (anomaly detection for rapid-fire, lateral movement, privilege escalation). Violet Dharma profile adds 5 security rules. Karma ledger now has ops_class field for dual-log transparency.
@@ -603,7 +603,7 @@ Server Instructions (4,858 chars auto-injected at init), Streamable HTTP transpo
 - **UMAP Visualization** (`core/memory/umap_projection.py`) — 2D/3D embedding projection with optional k-means clustering and metadata hydration.
 
 ### Metrics
-- **208 MCP tools** (was 186) across **28 Gana meta-tools**
+- **285 MCP tools** across **28 Gana meta-tools**
 - **180 nested tool enums** in the lean MCP server
 - **1,656 tests passing**, 0 failures
 - **58/58 benchmarks** (36 gauntlet + 22 MCP)

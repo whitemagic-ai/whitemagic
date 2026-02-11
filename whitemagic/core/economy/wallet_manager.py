@@ -3,7 +3,11 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import httpx  # For XRPL API calls
+try:
+    import httpx  # For XRPL API calls
+    _HTTPX_AVAILABLE = True
+except ImportError:
+    _HTTPX_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +80,9 @@ class WalletManager:
         """Scan the XRPL for new transactions to this address.
         Returns the amount of the latest tip in XRP if found, else None.
         """
+        if not _HTTPX_AVAILABLE:
+            logger.debug("httpx not installed — XRPL tip scanning disabled")
+            return None
         # Note: This requires the xrpl-py or similar, but we use httpx for zero-dependency lightness.
         try:
             payload = {
