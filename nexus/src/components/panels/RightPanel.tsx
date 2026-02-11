@@ -152,11 +152,9 @@ export default function RightPanel() {
     }
 
     // Start mock fallback immediately (will be cleared if WS connects)
-    if (!wsConnected) {
-      fallbackInterval = setInterval(() => {
-        setEvents((prev) => [generateEvent(), ...prev].slice(0, 50));
-      }, 1500 + Math.random() * 2000);
-    }
+    fallbackInterval = setInterval(() => {
+      setEvents((prev) => [generateEvent(), ...prev].slice(0, 50));
+    }, 1500 + Math.random() * 2000);
 
     return () => {
       if (fallbackInterval) clearInterval(fallbackInterval);

@@ -65,6 +65,9 @@ jobs:
       - name: Ruff Check
         run: ruff check whitemagic/ --select E,F,W --ignore E501
 
+      # TODO: Remove continue-on-error after dedicated typing cleanup pass.
+      #   Current baseline: 24 strict errors, 72 full-codebase errors.
+      #   Tracked: https://github.com/lbailey94/whitemagic/issues — typing-cleanup
       - name: Mypy (public surface — strict)
         run: |
           mypy whitemagic/tools/ whitemagic/interfaces/ \

@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-"""End-to-end MCP server test — spawns the lean server as a subprocess,
-connects via stdio, and verifies tool-call round trips.
+"""End-to-end MCP server test — runs the lean server **in-process** using
+anyio memory streams (no subprocess, no pipe buffering) and verifies
+tool-call round trips.
 
-Requires: mcp SDK installed (skip if unavailable).
+Requires: mcp SDK + anyio installed (skip if unavailable).
 
 Usage:
     pytest tests/integration/test_mcp_e2e.py -v
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
-import subprocess
-import sys
-import time
+import shutil
+import tempfile
+from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, AsyncGenerator
 
 import pytest
 
@@ -23,7 +25,10 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Skip entire module if mcp SDK not installed
 try:
-    import mcp  # noqa: F401
+    import anyio
+    import mcp.types as types
+    from mcp.shared.message import SessionMessage
+
     HAS_MCP = True
 except ImportError:
     HAS_MCP = False
@@ -31,245 +36,259 @@ except ImportError:
 pytestmark = pytest.mark.skipif(not HAS_MCP, reason="mcp SDK not installed")
 
 
-class MCPClient:
-    """Minimal MCP stdio client for testing."""
+# ── Environment setup ───────────────────────────────────────────────────
 
-    def __init__(self, process: subprocess.Popen):
-        self.proc = process
+@pytest.fixture(scope="module", autouse=True)
+def _mcp_env():
+    """Set up an isolated WM_STATE_ROOT before the server module is imported."""
+    state_dir = Path(tempfile.mkdtemp(prefix="wm_mcp_e2e_"))
+    prev = {
+        "WM_SILENT_INIT": os.environ.get("WM_SILENT_INIT"),
+        "WM_STATE_ROOT": os.environ.get("WM_STATE_ROOT"),
+    }
+    os.environ["WM_SILENT_INIT"] = "1"
+    os.environ["WM_STATE_ROOT"] = str(state_dir)
+    yield
+    for k, v in prev.items():
+        if v is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = v
+    shutil.rmtree(state_dir, ignore_errors=True)
+
+
+# ── In-process MCP session ──────────────────────────────────────────────
+
+class _InProcessClient:
+    """Sends JSON-RPC messages through anyio memory streams."""
+
+    def __init__(self, tx: Any, rx: Any) -> None:
+        self._tx = tx
+        self._rx = rx
         self._id = 0
 
     def _next_id(self) -> int:
         self._id += 1
         return self._id
 
-    def send(self, method: str, params: dict | None = None, *, timeout: float = 15.0) -> dict:
-        """Send a JSON-RPC request and read the response."""
+    async def request(
+        self, method: str, params: dict | None = None, *, timeout: float = 15.0,
+    ) -> dict:
+        """Send a JSON-RPC *request* and wait for the matching response."""
         req_id = self._next_id()
-        request: dict[str, Any] = {
-            "jsonrpc": "2.0",
-            "id": req_id,
-            "method": method,
-        }
+        raw: dict[str, Any] = {"jsonrpc": "2.0", "id": req_id, "method": method}
         if params is not None:
-            request["params"] = params
+            raw["params"] = params
 
-        payload = json.dumps(request)
-        # MCP stdio uses newline-delimited JSON
-        self.proc.stdin.write((payload + "\n").encode())
-        self.proc.stdin.flush()
+        msg = types.JSONRPCMessage.model_validate(raw)
+        await self._tx.send(SessionMessage(msg))
 
-        # Read response (newline-delimited JSON)
-        response = self._read_message(timeout=timeout)
-        return response
-
-    def _read_message(self, *, timeout: float = 15.0) -> dict:
-        """Read a newline-delimited JSON-RPC message from stdout."""
-        import selectors
-
-        sel = selectors.DefaultSelector()
-        sel.register(self.proc.stdout, selectors.EVENT_READ)
-
-        deadline = time.monotonic() + timeout
-        buf = b""
-        try:
+        async def _wait() -> dict:
             while True:
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    raise TimeoutError(f"No response within {timeout}s")
-                events = sel.select(timeout=remaining)
-                if not events:
-                    raise TimeoutError(f"No response within {timeout}s")
-                chunk = self.proc.stdout.read1(4096) if hasattr(self.proc.stdout, 'read1') else self.proc.stdout.readline()
-                if not chunk:
-                    raise ConnectionError("Server closed stdout")
-                buf += chunk
-                # Look for complete newline-delimited JSON lines
-                while b"\n" in buf:
-                    line, buf = buf.split(b"\n", 1)
-                    line_str = line.decode("utf-8", errors="replace").strip()
-                    if not line_str:
-                        continue
-                    try:
-                        return json.loads(line_str)
-                    except json.JSONDecodeError:
-                        continue  # skip non-JSON lines (e.g. log output)
-        finally:
-            sel.unregister(self.proc.stdout)
-            sel.close()
+                session_msg = await self._rx.receive()
+                data = json.loads(
+                    session_msg.message.model_dump_json(
+                        by_alias=True, exclude_none=True,
+                    )
+                )
+                # Skip server-initiated notifications (no "id" field)
+                if "id" in data:
+                    return data
 
-    def close(self) -> None:
-        """Terminate the server process."""
-        try:
-            self.proc.stdin.close()
-        except Exception:
-            pass
-        try:
-            self.proc.terminate()
-            self.proc.wait(timeout=5)
-        except Exception:
-            self.proc.kill()
+        return await asyncio.wait_for(_wait(), timeout=timeout)
+
+    async def notify(self, method: str, params: dict | None = None) -> None:
+        """Send a JSON-RPC *notification* (fire-and-forget, no response)."""
+        raw: dict[str, Any] = {"jsonrpc": "2.0", "method": method}
+        if params is not None:
+            raw["params"] = params
+        msg = types.JSONRPCMessage.model_validate(raw)
+        await self._tx.send(SessionMessage(msg))
+
+    async def initialize(self) -> dict:
+        """Perform the full MCP initialize handshake."""
+        resp = await self.request("initialize", {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {"name": "test-e2e", "version": "1.0.0"},
+        })
+        await self.notify("notifications/initialized")
+        return resp
 
 
-@pytest.fixture(scope="module")
-def mcp_server():
-    """Start the MCP lean server as a subprocess and yield a client."""
-    server_path = ROOT / "whitemagic" / "run_mcp_lean.py"
-    if not server_path.exists():
-        pytest.skip("run_mcp_lean.py not found")
+@asynccontextmanager
+async def mcp_session(
+    *, init: bool = True,
+) -> AsyncGenerator[_InProcessClient, None]:
+    """Start an in-process MCP server session.
 
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(ROOT)
-    # Use a temp state root so we don't touch the user's data
-    env["WM_STATE_ROOT"] = str(ROOT / ".test_mcp_state")
+    Creates anyio memory streams, starts ``server.run()`` as a background
+    task, optionally performs the initialize handshake, then yields a
+    client for sending further requests.
+    """
+    from whitemagic.run_mcp_lean import server
 
-    proc = subprocess.Popen(
-        [sys.executable, str(server_path)],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        env=env,
-        cwd=str(ROOT),
+    to_server_tx, to_server_rx = anyio.create_memory_object_stream(16)
+    from_server_tx, from_server_rx = anyio.create_memory_object_stream(16)
+
+    server_task = asyncio.create_task(
+        server.run(
+            to_server_rx, from_server_tx,
+            server.create_initialization_options(),
+        )
     )
 
-    # Give server a moment to start
-    time.sleep(1.0)
+    client = _InProcessClient(to_server_tx, from_server_rx)
+    try:
+        if init:
+            await client.initialize()
+        yield client
+    finally:
+        await to_server_tx.aclose()
+        server_task.cancel()
+        try:
+            await server_task
+        except (asyncio.CancelledError, Exception):
+            pass
 
-    if proc.poll() is not None:
-        stderr = proc.stderr.read().decode("utf-8", errors="replace")
-        pytest.skip(f"MCP server failed to start: {stderr[:500]}")
 
-    client = MCPClient(proc)
-    yield client
-    client.close()
-
-    # Cleanup temp state
-    import shutil
-    test_state = ROOT / ".test_mcp_state"
-    if test_state.exists():
-        shutil.rmtree(test_state, ignore_errors=True)
-
+# ── Tests ────────────────────────────────────────────────────────────────
 
 class TestMCPInitialize:
     """Test MCP initialization handshake."""
 
-    def test_initialize(self, mcp_server: MCPClient):
+    async def test_initialize(self):
         """Server responds to initialize with capabilities."""
-        response = mcp_server.send("initialize", {
-            "protocolVersion": "2024-11-05",
-            "capabilities": {},
-            "clientInfo": {"name": "test-client", "version": "1.0.0"},
-        })
+        async with mcp_session(init=False) as client:
+            response = await client.request("initialize", {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "test-client", "version": "1.0.0"},
+            })
 
-        assert "result" in response, f"Expected result, got: {response}"
-        result = response["result"]
-        assert "serverInfo" in result
-        assert "capabilities" in result
-        assert result["serverInfo"]["name"] == "whitemagic"
+            assert "result" in response, f"Expected result, got: {response}"
+            result = response["result"]
+            assert "serverInfo" in result
+            assert "capabilities" in result
+            server_name = result["serverInfo"]["name"]
+            assert "whitemagic" in server_name.lower()
 
-    def test_initialized_notification(self, mcp_server: MCPClient):
-        """Server accepts initialized notification."""
-        # Send as notification (no id expected back, but we send with id for simplicity)
-        mcp_server.send("notifications/initialized", {})
-        # If no error, notification accepted
+    async def test_initialized_notification(self):
+        """Server accepts initialized notification without error."""
+        async with mcp_session(init=False) as client:
+            resp = await client.request("initialize", {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "test-client", "version": "1.0.0"},
+            })
+            assert "result" in resp
+            # Fire-and-forget notification — must not raise
+            await client.notify("notifications/initialized")
 
 
 class TestMCPToolsList:
     """Test tools/list endpoint."""
 
-    def test_list_tools(self, mcp_server: MCPClient):
+    async def test_list_tools(self):
         """Server lists 28 PRAT Gana meta-tools."""
-        response = mcp_server.send("tools/list", {})
-        assert "result" in response, f"Expected result, got: {response}"
+        async with mcp_session() as client:
+            response = await client.request("tools/list", {})
+            assert "result" in response, f"Expected result, got: {response}"
 
-        tools = response["result"].get("tools", [])
-        assert len(tools) >= 28, f"Expected ≥28 tools, got {len(tools)}"
+            tools = response["result"].get("tools", [])
+            assert len(tools) >= 28, f"Expected ≥28 tools, got {len(tools)}"
 
-        tool_names = {t["name"] for t in tools}
-        # Verify a few known Ganas exist
-        for expected in ["gana_horn", "gana_neck", "gana_root", "gana_ghost"]:
-            assert expected in tool_names, f"Missing expected tool: {expected}"
+            tool_names = {t["name"] for t in tools}
+            # Verify a few known Ganas exist
+            for expected in ["gana_horn", "gana_neck", "gana_root", "gana_ghost"]:
+                assert expected in tool_names, f"Missing expected tool: {expected}"
 
 
 class TestMCPResourcesList:
     """Test resources/list endpoint."""
 
-    def test_list_resources(self, mcp_server: MCPClient):
+    async def test_list_resources(self):
         """Server lists orientation docs and workflow templates."""
-        response = mcp_server.send("resources/list", {})
-        assert "result" in response, f"Expected result, got: {response}"
+        async with mcp_session() as client:
+            response = await client.request("resources/list", {})
+            assert "result" in response, f"Expected result, got: {response}"
 
-        resources = response["result"].get("resources", [])
-        assert len(resources) >= 9, f"Expected ≥9 resources, got {len(resources)}"
+            resources = response["result"].get("resources", [])
+            assert len(resources) >= 9, f"Expected ≥9 resources, got {len(resources)}"
 
-        uris = {r["uri"] for r in resources}
-        assert "whitemagic://orientation/ai-primary" in uris
-        assert "whitemagic://orientation/server-instructions" in uris
+            uris = {r["uri"] for r in resources}
+            assert "whitemagic://orientation/ai-primary" in uris
+            assert "whitemagic://orientation/server-instructions" in uris
 
-        # v14.1.1 workflow templates
-        workflow_uris = [u for u in uris if "workflow/" in u]
-        assert len(workflow_uris) >= 6, f"Expected ≥6 workflows, got {len(workflow_uris)}"
+            # v14.1.1 workflow templates
+            workflow_uris = [u for u in uris if "workflow/" in u]
+            assert len(workflow_uris) >= 6, f"Expected ≥6 workflows, got {len(workflow_uris)}"
 
 
 class TestMCPToolCall:
     """Test actual tool invocation via tools/call."""
 
-    def test_call_gana_root_health(self, mcp_server: MCPClient):
+    async def test_call_gana_root_health(self):
         """Invoke gana_root with health_report tool."""
-        response = mcp_server.send("tools/call", {
-            "name": "gana_root",
-            "arguments": {
-                "tool": "health_report",
-                "args": {},
-            },
-        })
-        assert "result" in response, f"Expected result, got: {response}"
+        async with mcp_session() as client:
+            response = await client.request("tools/call", {
+                "name": "gana_root",
+                "arguments": {
+                    "tool": "health_report",
+                    "args": {},
+                },
+            })
+            assert "result" in response, f"Expected result, got: {response}"
 
-        content = response["result"].get("content", [])
-        assert len(content) > 0, "Expected non-empty content"
-        assert content[0]["type"] == "text"
+            content = response["result"].get("content", [])
+            assert len(content) > 0, "Expected non-empty content"
+            assert content[0]["type"] == "text"
 
-        # Parse the JSON text content
-        data = json.loads(content[0]["text"])
-        assert "health_score" in data or "status" in data
+            # Parse the JSON text content
+            data = json.loads(content[0]["text"])
+            assert "health_score" in data or "status" in data
 
-    def test_call_gana_ghost_capabilities(self, mcp_server: MCPClient):
+    async def test_call_gana_ghost_capabilities(self):
         """Invoke gana_ghost with capabilities tool."""
-        response = mcp_server.send("tools/call", {
-            "name": "gana_ghost",
-            "arguments": {
-                "tool": "capabilities",
-                "args": {},
-            },
-        })
-        assert "result" in response, f"Expected result, got: {response}"
+        async with mcp_session() as client:
+            response = await client.request("tools/call", {
+                "name": "gana_ghost",
+                "arguments": {
+                    "tool": "capabilities",
+                    "args": {},
+                },
+            })
+            assert "result" in response, f"Expected result, got: {response}"
 
-        content = response["result"].get("content", [])
-        assert len(content) > 0
+            content = response["result"].get("content", [])
+            assert len(content) > 0
 
 
 class TestMCPResourceRead:
     """Test resource reading."""
 
-    def test_read_server_instructions(self, mcp_server: MCPClient):
+    async def test_read_server_instructions(self):
         """Read the server-instructions resource."""
-        response = mcp_server.send("resources/read", {
-            "uri": "whitemagic://orientation/server-instructions",
-        })
-        assert "result" in response, f"Expected result, got: {response}"
+        async with mcp_session() as client:
+            response = await client.request("resources/read", {
+                "uri": "whitemagic://orientation/server-instructions",
+            })
+            assert "result" in response, f"Expected result, got: {response}"
 
-        contents = response["result"].get("contents", [])
-        assert len(contents) > 0
-        text = contents[0].get("text", "")
-        assert "WhiteMagic" in text
+            contents = response["result"].get("contents", [])
+            assert len(contents) > 0
+            text = contents[0].get("text", "")
+            assert "WhiteMagic" in text
 
-    def test_read_workflow_template(self, mcp_server: MCPClient):
+    async def test_read_workflow_template(self):
         """Read a workflow template resource."""
-        response = mcp_server.send("resources/read", {
-            "uri": "whitemagic://workflow/new_session",
-        })
-        assert "result" in response, f"Expected result, got: {response}"
+        async with mcp_session() as client:
+            response = await client.request("resources/read", {
+                "uri": "whitemagic://workflow/new_session",
+            })
+            assert "result" in response, f"Expected result, got: {response}"
 
-        contents = response["result"].get("contents", [])
-        assert len(contents) > 0
-        text = contents[0].get("text", "")
-        assert "session" in text.lower() or "bootstrap" in text.lower()
+            contents = response["result"].get("contents", [])
+            assert len(contents) > 0
+            text = contents[0].get("text", "")
+            assert "session" in text.lower() or "bootstrap" in text.lower()
