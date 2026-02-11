@@ -65,19 +65,15 @@ jobs:
       - name: Ruff Check
         run: ruff check whitemagic/ --select E,F,W --ignore E501
 
-      # TODO: Remove continue-on-error after dedicated typing cleanup pass.
-      #   Current baseline: 24 strict errors, 72 full-codebase errors.
-      #   Tracked: https://github.com/lbailey94/whitemagic/issues — typing-cleanup
+      # Mypy: hard gate as of v14.3.1 — all errors resolved.
       - name: Mypy (public surface — strict)
         run: |
           mypy whitemagic/tools/ whitemagic/interfaces/ \
             --ignore-missing-imports --no-error-summary \
-            --disallow-untyped-defs --warn-return-any 2>&1 | head -80
-        continue-on-error: true
+            --disallow-untyped-defs --warn-return-any
 
-      - name: Mypy (full codebase — advisory)
-        run: mypy whitemagic/ --ignore-missing-imports --no-error-summary 2>&1 | tail -20
-        continue-on-error: true
+      - name: Mypy (full codebase)
+        run: mypy whitemagic/ --ignore-missing-imports --no-error-summary
 
       - name: Check for large files
         run: |
