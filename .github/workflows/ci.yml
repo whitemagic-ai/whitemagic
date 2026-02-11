@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_call:
 
 jobs:
   core:
@@ -72,7 +73,7 @@ jobs:
         continue-on-error: true
 
       - name: Mypy (full codebase — advisory)
-        run: mypy whitemagic/ --ignore-missing-imports --no-error-summary 2>&1 | tail -5
+        run: mypy whitemagic/ --ignore-missing-imports --no-error-summary 2>&1 | tail -20
         continue-on-error: true
 
       - name: Check for large files

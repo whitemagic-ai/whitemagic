@@ -86,7 +86,7 @@ class WhiteMagicLogger:
                     "class": "logging.StreamHandler",
                     "level": level,
                     "formatter": "json" if environment == "production" else "detailed",
-                    "stream": sys.stdout
+                    "stream": sys.stderr
                 }
             },
             "loggers": {

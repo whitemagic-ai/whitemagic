@@ -6,9 +6,9 @@ Currently only the latest version of Whitemagic is supported for security update
 
 | Version | Supported          |
 | ------- | ------------------ |
+| v14.x   | :white_check_mark: |
 | v13.x   | :white_check_mark: |
-| v12.x   | :white_check_mark: |
-| < v12   | :x:                |
+| < v13   | :x:                |
 
 ## Reporting a Vulnerability
 

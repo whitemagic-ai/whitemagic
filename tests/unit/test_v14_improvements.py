@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import time
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -436,20 +437,19 @@ class TestCoreAccessDrift:
 class TestRustRRFModule:
     """Test that the Rust RRF module file exists and has correct structure."""
 
+    _ROOT = Path(__file__).resolve().parent.parent.parent
+
     def test_rust_rrf_file_exists(self):
-        import os
-        path = "/home/lucas/Desktop/whitemagic/whitemagic-rust/src/hybrid_rrf.rs"
-        assert os.path.exists(path)
+        path = self._ROOT / "whitemagic-rust" / "src" / "hybrid_rrf.rs"
+        assert path.exists(), f"Missing: {path}"
 
     def test_rust_walk_file_exists(self):
-        import os
-        path = "/home/lucas/Desktop/whitemagic/whitemagic-rust/src/association_walk.rs"
-        assert os.path.exists(path)
+        path = self._ROOT / "whitemagic-rust" / "src" / "association_walk.rs"
+        assert path.exists(), f"Missing: {path}"
 
     def test_mojo_topk_file_exists(self):
-        import os
-        path = "/home/lucas/Desktop/whitemagic/whitemagic-mojo/src/simd_cosine_topk.mojo"
-        assert os.path.exists(path)
+        path = self._ROOT / "whitemagic-mojo" / "src" / "simd_cosine_topk.mojo"
+        assert path.exists(), f"Missing: {path}"
 
 
 # -----------------------------------------------------------------------

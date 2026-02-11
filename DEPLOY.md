@@ -1,6 +1,6 @@
 # WhiteMagic Deployment Guide
 
-> **Version:** 13.5+ | **Last Updated:** February 2026
+> **Version:** 14.3+ | **Last Updated:** February 2026
 
 ---
 
@@ -29,13 +29,13 @@ Tag-driven release via GitHub Actions. Triggers `.github/workflows/release.yml`.
 
 ```bash
 # 1. Bump version
-echo "13.5.0" > VERSION
+echo "14.3.1" > VERSION
 # Update pyproject.toml version field to match
 
 # 2. Commit and tag
 git add -A
-git commit -m "release: v13.5.0"
-git tag v13.5.0
+git commit -m "release: v14.3.1"
+git tag v14.3.1
 
 # 3. Push (triggers CI + release workflow)
 git push origin main --tags

@@ -74,7 +74,7 @@ class InteractiveDocumentation:
         async def custom_swagger_ui_html(req: Request):
             root = req.scope.get("root_path") or ""
             openapi_url = root + self.app.openapi_url
-            return get_swagger_ui_html(
+            resp = get_swagger_ui_html(
                 openapi_url=openapi_url,
                 title=f"{title} - Swagger UI",
                 oauth2_redirect_url=self.swagger_ui_parameters.get("oauth2RedirectUrl"),
@@ -83,9 +83,14 @@ class InteractiveDocumentation:
                 swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js",
                 swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css",
                 swagger_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
-                custom_js=self.custom_js,
-                custom_css=self.custom_css,
             )
+            # Inject custom CSS/JS into the HTML response body
+            body = resp.body.decode("utf-8") if isinstance(resp.body, bytes) else resp.body
+            if self.custom_css:
+                body = body.replace("</head>", f"<style>{self.custom_css}</style></head>")
+            if self.custom_js:
+                body = body.replace("</body>", f"<script>{self.custom_js}</script></body>")
+            return Response(content=body, media_type="text/html")
 
         # OAuth2 redirect endpoint
         @self.app.get(f"{self.docs_url}/oauth2-redirect.html", include_in_schema=False)
@@ -131,13 +136,17 @@ class InteractiveDocumentation:
         async def redoc_html(req: Request):
             root = req.scope.get("root_path") or ""
             openapi_url = root + self.app.openapi_url
-            return get_redoc_html(
+            resp = get_redoc_html(
                 openapi_url=openapi_url,
                 title=f"{title} - ReDoc",
                 redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js",
                 redoc_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
-                custom_css=final_css,
             )
+            # Inject custom CSS into the HTML response body
+            body = resp.body.decode("utf-8") if isinstance(resp.body, bytes) else resp.body
+            if final_css:
+                body = body.replace("</head>", f"<style>{final_css}</style></head>")
+            return Response(content=body, media_type="text/html")
 
     def add_code_examples(self) -> None:
         """Add code examples to the OpenAPI schema."""

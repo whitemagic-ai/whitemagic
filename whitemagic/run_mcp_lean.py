@@ -68,6 +68,15 @@ def _ensure_init() -> None:
     except Exception:
         pass
 
+    # Auto-load Gana Forge extensions (12.108.17 — declarative śāstra)
+    try:
+        from whitemagic.tools.gana_forge import load_extensions
+        ext_result = load_extensions()
+        if ext_result.get("loaded", 0) > 0:
+            logger.info("Forge: loaded %d extension tool(s)", ext_result["loaded"])
+    except Exception:
+        pass
+
 
 # ══════════════════════════════════════════════════════════════════════
 # PRAT Gana tool definitions (static — no heavy imports needed)
@@ -125,7 +134,7 @@ _GANA_SHORT_DESC: dict[str, str] = {
     "gana_winnowing_basket": "Wisdom & search — search, vector search, hybrid recall, graph walk, read memories",
     "gana_ghost": "Introspection — gnosis, telemetry, capabilities, graph topology, surprise stats",
     "gana_willow": "Resilience — rate limiter, grimoire spells & suggestions",
-    "gana_star": "Governance — governor validate/set-goal/drift, dharma reload/profile",
+    "gana_star": "Governance — governor validate/set-goal/drift, dharma reload/profile, forge status/reload/validate",
     "gana_extended_net": "Pattern connectivity — pattern search, cluster stats, learning",
     "gana_wings": "Deployment & export — export memories, audit export, mesh",
     "gana_chariot": "Archaeology & knowledge graph — archaeology, KG extract/query/top",
@@ -136,7 +145,7 @@ _GANA_SHORT_DESC: dict[str, str] = {
     "gana_hairy_head": "Detail & debug — salience, anomaly, otel, karma report/trace, dharma rules",
     "gana_net": "Capture & filtering — prompt render/list/reload, karma verify",
     "gana_turtle_beak": "Precision — edge/bitnet inference, edge batch, stats",
-    "gana_three_stars": "Judgment & synthesis — bicameral reasoning, ensemble, optimization, kaizen",
+    "gana_three_stars": "Judgment & synthesis — bicameral reasoning, ensemble, optimization, kaizen, sabha convene/status",
     "gana_dipper": "Strategy — homeostasis, maturity assess, starter packs",
     "gana_ox": "Endurance — swarm decompose/route/complete/vote/plan/status, worker",
     "gana_girl": "Nurture — agent register/heartbeat/list/capabilities/deregister/trust",
@@ -157,7 +166,7 @@ _GANA_TOOLS: dict[str, list[str]] = {
     "gana_winnowing_basket": ["batch_read_memories", "fast_read_memory", "graph_walk", "hybrid_recall", "list_memories", "read_memory", "search_memories", "vector.index", "vector.search", "vector.status"],
     "gana_ghost": ["capabilities", "capability.matrix", "capability.status", "capability.suggest", "drive.event", "drive.snapshot", "explain_this", "get_telemetry_summary", "gnosis", "graph_topology", "manifest", "repo.summary", "selfmodel.alerts", "selfmodel.forecast", "surprise_stats"],
     "gana_willow": ["grimoire_auto_status", "grimoire_cast", "grimoire_recommend", "grimoire_suggest", "grimoire_walkthrough", "rate_limiter.stats"],
-    "gana_star": ["dharma.reload", "governor_check_drift", "governor_set_goal", "governor_validate", "set_dharma_profile"],
+    "gana_star": ["dharma.reload", "forge.reload", "forge.status", "forge.validate", "governor_check_drift", "governor_set_goal", "governor_validate", "set_dharma_profile"],
     "gana_extended_net": ["cluster_stats", "learning.patterns", "learning.status", "learning.suggest", "pattern_search", "tool.graph"],
     "gana_wings": ["audit.export", "export_memories", "mesh.broadcast", "mesh.status"],
     "gana_chariot": ["archaeology", "kg.extract", "kg.query", "kg.status", "kg.top"],
@@ -168,7 +177,7 @@ _GANA_TOOLS: dict[str, list[str]] = {
     "gana_hairy_head": ["anomaly", "dharma_rules", "karma_report", "karmic_trace", "otel", "salience.spotlight"],
     "gana_net": ["karma.verify_chain", "prompt.list", "prompt.reload", "prompt.render"],
     "gana_turtle_beak": ["bitnet_infer", "bitnet_status", "edge_batch_infer", "edge_infer", "edge_stats"],
-    "gana_three_stars": ["ensemble", "kaizen_analyze", "kaizen_apply_fixes", "reasoning.bicameral", "solve_optimization"],
+    "gana_three_stars": ["ensemble", "kaizen_analyze", "kaizen_apply_fixes", "reasoning.bicameral", "sabha.convene", "sabha.status", "solve_optimization"],
     "gana_dipper": ["homeostasis", "maturity.assess", "starter_packs"],
     "gana_ox": ["swarm.complete", "swarm.decompose", "swarm.plan", "swarm.resolve", "swarm.route", "swarm.status", "swarm.vote", "worker.status"],
     "gana_girl": ["agent.capabilities", "agent.deregister", "agent.heartbeat", "agent.list", "agent.register", "agent.trust"],
@@ -346,10 +355,22 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[types.T
     return [types.TextContent(type="text", text=text)]
 
 
+# ── Workflow templates (v14.1.1) ─────────────────────────────────────
+_WORKFLOW_DIR = ROOT_DIR / "workflows"
+_WORKFLOW_META: dict[str, str] = {
+    "new_session": "Start every conversation — bootstrap, health, introspect, serendipity",
+    "deep_research": "Multi-step research — search, graph walk, KG extract, synthesise",
+    "memory_maintenance": "Periodic Data Sea hygiene — sweep, constellations, patterns",
+    "ethical_review": "Full ethical governance check — dharma, boundaries, karma, harmony",
+    "galaxy_setup": "Create and populate a new galaxy (isolated memory namespace)",
+    "local_ai_chat": "Privacy-first local AI reasoning via Ollama integration",
+}
+
+
 @server.list_resources()
 async def list_resources() -> list[types.Resource]:
-    """Expose orientation and documentation resources."""
-    return [
+    """Expose orientation docs and workflow templates."""
+    resources = [
         types.Resource(
             uri="whitemagic://orientation/ai-primary",
             name="AI Primary",
@@ -369,6 +390,15 @@ async def list_resources() -> list[types.Resource]:
             mimeType="text/markdown",
         ),
     ]
+    # v14.1.1: Workflow templates
+    for wf_name, wf_desc in _WORKFLOW_META.items():
+        resources.append(types.Resource(
+            uri=f"whitemagic://workflow/{wf_name}",
+            name=f"Workflow: {wf_name.replace('_', ' ').title()}",
+            description=wf_desc,
+            mimeType="text/markdown",
+        ))
+    return resources
 
 
 @server.read_resource()
@@ -389,6 +419,14 @@ async def read_resource(uri) -> str:
             return path.read_text(encoding="utf-8")
         except Exception as exc:
             return f"# Unavailable\n\nerror: {exc}"
+    # v14.1.1: Workflow templates
+    if "workflow/" in uri_str:
+        wf_name = uri_str.split("workflow/")[-1].strip("/")
+        wf_path = _WORKFLOW_DIR / f"{wf_name}.md"
+        try:
+            return wf_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            return f"# Workflow not found: {wf_name}\n\nerror: {exc}"
     return f"# Unknown resource: {uri}"
 
 
@@ -437,17 +475,15 @@ async def main_http(host: str = "127.0.0.1", port: int = 8770) -> None:
     config = uvicorn.Config(app, host=host, port=port, log_level="warning")
     uv_server = uvicorn.Server(config)
 
-    async def _run_both() -> None:
+    async with transport.connect() as (read_stream, write_stream):
         await asyncio.gather(
             server.run(
-                transport.read_stream,
-                transport.write_stream,
+                read_stream,
+                write_stream,
                 server.create_initialization_options(),
             ),
             uv_server.serve(),
         )
-
-    await _run_both()
 
 
 def main() -> None:

@@ -334,11 +334,16 @@ def health_command(ctx):
             click.echo(f"Error checking health: {e}")
 
 @main.command(name="doctor")
+@click.option("--fix", is_flag=True, help="Auto-fix common issues (missing tables, stale indexes, orphaned associations)")
 @click.pass_context
-def doctor_command(ctx):
+def doctor_command(ctx, fix: bool):
     """Run consolidated system diagnostics via health_report tool"""
     from whitemagic.tools.dispatch_table import dispatch
     json_output = (ctx.obj or {}).get("json_output") if isinstance(ctx.obj, dict) else False
+
+    if fix:
+        _doctor_fix()
+        return
 
     result = dispatch("health_report") or {}
 
@@ -381,6 +386,125 @@ def doctor_command(ctx):
             click.echo(f"DB: {result['db'].get('memory_count', '?')} memories")
         click.echo(f"Rust: {'yes' if result.get('rust', {}).get('available') else 'no'}")
         click.echo(f"Julia: {'yes' if result.get('julia', {}).get('available') else 'no'}")
+
+
+def _doctor_fix() -> None:
+    """Auto-fix common WhiteMagic issues."""
+    click.echo("\n🔧 WhiteMagic Doctor --fix\n")
+
+    fixes_applied = 0
+
+    # Fix 1: Ensure state directory exists
+    click.echo("1. State directory...")
+    try:
+        from whitemagic.config import paths as cfg_paths
+        state_root = cfg_paths.get_state_root()
+        state_root.mkdir(parents=True, exist_ok=True)
+        click.echo(f"   ✅ {state_root}")
+    except Exception as exc:
+        click.echo(f"   ❌ {exc}")
+
+    # Fix 2: Re-init DB schema (creates missing tables/columns)
+    click.echo("2. Database schema...")
+    try:
+        from whitemagic.core.memory.unified import get_unified_memory
+        um = get_unified_memory()
+        um.backend._init_db()
+        click.echo("   ✅ All tables and columns verified")
+        fixes_applied += 1
+    except Exception as exc:
+        click.echo(f"   ❌ DB init failed: {exc}")
+
+    # Fix 3: Rebuild FTS index
+    click.echo("3. FTS index integrity...")
+    try:
+        with um.backend.pool.connection() as conn:
+            # Check FTS row count vs memories count
+            mem_count = conn.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
+            fts_count = conn.execute("SELECT COUNT(*) FROM memories_fts").fetchone()[0]
+            if abs(mem_count - fts_count) > 10:
+                click.echo(f"   ⚠️  FTS desync: {fts_count} FTS rows vs {mem_count} memories. Rebuilding...")
+                conn.execute("DELETE FROM memories_fts")
+                conn.execute("""
+                    INSERT INTO memories_fts (id, title, content, tags_text)
+                    SELECT m.id, COALESCE(m.title, ''), COALESCE(m.content, ''),
+                           COALESCE((SELECT GROUP_CONCAT(tag, ' ') FROM tags WHERE memory_id = m.id), '')
+                    FROM memories m
+                """)
+                conn.commit()
+                new_fts = conn.execute("SELECT COUNT(*) FROM memories_fts").fetchone()[0]
+                click.echo(f"   ✅ FTS rebuilt: {new_fts} rows")
+                fixes_applied += 1
+            else:
+                click.echo(f"   ✅ FTS in sync ({fts_count} rows)")
+    except Exception as exc:
+        click.echo(f"   ❌ FTS check failed: {exc}")
+
+    # Fix 4: Prune orphaned associations
+    click.echo("4. Orphaned associations...")
+    try:
+        with um.backend.pool.connection() as conn:
+            orphaned = conn.execute("""
+                SELECT COUNT(*) FROM associations
+                WHERE source_id NOT IN (SELECT id FROM memories)
+                   OR target_id NOT IN (SELECT id FROM memories)
+            """).fetchone()[0]
+            if orphaned > 0:
+                with conn:
+                    conn.execute("""
+                        DELETE FROM associations
+                        WHERE source_id NOT IN (SELECT id FROM memories)
+                           OR target_id NOT IN (SELECT id FROM memories)
+                    """)
+                click.echo(f"   ✅ Removed {orphaned:,} orphaned associations")
+                fixes_applied += 1
+            else:
+                click.echo("   ✅ No orphaned associations")
+    except Exception as exc:
+        click.echo(f"   ❌ Association cleanup failed: {exc}")
+
+    # Fix 5: Ensure content_hash index exists
+    click.echo("5. Indexes...")
+    try:
+        with um.backend.pool.connection() as conn:
+            indexes_created = 0
+            for idx_sql in [
+                "CREATE INDEX IF NOT EXISTS idx_memories_content_hash ON memories(content_hash)",
+                "CREATE INDEX IF NOT EXISTS idx_assoc_strength ON associations(strength)",
+                "CREATE INDEX IF NOT EXISTS idx_assoc_target ON associations(target_id)",
+                "CREATE INDEX IF NOT EXISTS idx_memories_accessed ON memories(accessed_at)",
+            ]:
+                try:
+                    conn.execute(idx_sql)
+                    indexes_created += 1
+                except Exception:
+                    pass
+            click.echo(f"   ✅ {indexes_created} indexes verified")
+    except Exception as exc:
+        click.echo(f"   ❌ Index check failed: {exc}")
+
+    # Fix 6: VACUUM to reclaim space
+    click.echo("6. Database compaction...")
+    try:
+        with um.backend.pool.connection() as conn:
+            conn.execute("VACUUM")
+        click.echo("   ✅ VACUUM complete")
+        fixes_applied += 1
+    except Exception as exc:
+        click.echo(f"   ❌ VACUUM failed: {exc}")
+
+    # Final health check
+    click.echo("\n7. Post-fix health check...")
+    try:
+        from whitemagic.tools.dispatch_table import dispatch
+        result = dispatch("health_report") or {}
+        score = result.get("health_score", 0)
+        status = result.get("health_status", "unknown")
+        click.echo(f"   Health: {status} ({score:.0%})")
+    except Exception as exc:
+        click.echo(f"   ❌ Health check failed: {exc}")
+
+    click.echo(f"\n✅ Doctor --fix complete. {fixes_applied} fixes applied.\n")
 
 @main.command(name="explore")
 def explore_command():
@@ -430,6 +554,120 @@ def galaxy_command():
         click.echo(f"❌ Error: TUI dependencies missing. Install with 'pip install whitemagic[tui]' ({e})")
     except Exception as e:
         click.echo(f"❌ Error launching Galaxy: {e}")
+
+
+@main.command(name="init")
+@click.option("--galaxy", default="default", help="Name for the default galaxy")
+@click.option("--skip-seed", is_flag=True, help="Skip seeding quickstart memories")
+@click.option("--skip-ollama", is_flag=True, help="Skip Ollama detection")
+@click.pass_context
+def init_command(ctx, galaxy: str, skip_seed: bool, skip_ollama: bool):
+    """🧙 First-time setup wizard for WhiteMagic.
+
+    Creates state directory, seeds quickstart memories, detects Ollama,
+    and runs a health check.
+    """
+    import shutil
+
+    from whitemagic.config import paths as cfg_paths
+
+    _echo = click.echo
+
+    def _ok(msg: str) -> None:
+        _echo(f"  ✅ {msg}")
+
+    def _skip(msg: str) -> None:
+        _echo(f"  ⏭️  {msg}")
+
+    def _fail(msg: str) -> None:
+        _echo(f"  ❌ {msg}")
+
+    _echo(f"\n🧙 WhiteMagic Init Wizard (v{__version__})\n")
+
+    # Step 1: Ensure state directory
+    _echo("Step 1/5: State directory")
+    state_root = cfg_paths.get_state_root()
+    state_root.mkdir(parents=True, exist_ok=True)
+    _ok(f"WM_STATE_ROOT = {state_root}")
+
+    # Step 2: Create default galaxy
+    _echo("Step 2/5: Default galaxy")
+    try:
+        from whitemagic.core.memory.galaxy_manager import get_galaxy_manager
+        gm = get_galaxy_manager()
+        existing = gm.list_galaxies()
+        if any(g.get("name") == galaxy for g in existing):
+            _ok(f"Galaxy '{galaxy}' already exists")
+        else:
+            gm.create_galaxy(galaxy)
+            _ok(f"Galaxy '{galaxy}' created")
+    except Exception as e:
+        _fail(f"Galaxy setup: {e}")
+
+    # Step 3: Seed quickstart memories
+    _echo("Step 3/5: Quickstart memories")
+    if skip_seed:
+        _skip("Skipped (--skip-seed)")
+    else:
+        try:
+            from whitemagic.core.memory.unified import get_unified_memory
+            um = get_unified_memory()
+            existing_count = len(um.search(tags={"quickstart"}, limit=1))
+            if existing_count > 0:
+                _ok("Quickstart memories already present")
+            else:
+                import subprocess
+                import sys
+                seed_script = Path(__file__).resolve().parent.parent.parent / "scripts" / "seed_quickstart_memories.py"
+                if seed_script.exists():
+                    subprocess.run([sys.executable, str(seed_script)], check=True, capture_output=True)
+                    _ok("Quickstart memories seeded")
+                else:
+                    _skip("Seed script not found (run from git checkout)")
+        except Exception as e:
+            _fail(f"Seed: {e}")
+
+    # Step 4: Detect Ollama
+    _echo("Step 4/5: Ollama detection")
+    if skip_ollama:
+        _skip("Skipped (--skip-ollama)")
+    else:
+        ollama_bin = shutil.which("ollama")
+        if ollama_bin:
+            _ok(f"Ollama found: {ollama_bin}")
+            try:
+                import subprocess
+                result = subprocess.run(
+                    ["ollama", "list"], capture_output=True, text=True, timeout=5,
+                )
+                if result.returncode == 0:
+                    lines = result.stdout.strip().split("\n")
+                    model_count = max(0, len(lines) - 1)  # subtract header
+                    _ok(f"{model_count} model(s) available")
+                else:
+                    _skip("Ollama installed but not running")
+            except Exception:
+                _skip("Ollama installed but not responding")
+        else:
+            _skip("Ollama not found (optional — install from ollama.com)")
+
+    # Step 5: Health check
+    _echo("Step 5/5: Health check")
+    try:
+        from whitemagic.tools.dispatch_table import dispatch
+        result = dispatch("health_report") or {}
+        score = result.get("health_score", 0)
+        status = result.get("health_status", "unknown")
+        tool_count = result.get("tool_count", "?")
+        _ok(f"Health: {status} ({score:.0%}) | {tool_count} tools")
+    except Exception as e:
+        _fail(f"Health check: {e}")
+
+    _echo("\n🎉 WhiteMagic is ready! Try:\n")
+    _echo("  wm status          # system overview")
+    _echo("  wm doctor          # detailed diagnostics")
+    _echo('  wm gana invoke gnosis \'{"compact": true}\'  # introspection')
+    _echo("")
 
 # --- Global Memory Helper ---
 
@@ -879,7 +1117,10 @@ def maintenance_reindex():
     else:
         click.echo("🌌 Starting The Great Realignment...")
         # (Simplified execution for non-rich)
-        os.system("export PYTHONPATH=$PYTHONPATH:. && ./.venv/bin/python3 scripts/reindex_data_sea.py")
+        import subprocess as _sp
+        env = os.environ.copy()
+        env["PYTHONPATH"] = env.get("PYTHONPATH", "") + ":."
+        _sp.run([sys.executable, "scripts/reindex_data_sea.py"], env=env, check=False)
 
 # --- Core Memory Commands ---
 

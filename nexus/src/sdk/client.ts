@@ -217,7 +217,10 @@ export class WhiteMagicClient {
 // ---------------------------------------------------------------------------
 
 export class MemoryClient {
-  constructor(private client: WhiteMagicClient) {}
+  private client: WhiteMagicClient;
+  constructor(client: WhiteMagicClient) {
+    this.client = client;
+  }
 
   /** Search memories by query string. */
   async search(query: string, limit?: number): Promise<MemorySearchResult[]> {
@@ -262,7 +265,10 @@ export class MemoryClient {
 }
 
 export class ToolClient {
-  constructor(private client: WhiteMagicClient) {}
+  private client: WhiteMagicClient;
+  constructor(client: WhiteMagicClient) {
+    this.client = client;
+  }
 
   /** Call a tool by name with arguments. */
   async call(toolName: string, args?: Record<string, unknown>): Promise<ToolCallResult> {
@@ -294,7 +300,10 @@ export class ToolClient {
 }
 
 export class AgentClient {
-  constructor(private client: WhiteMagicClient) {}
+  private client: WhiteMagicClient;
+  constructor(client: WhiteMagicClient) {
+    this.client = client;
+  }
 
   /** List registered agents. */
   async list(): Promise<AgentInfo[]> {
@@ -326,7 +335,10 @@ export class AgentClient {
 }
 
 export class GovernanceClient {
-  constructor(private client: WhiteMagicClient) {}
+  private client: WhiteMagicClient;
+  constructor(client: WhiteMagicClient) {
+    this.client = client;
+  }
 
   /** Get current Dharma profile and rules. */
   async dharmaRules(): Promise<{ profile: string; rules: unknown[] }> {

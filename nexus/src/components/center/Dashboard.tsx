@@ -15,8 +15,6 @@ import {
   Gauge,
   Orbit,
   Zap,
-  Brain,
-  GitBranch,
 } from "lucide-react";
 
 // ── Mock data for when API is unavailable ─────────────────────────
