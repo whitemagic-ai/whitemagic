@@ -85,13 +85,13 @@ class RedisCache:
                 pool_kwargs["ssl_cert_reqs"] = self.config.ssl_cert_reqs
 
             # Create connection pool
-            self._connection_pool = redis.ConnectionPool(**pool_kwargs)
+            self._connection_pool = redis.ConnectionPool(**pool_kwargs)  # type: ignore[arg-type]
 
             # Create sync client
             self._client = redis.Redis(connection_pool=self._connection_pool)
 
             # Create async client
-            self._async_client = AsyncRedis(connection_pool=self._connection_pool)
+            self._async_client = AsyncRedis(connection_pool=self._connection_pool)  # type: ignore[arg-type]
 
             # Test connection
             self._client.ping()
@@ -172,7 +172,7 @@ class RedisCache:
             if value is None:
                 return default
 
-            return self._deserialize(value)
+            return self._deserialize(value)  # type: ignore[arg-type]
 
         except RedisError as e:
             logger.error(f"Cache get error: {e}")
@@ -247,7 +247,7 @@ class RedisCache:
         try:
             full_key = self._make_key(key)
             assert self._client is not None
-            return int(self._client.ttl(full_key))
+            return int(self._client.ttl(full_key))  # type: ignore[arg-type]
 
         except RedisError as e:
             logger.error(f"Cache TTL error: {e}")
@@ -270,7 +270,7 @@ class RedisCache:
 
             if keys:
                 assert self._client is not None
-                return int(self._client.delete(*keys))
+                return int(self._client.delete(*keys))  # type: ignore[arg-type,misc]
             return 0
 
         except RedisError as e:

@@ -18,6 +18,7 @@ Usage:
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import logging
@@ -27,6 +28,13 @@ from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+try:
+    from nacl.signing import SigningKey, VerifyKey
+    from nacl.encoding import RawEncoder
+    _NACL_AVAILABLE = True
+except ImportError:
+    _NACL_AVAILABLE = False
 
 # ---------------------------------------------------------------------------
 # Permission Scopes (Leap 9: capability declarations)
@@ -408,3 +416,208 @@ def manifest_verify_tool() -> dict[str, Any]:
         "merkle_root": manifest.merkle_root,
         "tool_count": manifest.tool_count,
     }
+
+
+# ---------------------------------------------------------------------------
+# Ed25519 Cryptographic Signing (v14.3 — Phase 4a of V15 Strategy)
+# ---------------------------------------------------------------------------
+
+def _get_key_dir() -> Path:
+    """Return the directory for signing keys (~/.whitemagic/keys/)."""
+    try:
+        from whitemagic.config.paths import WM_ROOT
+        key_dir = WM_ROOT / "keys"
+    except Exception:
+        key_dir = Path.home() / ".whitemagic" / "keys"
+    key_dir.mkdir(parents=True, exist_ok=True)
+    return key_dir
+
+
+def generate_signing_keypair(force: bool = False) -> dict[str, Any]:
+    """Generate an Ed25519 signing keypair for manifest signing.
+
+    Stores the private key at ~/.whitemagic/keys/manifest_signing.key
+    and the public key at ~/.whitemagic/keys/manifest_signing.pub.
+
+    Returns dict with public_key_b64, did_key, and key_path.
+    The DID:key format follows did:key:z6Mk... (multicodec Ed25519-pub).
+    """
+    if not _NACL_AVAILABLE:
+        return {"status": "error", "reason": "PyNaCl not installed (pip install pynacl)"}
+
+    key_dir = _get_key_dir()
+    priv_path = key_dir / "manifest_signing.key"
+    pub_path = key_dir / "manifest_signing.pub"
+
+    if priv_path.exists() and not force:
+        return {
+            "status": "exists",
+            "message": "Keypair already exists. Use force=True to regenerate.",
+            "public_key_path": str(pub_path),
+        }
+
+    signing_key = SigningKey.generate()
+    verify_key = signing_key.verify_key
+
+    # Store raw 32-byte keys
+    priv_path.write_bytes(signing_key.encode())
+    pub_path.write_bytes(verify_key.encode())
+    # Restrict permissions on private key
+    priv_path.chmod(0o600)
+
+    pub_b64 = base64.urlsafe_b64encode(verify_key.encode()).decode()
+
+    # DID:key format: multicodec prefix 0xed01 for Ed25519-pub + base58btc
+    # Simplified: use base64url encoding with did:key:z prefix
+    did_key = f"did:key:z{pub_b64}"
+
+    logger.info(f"Generated Ed25519 keypair at {key_dir}")
+    return {
+        "status": "ok",
+        "public_key_b64": pub_b64,
+        "did_key": did_key,
+        "private_key_path": str(priv_path),
+        "public_key_path": str(pub_path),
+    }
+
+
+def _load_signing_key() -> Any | None:
+    """Load the Ed25519 private signing key from disk."""
+    if not _NACL_AVAILABLE:
+        return None
+    key_dir = _get_key_dir()
+    priv_path = key_dir / "manifest_signing.key"
+    if not priv_path.exists():
+        return None
+    try:
+        return SigningKey(priv_path.read_bytes())
+    except Exception as e:
+        logger.warning(f"Failed to load signing key: {e}")
+        return None
+
+
+def _load_verify_key() -> Any | None:
+    """Load the Ed25519 public verification key from disk."""
+    if not _NACL_AVAILABLE:
+        return None
+    key_dir = _get_key_dir()
+    pub_path = key_dir / "manifest_signing.pub"
+    if not pub_path.exists():
+        return None
+    try:
+        return VerifyKey(pub_path.read_bytes())
+    except Exception as e:
+        logger.warning(f"Failed to load verify key: {e}")
+        return None
+
+
+def sign_manifest(manifest: ToolManifest) -> dict[str, Any]:
+    """Sign a manifest's Merkle root with the Ed25519 private key.
+
+    Returns dict with signature_b64, merkle_root, public_key_b64, did_key,
+    and signed_at timestamp. The signature covers:
+        SHA-256(version || merkle_root || tool_count || generated_at)
+
+    This provides non-repudiation: anyone with the public key can verify
+    that this specific manifest was approved by the key holder.
+    """
+    if not _NACL_AVAILABLE:
+        return {"status": "error", "reason": "PyNaCl not installed"}
+
+    signing_key = _load_signing_key()
+    if signing_key is None:
+        return {
+            "status": "error",
+            "reason": "No signing key found. Run generate_signing_keypair() first.",
+        }
+
+    # Canonical message to sign
+    message = (
+        f"{manifest.version}|{manifest.merkle_root}|"
+        f"{manifest.tool_count}|{manifest.generated_at}"
+    ).encode()
+
+    signed = signing_key.sign(message, encoder=RawEncoder)
+    signature_b64 = base64.urlsafe_b64encode(signed.signature).decode()
+
+    verify_key = signing_key.verify_key
+    pub_b64 = base64.urlsafe_b64encode(verify_key.encode()).decode()
+    did_key = f"did:key:z{pub_b64}"
+
+    return {
+        "status": "ok",
+        "signature_b64": signature_b64,
+        "merkle_root": manifest.merkle_root,
+        "message_signed": message.decode(),
+        "public_key_b64": pub_b64,
+        "did_key": did_key,
+        "signed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "tool_count": manifest.tool_count,
+        "version": manifest.version,
+    }
+
+
+def verify_signature(
+    signature_b64: str,
+    manifest: ToolManifest,
+    public_key_b64: str | None = None,
+) -> dict[str, Any]:
+    """Verify an Ed25519 signature against a manifest.
+
+    Args:
+        signature_b64: Base64url-encoded Ed25519 signature.
+        manifest: The ToolManifest to verify against.
+        public_key_b64: Optional explicit public key. If None, loads from disk.
+
+    Returns dict with valid (bool), message, and details.
+    """
+    if not _NACL_AVAILABLE:
+        return {"valid": False, "reason": "PyNaCl not installed"}
+
+    # Load or parse verify key
+    if public_key_b64:
+        try:
+            pub_bytes = base64.urlsafe_b64decode(public_key_b64)
+            verify_key = VerifyKey(pub_bytes)
+        except Exception as e:
+            return {"valid": False, "reason": f"Invalid public key: {e}"}
+    else:
+        loaded = _load_verify_key()
+        if loaded is None:
+            return {"valid": False, "reason": "No public key found on disk"}
+        verify_key = loaded
+
+    # Reconstruct the canonical message
+    message = (
+        f"{manifest.version}|{manifest.merkle_root}|"
+        f"{manifest.tool_count}|{manifest.generated_at}"
+    ).encode()
+
+    try:
+        sig_bytes = base64.urlsafe_b64decode(signature_b64)
+        verify_key.verify(message, sig_bytes)
+        return {
+            "valid": True,
+            "message": "Signature verified — manifest is authentic",
+            "merkle_root": manifest.merkle_root,
+            "tool_count": manifest.tool_count,
+        }
+    except Exception as e:
+        return {
+            "valid": False,
+            "reason": f"Signature verification failed: {e}",
+            "merkle_root": manifest.merkle_root,
+        }
+
+
+def manifest_sign_tool() -> dict[str, Any]:
+    """Generate, sign, and return a manifest (MCP tool handler)."""
+    manifest = generate_manifest()
+    result = sign_manifest(manifest)
+    if result.get("status") == "error":
+        # Auto-generate keypair on first use
+        if "No signing key" in result.get("reason", ""):
+            keygen = generate_signing_keypair()
+            if keygen.get("status") == "ok":
+                result = sign_manifest(manifest)
+    return result

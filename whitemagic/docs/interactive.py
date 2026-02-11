@@ -65,7 +65,7 @@ class InteractiveDocumentation:
         # OAuth2 configuration
         if oauth2_config:
             self.swagger_ui_parameters = {
-                "oauth2RedirectUrl": f"{self.app.servers[0].url}{self.docs_url}/oauth2-redirect.html",
+                "oauth2RedirectUrl": f"{self.app.servers[0].url}{self.docs_url}/oauth2-redirect.html",  # type: ignore[attr-defined]
                 **oauth2_config,
             }
 
@@ -73,7 +73,7 @@ class InteractiveDocumentation:
         @self.app.get(self.docs_url, include_in_schema=False)
         async def custom_swagger_ui_html(req: Request):
             root = req.scope.get("root_path") or ""
-            openapi_url = root + self.app.openapi_url
+            openapi_url = root + (self.app.openapi_url or "")
             resp = get_swagger_ui_html(
                 openapi_url=openapi_url,
                 title=f"{title} - Swagger UI",
@@ -85,11 +85,12 @@ class InteractiveDocumentation:
                 swagger_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
             )
             # Inject custom CSS/JS into the HTML response body
-            body = resp.body.decode("utf-8") if isinstance(resp.body, bytes) else resp.body
+            raw_body = resp.body.decode("utf-8") if isinstance(resp.body, bytes) else str(resp.body)
             if self.custom_css:
-                body = body.replace("</head>", f"<style>{self.custom_css}</style></head>")
+                raw_body = raw_body.replace("</head>", f"<style>{self.custom_css}</style></head>")
             if self.custom_js:
-                body = body.replace("</body>", f"<script>{self.custom_js}</script></body>")
+                raw_body = raw_body.replace("</body>", f"<script>{self.custom_js}</script></body>")
+            body = raw_body
             return Response(content=body, media_type="text/html")
 
         # OAuth2 redirect endpoint
@@ -135,7 +136,7 @@ class InteractiveDocumentation:
         @self.app.get(self.redoc_url, include_in_schema=False)
         async def redoc_html(req: Request):
             root = req.scope.get("root_path") or ""
-            openapi_url = root + self.app.openapi_url
+            openapi_url = root + (self.app.openapi_url or "")
             resp = get_redoc_html(
                 openapi_url=openapi_url,
                 title=f"{title} - ReDoc",
@@ -143,9 +144,10 @@ class InteractiveDocumentation:
                 redoc_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
             )
             # Inject custom CSS into the HTML response body
-            body = resp.body.decode("utf-8") if isinstance(resp.body, bytes) else resp.body
+            raw_body = resp.body.decode("utf-8") if isinstance(resp.body, bytes) else str(resp.body)
             if final_css:
-                body = body.replace("</head>", f"<style>{final_css}</style></head>")
+                raw_body = raw_body.replace("</head>", f"<style>{final_css}</style></head>")
+            body = raw_body
             return Response(content=body, media_type="text/html")
 
     def add_code_examples(self) -> None:
@@ -223,7 +225,7 @@ class InteractiveDocumentation:
                 "variable": [
                     {
                         "key": "baseUrl",
-                        "value": self.app.servers[0].url if self.app.servers else "http://localhost:8000",
+                        "value": self.app.servers[0].url if self.app.servers else "http://localhost:8000",  # type: ignore[attr-defined]
                     },
                 ],
                 "item": [],

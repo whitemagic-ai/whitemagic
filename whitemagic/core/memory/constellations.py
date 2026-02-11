@@ -8,13 +8,13 @@ from the Data Sea.
 Constellations are persisted as PATTERN memories with special tags,
 allowing them to be searched, visualized, and used for contextual recall.
 
-Strategy:
+Strategy (v14.1.1 — dual algorithm):
   1. Load all memories with holographic coordinates.
-  2. Use a lightweight grid-based density scan in 5D space.
-  3. Identify cells with memory count above threshold.
-  4. Merge adjacent dense cells into constellations.
-  5. Name each constellation from dominant tags/keywords.
-  6. Persist as metadata (not as new memories — avoids bloat).
+  2a. HDBSCAN: variable-density clustering with noise rejection (preferred).
+  2b. Grid-based density scan fallback when hdbscan unavailable.
+  3. Name each constellation from dominant tags/keywords.
+  4. Persist as metadata (not as new memories — avoids bloat).
+  5. Track drift via Hungarian optimal centroid matching.
 
 Usage:
     from whitemagic.core.memory.constellations import get_constellation_detector
@@ -32,6 +32,27 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
+
+try:
+    import hdbscan as _hdbscan
+    _HDBSCAN_AVAILABLE = True
+except ImportError:
+    _hdbscan = None  # type: ignore[assignment]
+    _HDBSCAN_AVAILABLE = False
+
+try:
+    import numpy as _np
+    _NP_AVAILABLE = True
+except ImportError:
+    _np = None  # type: ignore[assignment]
+    _NP_AVAILABLE = False
+
+try:
+    from scipy.optimize import linear_sum_assignment as _hungarian
+    _SCIPY_AVAILABLE = True
+except ImportError:
+    _hungarian = None  # type: ignore[assignment]
+    _SCIPY_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +73,7 @@ class Constellation:
     dominant_type: str  # Most common memory_type
     avg_importance: float
     zone: str  # Galactic zone of centroid's V coordinate
+    stability: float = 0.0  # HDBSCAN cluster persistence (0-1), 0 for grid-based
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -81,6 +103,7 @@ class DetectionReport:
     constellations_found: int = 0
     largest_constellation: int = 0
     duration_ms: float = 0.0
+    algorithm: str = "grid"  # "grid" or "hdbscan"
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     constellations: list[Constellation] = field(default_factory=list)
 
@@ -169,6 +192,9 @@ class ConstellationDetector:
     def detect(self, sample_limit: int = 50000) -> DetectionReport:
         """Run constellation detection across the Data Sea.
 
+        Uses HDBSCAN when available (variable-density, noise-aware).
+        Falls back to grid-based density scan otherwise.
+
         Returns a DetectionReport with discovered constellations.
         """
         start = time.perf_counter()
@@ -201,51 +227,31 @@ class ConstellationDetector:
             return report
 
         report.memories_scanned = len(rows)
+        coords: list[tuple[float, ...]] = [
+            (r["x"], r["y"], r["z"], r["w"], r["v"]) for r in rows
+        ]
 
-        # Compute axis ranges
-        coords = [(r["x"], r["y"], r["z"], r["w"], r["v"]) for r in rows]
-        ranges = {}
-        for i, axis in enumerate(["x", "y", "z", "w", "v"]):
-            vals = [c[i] for c in coords]
-            ranges[axis] = (min(vals), max(vals))
-
-        # Assign memories to grid cells
-        cells: dict[tuple, list[int]] = defaultdict(list)
-        for idx, row in enumerate(rows):
-            key = self._cell_key(row["x"], row["y"], row["z"], row["w"], row["v"], ranges)
-            cells[key].append(idx)
-
-        # Find dense cells (above threshold)
-        dense_cells = {
-            k: v for k, v in cells.items()
-            if len(v) >= self._min_size
-        }
-
-        if not dense_cells:
-            report.duration_ms = (time.perf_counter() - start) * 1000
-            return report
-
-        # Merge adjacent dense cells into constellations
-        merged = self._merge_adjacent(dense_cells)
+        # Choose algorithm
+        if _HDBSCAN_AVAILABLE and _NP_AVAILABLE:
+            cluster_groups, stabilities = self._detect_hdbscan(coords)
+            report.algorithm = "hdbscan"
+        else:
+            cluster_groups, stabilities = self._detect_grid(coords)
+            report.algorithm = "grid"
 
         # Build Constellation objects
         used_names: set[str] = set()
         constellations = []
-        for cell_group in merged:
-            member_indices = []
-            for cell_key in cell_group:
-                member_indices.extend(dense_cells[cell_key])
-
-            # Deduplicate
+        for group_idx, member_indices in enumerate(cluster_groups):
             member_indices = list(set(member_indices))
             if len(member_indices) < self._min_size:
                 continue
 
             # Compute centroid
             member_coords = [coords[i] for i in member_indices]
-            centroid = tuple(
-                sum(c[d] for c in member_coords) / len(member_coords)
-                for d in range(5)
+            _cx = [sum(c[d] for c in member_coords) / len(member_coords) for d in range(5)]
+            centroid: tuple[float, float, float, float, float] = (
+                _cx[0], _cx[1], _cx[2], _cx[3], _cx[4],
             )
 
             # Average distance from centroid
@@ -274,6 +280,8 @@ class ConstellationDetector:
             # Name from dominant tags
             name = self._generate_name(dominant_tags, dominant_type, zone, used_names)
 
+            stability = stabilities[group_idx] if group_idx < len(stabilities) else 0.0
+
             constellations.append(Constellation(
                 name=name,
                 member_ids=member_ids,
@@ -283,6 +291,7 @@ class ConstellationDetector:
                 dominant_type=dominant_type,
                 avg_importance=avg_imp,
                 zone=zone,
+                stability=stability,
             ))
 
         # Sort by size descending, cap
@@ -306,12 +315,100 @@ class ConstellationDetector:
         # Gap A3 synthesis: Feed constellations into Knowledge Graph
         self._feed_knowledge_graph(constellations)
 
+        # v14.3: Persist constellation memberships to DB for search-time boost
+        self.persist_memberships()
+
         logger.info(
-            f"✨ Constellation detection: {report.constellations_found} constellations "
+            f"✨ Constellation detection ({report.algorithm}): "
+            f"{report.constellations_found} constellations "
             f"found in {report.memories_scanned} memories ({report.duration_ms:.0f}ms). "
             f"Largest: {report.largest_constellation} members",
         )
         return report
+
+    # ------------------------------------------------------------------
+    # HDBSCAN detection (preferred)
+    # ------------------------------------------------------------------
+
+    def _detect_hdbscan(
+        self, coords: list[tuple[float, ...]],
+    ) -> tuple[list[list[int]], list[float]]:
+        """Cluster using HDBSCAN — variable-density with noise rejection.
+
+        Returns (groups, stabilities) where groups is a list of member-index
+        lists and stabilities is per-cluster persistence score (0-1).
+        """
+        data = _np.array(coords, dtype=_np.float64)
+        clusterer = _hdbscan.HDBSCAN(
+            min_cluster_size=max(self._min_size, 5),
+            min_samples=max(self._min_size // 2, 2),
+            metric="euclidean",
+        )
+        labels = clusterer.fit_predict(data)
+
+        # Group indices by label (-1 = noise → skip)
+        label_to_indices: dict[int, list[int]] = defaultdict(list)
+        for idx, label in enumerate(labels):
+            if label >= 0:
+                label_to_indices[label].append(idx)
+
+        # Extract per-cluster stability from HDBSCAN's probabilities
+        groups: list[list[int]] = []
+        stabilities: list[float] = []
+        for label in sorted(label_to_indices.keys()):
+            members = label_to_indices[label]
+            groups.append(members)
+            if hasattr(clusterer, "probabilities_") and clusterer.probabilities_ is not None:
+                avg_prob = float(_np.mean(clusterer.probabilities_[members]))
+            else:
+                avg_prob = 0.5
+            stabilities.append(avg_prob)
+
+        logger.info(
+            f"HDBSCAN: {len(groups)} clusters, "
+            f"{sum(1 for lbl in labels if lbl == -1)} noise points",
+        )
+        return groups, stabilities
+
+    # ------------------------------------------------------------------
+    # Grid-based detection (fallback)
+    # ------------------------------------------------------------------
+
+    def _detect_grid(
+        self, coords: list[tuple[float, ...]],
+    ) -> tuple[list[list[int]], list[float]]:
+        """Grid-based density scan fallback.
+
+        Returns (groups, stabilities) — stabilities are always 0.0 for grid.
+        """
+        # Compute axis ranges
+        ranges = {}
+        for i, axis in enumerate(["x", "y", "z", "w", "v"]):
+            vals = [c[i] for c in coords]
+            ranges[axis] = (min(vals), max(vals))
+
+        # Assign to grid cells
+        cells: dict[tuple, list[int]] = defaultdict(list)
+        for idx, c in enumerate(coords):
+            key = self._cell_key(c[0], c[1], c[2], c[3], c[4], ranges)
+            cells[key].append(idx)
+
+        # Dense cells
+        dense_cells = {k: v for k, v in cells.items() if len(v) >= self._min_size}
+        if not dense_cells:
+            return [], []
+
+        # Merge adjacent
+        merged = self._merge_adjacent(dense_cells)
+
+        groups: list[list[int]] = []
+        for cell_group in merged:
+            member_indices = []
+            for cell_key in cell_group:
+                member_indices.extend(dense_cells[cell_key])
+            groups.append(member_indices)
+
+        return groups, [0.0] * len(groups)
 
     # ------------------------------------------------------------------
     # Helpers
@@ -537,6 +634,83 @@ class ConstellationDetector:
 
         return memories
 
+    def get_constellation_centroids(self) -> list[dict[str, Any]]:
+        """Return all constellation centroids from the last detection report.
+
+        Each entry contains: name, centroid (5-tuple), dominant_tags, size, stability.
+        Used by the embedding engine to find the closest constellation to a query.
+        """
+        with self._lock:
+            if not self._last_report or not self._last_report.constellations:
+                return []
+            return [
+                {
+                    "name": c.name,
+                    "centroid": c.centroid,
+                    "dominant_tags": c.dominant_tags,
+                    "size": len(c.member_ids),
+                    "stability": c.stability,
+                    "zone": c.zone,
+                }
+                for c in self._last_report.constellations
+            ]
+
+    def get_memory_constellation(self, memory_id: str) -> dict[str, Any] | None:
+        """Look up the constellation for a specific memory from the DB index.
+
+        Returns dict with constellation_name, membership_confidence, or None.
+        Falls back to in-memory membership scan if DB index is empty.
+        """
+        # Fast path: DB index (persisted by persist_memberships)
+        try:
+            from whitemagic.core.memory.unified import get_unified_memory
+            um = get_unified_memory()
+            result = um.backend.get_constellation_membership(memory_id)
+            if result:
+                return result
+        except Exception:
+            pass
+
+        # Slow path: scan cached report member_ids
+        with self._lock:
+            if not self._last_report:
+                return None
+            for c in self._last_report.constellations:
+                if memory_id in c.member_ids:
+                    return {
+                        "constellation_name": c.name,
+                        "membership_confidence": c.stability if c.stability > 0 else 0.8,
+                    }
+        return None
+
+    def persist_memberships(self) -> int:
+        """Persist current constellation memberships to the DB index.
+
+        Called after detection to make memberships queryable at search time.
+        Returns number of memberships persisted.
+        """
+        with self._lock:
+            if not self._last_report or not self._last_report.constellations:
+                return 0
+            memberships: list[tuple[str, str, float]] = []
+            for c in self._last_report.constellations:
+                confidence = c.stability if c.stability > 0 else 0.8
+                for mid in c.member_ids:
+                    memberships.append((mid, c.name, confidence))
+
+        if not memberships:
+            return 0
+
+        try:
+            from whitemagic.core.memory.unified import get_unified_memory
+            um = get_unified_memory()
+            count = um.backend.update_constellation_membership(memberships)
+            logger.info(f"Persisted {count} constellation memberships to DB index")
+            return count
+        except Exception as e:
+            logger.debug(f"Failed to persist constellation memberships: {e}")
+            return 0
+
     def get_last_report(self) -> dict[str, Any] | None:
         with self._lock:
             return self._last_report.to_dict() if self._last_report else None
@@ -572,12 +746,17 @@ class ConstellationDetector:
     def get_drift_vectors(self, window_days: int = 7) -> list[dict[str, Any]]:
         """Compute drift vectors for all tracked constellations.
 
+        Uses Hungarian algorithm (scipy) for optimal centroid matching
+        when available, falling back to name-based matching otherwise.
+
         Returns list of dicts with:
           - name: constellation name
           - current_centroid: current 5D position
           - drift_vector: 5D displacement over the window
           - drift_magnitude: Euclidean distance moved
           - samples: number of historical observations in the window
+          - novel_concepts: constellations that appeared (no prior match)
+          - forgotten_concepts: constellations that disappeared
         """
         import math as _math
         from datetime import datetime as _dt, timedelta as _td
@@ -591,40 +770,156 @@ class ConstellationDetector:
         if not current_report:
             return []
 
-        current_centroids = {c.name: c.centroid for c in current_report.constellations}
+        current_centroids: dict[str, tuple[float, ...]] = {
+            c.name: c.centroid for c in current_report.constellations
+        }
 
+        # Collect earliest historical centroids within window
+        historical_centroids: dict[str, tuple[float, ...]] = {}
         for name, history in self._centroid_history.items():
-            if name not in current_centroids:
-                continue
-
-            # Filter history within window
             window_points = [(ts, c) for ts, c in history if ts >= cutoff]
-            if len(window_points) < 2:
-                continue
+            if len(window_points) >= 2:
+                historical_centroids[name] = window_points[0][1]
 
-            earliest = window_points[0][1]
-            current = current_centroids[name]
+        # Try Hungarian matching for optimal correspondence
+        if _SCIPY_AVAILABLE and historical_centroids and current_centroids:
+            matched, novel, forgotten = self._hungarian_match(
+                historical_centroids, current_centroids,
+            )
 
-            drift_vec = tuple(c - e for c, e in zip(current, earliest))
-            magnitude = _math.sqrt(sum(d * d for d in drift_vec))
+            for curr_name, hist_name in matched.items():
+                current = current_centroids[curr_name]
+                earliest = historical_centroids[hist_name]
+                drift_vec = tuple(c - e for c, e in zip(current, earliest))
+                magnitude = _math.sqrt(sum(d * d for d in drift_vec))
+                window_points = [(ts, c) for ts, c in self._centroid_history.get(hist_name, []) if ts >= cutoff]
 
-            results.append({
-                "name": name,
-                "current_centroid": {"x": current[0], "y": current[1],
-                                     "z": current[2], "w": current[3],
-                                     "v": current[4]},
-                "drift_vector": {"dx": round(drift_vec[0], 4),
-                                 "dy": round(drift_vec[1], 4),
-                                 "dz": round(drift_vec[2], 4),
-                                 "dw": round(drift_vec[3], 4),
-                                 "dv": round(drift_vec[4], 4)},
-                "drift_magnitude": round(magnitude, 4),
-                "samples": len(window_points),
-                "window_days": window_days,
-            })
+                results.append({
+                    "name": curr_name,
+                    "matched_from": hist_name if hist_name != curr_name else None,
+                    "current_centroid": {"x": current[0], "y": current[1],
+                                         "z": current[2], "w": current[3],
+                                         "v": current[4]},
+                    "drift_vector": {"dx": round(drift_vec[0], 4),
+                                     "dy": round(drift_vec[1], 4),
+                                     "dz": round(drift_vec[2], 4),
+                                     "dw": round(drift_vec[3], 4),
+                                     "dv": round(drift_vec[4], 4)},
+                    "drift_magnitude": round(magnitude, 4),
+                    "samples": len(window_points),
+                    "window_days": window_days,
+                })
+
+            # Emit events for novel / forgotten concepts
+            self._emit_concept_events(novel, forgotten)
+
+        else:
+            # Fallback: name-based matching (original behavior)
+            for name, history in self._centroid_history.items():
+                if name not in current_centroids:
+                    continue
+                window_points = [(ts, c) for ts, c in history if ts >= cutoff]
+                if len(window_points) < 2:
+                    continue
+                earliest = window_points[0][1]
+                current = current_centroids[name]
+                drift_vec = tuple(c - e for c, e in zip(current, earliest))
+                magnitude = _math.sqrt(sum(d * d for d in drift_vec))
+
+                results.append({
+                    "name": name,
+                    "current_centroid": {"x": current[0], "y": current[1],
+                                         "z": current[2], "w": current[3],
+                                         "v": current[4]},
+                    "drift_vector": {"dx": round(drift_vec[0], 4),
+                                     "dy": round(drift_vec[1], 4),
+                                     "dz": round(drift_vec[2], 4),
+                                     "dw": round(drift_vec[3], 4),
+                                     "dv": round(drift_vec[4], 4)},
+                    "drift_magnitude": round(magnitude, 4),
+                    "samples": len(window_points),
+                    "window_days": window_days,
+                })
 
         results.sort(key=lambda r: -r["drift_magnitude"])
         return results
+
+    # ------------------------------------------------------------------
+    # Hungarian Optimal Matching
+    # ------------------------------------------------------------------
+
+    def _hungarian_match(
+        self,
+        old_centroids: dict[str, tuple[float, ...]],
+        new_centroids: dict[str, tuple[float, ...]],
+        max_match_distance: float = 2.0,
+    ) -> tuple[dict[str, str], list[str], list[str]]:
+        """Match old→new constellations using the Hungarian algorithm.
+
+        Returns:
+            matched: new_name → old_name for matched pairs
+            novel: list of new constellation names with no match
+            forgotten: list of old constellation names with no match
+        """
+        old_names = sorted(old_centroids.keys())
+        new_names = sorted(new_centroids.keys())
+        n_old, n_new = len(old_names), len(new_names)
+
+        if n_old == 0 or n_new == 0:
+            return {}, list(new_names), list(old_names)
+
+        # Build cost matrix: n_new × n_old (distances)
+        import numpy as np
+        cost = np.zeros((n_new, n_old), dtype=np.float64)
+        for i, nn in enumerate(new_names):
+            for j, on in enumerate(old_names):
+                cost[i, j] = self._distance_5d(new_centroids[nn], old_centroids[on])
+
+        row_ind, col_ind = _hungarian(cost)
+
+        matched: dict[str, str] = {}
+        matched_old: set[str] = set()
+        matched_new: set[str] = set()
+
+        for r, c in zip(row_ind, col_ind):
+            if cost[r, c] <= max_match_distance:
+                matched[new_names[r]] = old_names[c]
+                matched_new.add(new_names[r])
+                matched_old.add(old_names[c])
+
+        novel = [n for n in new_names if n not in matched_new]
+        forgotten = [o for o in old_names if o not in matched_old]
+
+        if novel or forgotten:
+            logger.info(
+                f"Drift tracking: {len(matched)} matched, "
+                f"{len(novel)} novel, {len(forgotten)} forgotten",
+            )
+        return matched, novel, forgotten
+
+    @staticmethod
+    def _emit_concept_events(novel: list[str], forgotten: list[str]) -> None:
+        """Emit NOVEL_CONCEPT / FORGOTTEN_CONCEPT events to Gan Ying bus."""
+        if not novel and not forgotten:
+            return
+        try:
+            from whitemagic.core.resonance.gan_ying_enhanced import EventType
+            from whitemagic.core.resonance.gan_ying import emit_event
+
+            for name in novel:
+                emit_event(
+                    source="constellation_detector",
+                    event_type=EventType.PATTERN_DETECTED,
+                    data={"type": "NOVEL_CONCEPT", "constellation": name},
+                )
+            for name in forgotten:
+                emit_event(
+                    source="constellation_detector",
+                    event_type=EventType.PATTERN_DETECTED,
+                    data={"type": "FORGOTTEN_CONCEPT", "constellation": name},
+                )
+        except Exception:
+            pass  # Gan Ying bus optional
 
 
 # ---------------------------------------------------------------------------

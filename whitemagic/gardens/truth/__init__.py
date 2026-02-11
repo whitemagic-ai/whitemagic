@@ -94,7 +94,7 @@ class TruthGarden(BaseGarden, GanYingMixin):
 
         # Zig (ctypes .so)
         try:
-            from whitemagic.optimization import zig_accelerators
+            from whitemagic.optimization import zig_accelerators  # type: ignore[attr-defined]
             status["zig"] = hasattr(zig_accelerators, '_lib') or True
         except ImportError:
             status["zig"] = False

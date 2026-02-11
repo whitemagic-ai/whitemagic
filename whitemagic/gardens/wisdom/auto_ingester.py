@@ -51,7 +51,7 @@ async def ingest_all_async() -> dict[str, int]:
         for text in TEXTS:
             try:
                 await asyncio.sleep(2)  # Rate limit
-                async with session.get(text.base_url, timeout=30) as resp:
+                async with session.get(text.base_url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
                     if resp.status == 200:
                         content = await resp.text()
                         memory.create_memory(

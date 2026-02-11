@@ -37,7 +37,7 @@ class TerminalConfig(BaseModel):
     @classmethod
     def from_env(cls) -> "TerminalConfig":
         """Load configuration from environment."""
-        return cls(
+        return cls(  # type: ignore[call-arg]
             default_profile=os.getenv("WM_EXEC_PROFILE", "agent"),
             default_timeout=int(os.getenv("WM_EXEC_TIMEOUT", "30")),
             auto_approve=os.getenv("WM_AUTO_APPROVE", "false").lower() == "true",

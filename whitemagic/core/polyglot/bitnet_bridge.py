@@ -8,7 +8,7 @@ from collections.abc import Callable
 try:
     import redis
 except ImportError:
-    redis = None
+    redis = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 

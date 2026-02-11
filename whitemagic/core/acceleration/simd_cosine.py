@@ -92,12 +92,25 @@ def _load_lib() -> Any:
             return None
 
 
-def _to_c_array(vec: Sequence[float]) -> ctypes.Array:
-    """Convert a Python list/tuple of floats to a ctypes float array."""
-    arr = (ctypes.c_float * len(vec))()
+def _to_c_array(vec: Sequence[float]) -> Any:
+    """Convert a Python sequence of floats to a ctypes float array.
+
+    Uses numpy buffer protocol for zero-copy when available (avoids
+    O(n) element-by-element copy that the FFI analysis identified as
+    a significant overhead for high-frequency calls).
+    """
+    try:
+        import numpy as np
+        if isinstance(vec, np.ndarray) and vec.dtype == np.float32:
+            return vec.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+        np_arr = np.asarray(vec, dtype=np.float32)
+        return np_arr.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    except ImportError:
+        pass
+    c_arr = (ctypes.c_float * len(vec))()
     for i, v in enumerate(vec):
-        arr[i] = v
-    return arr
+        c_arr[i] = v
+    return c_arr
 
 
 # ---------------------------------------------------------------------------

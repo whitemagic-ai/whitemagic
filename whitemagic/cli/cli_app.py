@@ -67,7 +67,7 @@ try:
     console = Console()
 except ImportError:
     HAS_RICH = False
-    console = None
+    console = None  # type: ignore[assignment]
 
 # Optional feature flags
 HAS_VOICE = False
@@ -398,7 +398,7 @@ def _doctor_fix() -> None:
     click.echo("1. State directory...")
     try:
         from whitemagic.config import paths as cfg_paths
-        state_root = cfg_paths.get_state_root()
+        state_root = cfg_paths.get_state_root()  # type: ignore[attr-defined]
         state_root.mkdir(parents=True, exist_ok=True)
         click.echo(f"   ✅ {state_root}")
     except Exception as exc:
@@ -586,7 +586,7 @@ def init_command(ctx, galaxy: str, skip_seed: bool, skip_ollama: bool):
 
     # Step 1: Ensure state directory
     _echo("Step 1/5: State directory")
-    state_root = cfg_paths.get_state_root()
+    state_root = cfg_paths.get_state_root()  # type: ignore[attr-defined]
     state_root.mkdir(parents=True, exist_ok=True)
     _ok(f"WM_STATE_ROOT = {state_root}")
 
@@ -655,10 +655,11 @@ def init_command(ctx, galaxy: str, skip_seed: bool, skip_ollama: bool):
     _echo("Step 5/5: Health check")
     try:
         from whitemagic.tools.dispatch_table import dispatch
-        result = dispatch("health_report") or {}
-        score = result.get("health_score", 0)
-        status = result.get("health_status", "unknown")
-        tool_count = result.get("tool_count", "?")
+        raw = dispatch("health_report") or {}
+        health: dict = raw if isinstance(raw, dict) else {}
+        score = health.get("health_score", 0)
+        status = health.get("health_status", "unknown")
+        tool_count = health.get("tool_count", "?")
         _ok(f"Health: {status} ({score:.0%}) | {tool_count} tools")
     except Exception as e:
         _fail(f"Health check: {e}")

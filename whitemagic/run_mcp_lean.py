@@ -39,8 +39,8 @@ logger = logging.getLogger("wm_mcp")
 
 # ── Standard MCP SDK imports ─────────────────────────────────────────
 from mcp.server import Server
-from mcp.server.stdio import stdio_server
 import mcp.types as types
+from mcp.shared.message import SessionMessage
 
 # ── Version ──────────────────────────────────────────────────────────
 _VERSION_FILE = CORE_SYSTEM_DIR / "VERSION"
@@ -132,7 +132,7 @@ _GANA_SHORT_DESC: dict[str, str] = {
     "gana_heart": "Session context — scratchpad, handoff, context pack/status",
     "gana_tail": "Performance & acceleration — SIMD ops, cascade execution",
     "gana_winnowing_basket": "Wisdom & search — search, vector search, hybrid recall, graph walk, read memories",
-    "gana_ghost": "Introspection — gnosis, telemetry, capabilities, graph topology, surprise stats",
+    "gana_ghost": "Introspection & web research — gnosis, telemetry, capabilities, graph topology, surprise stats, web_search, web_fetch, web_search_and_read, research_topic, browser automation",
     "gana_willow": "Resilience — rate limiter, grimoire spells & suggestions",
     "gana_star": "Governance — governor validate/set-goal/drift, dharma reload/profile, forge status/reload/validate",
     "gana_extended_net": "Pattern connectivity — pattern search, cluster stats, learning",
@@ -157,33 +157,33 @@ _GANA_SHORT_DESC: dict[str, str] = {
 
 # Static per-Gana tool lists (no heavy imports needed at startup).
 _GANA_TOOLS: dict[str, list[str]] = {
-    "gana_horn": ["checkpoint_session", "create_session", "resume_session", "session_bootstrap"],
-    "gana_neck": ["create_memory", "delete_memory", "import_memories", "update_memory"],
-    "gana_root": ["health_report", "rust_similarity", "rust_status", "ship.check", "state.paths", "state.summary"],
-    "gana_room": ["mcp_integrity.snapshot", "mcp_integrity.status", "mcp_integrity.verify", "sandbox.set_limits", "sandbox.status", "sandbox.violations", "sangha_lock", "security.alerts", "security.monitor_status"],
-    "gana_heart": ["context.pack", "context.status", "scratchpad", "session.handoff"],
+    "gana_horn": ["checkpoint_session", "create_session", "resume_session", "session_bootstrap", "session_status", "focus_session"],
+    "gana_neck": ["create_memory", "delete_memory", "import_memories", "update_memory", "thought_clone"],
+    "gana_root": ["health_report", "rust_audit", "rust_compress", "rust_similarity", "rust_status", "ship.check", "state.paths", "state.summary"],
+    "gana_room": ["immune_heal", "immune_scan", "mcp_integrity.snapshot", "mcp_integrity.status", "mcp_integrity.verify", "sandbox.set_limits", "sandbox.status", "sandbox.violations", "sangha_lock", "security.alerts", "security.monitor_status"],
+    "gana_heart": ["analyze_scratchpad", "context.pack", "context.status", "scratchpad", "scratchpad_create", "scratchpad_finalize", "scratchpad_update", "session.handoff"],
     "gana_tail": ["execute_cascade", "list_cascade_patterns", "simd.batch", "simd.cosine", "simd.status"],
     "gana_winnowing_basket": ["batch_read_memories", "fast_read_memory", "graph_walk", "hybrid_recall", "list_memories", "read_memory", "search_memories", "vector.index", "vector.search", "vector.status"],
-    "gana_ghost": ["capabilities", "capability.matrix", "capability.status", "capability.suggest", "drive.event", "drive.snapshot", "explain_this", "get_telemetry_summary", "gnosis", "graph_topology", "manifest", "repo.summary", "selfmodel.alerts", "selfmodel.forecast", "surprise_stats"],
-    "gana_willow": ["grimoire_auto_status", "grimoire_cast", "grimoire_recommend", "grimoire_suggest", "grimoire_walkthrough", "rate_limiter.stats"],
-    "gana_star": ["dharma.reload", "forge.reload", "forge.status", "forge.validate", "governor_check_drift", "governor_set_goal", "governor_validate", "set_dharma_profile"],
-    "gana_extended_net": ["cluster_stats", "learning.patterns", "learning.status", "learning.suggest", "pattern_search", "tool.graph"],
+    "gana_ghost": ["capabilities", "capability.matrix", "capability.status", "capability.suggest", "drive.event", "drive.snapshot", "explain_this", "get_telemetry_summary", "gnosis", "graph_topology", "manifest", "repo.summary", "selfmodel.alerts", "selfmodel.forecast", "surprise_stats", "watcher_add", "watcher_list", "watcher_recent_events", "watcher_status", "web_fetch", "web_search", "web_search_and_read", "research_topic", "browser_navigate", "browser_click", "browser_type", "browser_extract_dom", "browser_screenshot", "browser_get_interactables", "browser_session_status"],
+    "gana_willow": ["cast_oracle", "grimoire_auto_status", "grimoire_cast", "grimoire_list", "grimoire_read", "grimoire_recommend", "grimoire_suggest", "grimoire_walkthrough", "rate_limiter.stats"],
+    "gana_star": ["dharma.reload", "forge.reload", "forge.status", "forge.validate", "governor_check_budget", "governor_check_dharma", "governor_check_drift", "governor_set_goal", "governor_stats", "governor_validate", "governor_validate_path", "set_dharma_profile"],
+    "gana_extended_net": ["cluster_stats", "coherence_boost", "learning.patterns", "learning.status", "learning.suggest", "pattern_search", "resonance_trace", "tool.graph", "tool.graph_full"],
     "gana_wings": ["audit.export", "export_memories", "mesh.broadcast", "mesh.status"],
-    "gana_chariot": ["archaeology", "kg.extract", "kg.query", "kg.status", "kg.top"],
-    "gana_abundance": ["dream", "entity_resolve", "gratitude.benefits", "gratitude.stats", "memory.lifecycle", "memory.retention_sweep", "serendipity_mark_accessed", "serendipity_surface", "whitemagic.tip"],
-    "gana_straddling_legs": ["check_boundaries", "evaluate_ethics", "get_dharma_guidance", "get_ethical_score", "harmony_vector", "verify_consent"],
+    "gana_chariot": ["archaeology", "archaeology_daily_digest", "archaeology_search", "archaeology_stats", "kg.extract", "kg.query", "kg.status", "kg.top", "windsurf_list_conversations", "windsurf_search_conversations"],
+    "gana_abundance": ["dream", "dream_now", "dream_start", "dream_status", "dream_stop", "entity_resolve", "gratitude.benefits", "gratitude.stats", "memory.consolidate", "memory.consolidation_stats", "memory.lifecycle", "memory.lifecycle_stats", "memory.lifecycle_sweep", "memory.retention_sweep", "serendipity_mark_accessed", "serendipity_surface", "whitemagic.tip"],
+    "gana_straddling_legs": ["check_boundaries", "evaluate_ethics", "get_dharma_guidance", "get_ethical_score", "harmony_vector", "verify_consent", "wu_xing_balance"],
     "gana_mound": ["get_metrics_summary", "get_yin_yang_balance", "record_yin_yang_activity", "track_metric", "view_hologram"],
-    "gana_stomach": ["pipeline", "task.complete", "task.distribute", "task.list", "task.route_smart", "task.status"],
-    "gana_hairy_head": ["anomaly", "dharma_rules", "karma_report", "karmic_trace", "otel", "salience.spotlight"],
+    "gana_stomach": ["pipeline", "pipeline.create", "pipeline.list", "pipeline.status", "task.complete", "task.distribute", "task.list", "task.route_smart", "task.status"],
+    "gana_hairy_head": ["anomaly", "anomaly.check", "anomaly.history", "anomaly.status", "dharma_rules", "karma_report", "karmic_trace", "otel", "otel.metrics", "otel.spans", "otel.status", "salience.spotlight"],
     "gana_net": ["karma.verify_chain", "prompt.list", "prompt.reload", "prompt.render"],
     "gana_turtle_beak": ["bitnet_infer", "bitnet_status", "edge_batch_infer", "edge_infer", "edge_stats"],
-    "gana_three_stars": ["ensemble", "kaizen_analyze", "kaizen_apply_fixes", "reasoning.bicameral", "sabha.convene", "sabha.status", "solve_optimization"],
-    "gana_dipper": ["homeostasis", "maturity.assess", "starter_packs"],
+    "gana_three_stars": ["ensemble", "ensemble.history", "ensemble.query", "ensemble.status", "kaizen_analyze", "kaizen_apply_fixes", "reasoning.bicameral", "sabha.convene", "sabha.status", "solve_optimization"],
+    "gana_dipper": ["homeostasis", "homeostasis.check", "homeostasis.status", "maturity.assess", "starter_packs", "starter_packs.get", "starter_packs.list", "starter_packs.suggest"],
     "gana_ox": ["swarm.complete", "swarm.decompose", "swarm.plan", "swarm.resolve", "swarm.route", "swarm.status", "swarm.vote", "worker.status"],
     "gana_girl": ["agent.capabilities", "agent.deregister", "agent.heartbeat", "agent.list", "agent.register", "agent.trust"],
-    "gana_void": ["galactic.dashboard", "galaxy.create", "galaxy.delete", "galaxy.ingest", "galaxy.list", "galaxy.status", "galaxy.switch", "garden_activate", "garden_health", "garden_status"],
+    "gana_void": ["galactic.dashboard", "galaxy.create", "galaxy.delete", "galaxy.ingest", "galaxy.list", "galaxy.status", "galaxy.switch", "garden_activate", "garden_health", "garden_status", "garden_synergy"],
     "gana_roof": ["model.hash", "model.list", "model.register", "model.signing_status", "model.verify", "ollama.agent", "ollama.chat", "ollama.generate", "ollama.models"],
-    "gana_encampment": ["broker.history", "broker.publish", "broker.status", "sangha_chat_read", "sangha_chat_send"],
+    "gana_encampment": ["broker.history", "broker.publish", "broker.status", "ganying_emit", "ganying_history", "ganying_listeners", "sangha_chat_read", "sangha_chat_send"],
     "gana_wall": ["engagement.issue", "engagement.list", "engagement.revoke", "engagement.status", "engagement.validate", "vote.analyze", "vote.cast", "vote.create", "vote.list", "vote.record_outcome"],
 }
 
@@ -317,7 +317,7 @@ async def list_tools() -> list[types.Tool]:
         if icons:
             kwargs["icons"] = icons
         if name in _SLOW_GANAS:
-            kwargs["execution"] = types.ToolExecution(mode=types.TASK_OPTIONAL)
+            kwargs["execution"] = types.ToolExecution(taskSupport=types.TASK_OPTIONAL)
         tools.append(types.Tool(**kwargs))
     return tools
 
@@ -372,19 +372,19 @@ async def list_resources() -> list[types.Resource]:
     """Expose orientation docs and workflow templates."""
     resources = [
         types.Resource(
-            uri="whitemagic://orientation/ai-primary",
+            uri="whitemagic://orientation/ai-primary",  # type: ignore[arg-type]
             name="AI Primary",
             description="Primary orientation document for AI runtimes.",
             mimeType="text/markdown",
         ),
         types.Resource(
-            uri="whitemagic://orientation/server-instructions",
+            uri="whitemagic://orientation/server-instructions",  # type: ignore[arg-type]
             name="Server Instructions",
             description="How to use WhiteMagic — tool guide for AI clients.",
             mimeType="text/markdown",
         ),
         types.Resource(
-            uri="whitemagic://orientation/system-map",
+            uri="whitemagic://orientation/system-map",  # type: ignore[arg-type]
             name="System Map",
             description="Architecture overview and subsystem map.",
             mimeType="text/markdown",
@@ -393,7 +393,7 @@ async def list_resources() -> list[types.Resource]:
     # v14.1.1: Workflow templates
     for wf_name, wf_desc in _WORKFLOW_META.items():
         resources.append(types.Resource(
-            uri=f"whitemagic://workflow/{wf_name}",
+            uri=f"whitemagic://workflow/{wf_name}",  # type: ignore[arg-type]
             name=f"Workflow: {wf_name.replace('_', ' ').title()}",
             description=wf_desc,
             mimeType="text/markdown",
@@ -436,8 +436,42 @@ async def read_resource(uri) -> str:
 
 async def main_stdio() -> None:
     """Run as stdio MCP server (default, for IDE integration)."""
-    async with stdio_server() as (read_stream, write_stream):
+    import anyio
+
+    read_stream_writer, read_stream = anyio.create_memory_object_stream[SessionMessage | Exception](0)
+    write_stream, write_stream_reader = anyio.create_memory_object_stream[SessionMessage](0)
+
+    async def stdin_reader() -> None:
+        """Read newline-delimited JSON-RPC from stdin and forward to MCP stream."""
+        async with read_stream_writer:
+            while True:
+                raw = await asyncio.to_thread(sys.stdin.buffer.readline)
+                if not raw:
+                    break
+                try:
+                    line = raw.decode("utf-8")
+                    message = types.JSONRPCMessage.model_validate_json(line)
+                except Exception as exc:
+                    await read_stream_writer.send(exc)
+                    continue
+                await read_stream_writer.send(SessionMessage(message))
+
+    async def stdout_writer() -> None:
+        """Write MCP session messages as newline-delimited JSON-RPC to stdout."""
+        async with write_stream_reader:
+            async for session_message in write_stream_reader:
+                payload = session_message.message.model_dump_json(by_alias=True, exclude_none=True)
+                sys.stdout.write(payload + "\n")
+                sys.stdout.flush()
+
+    stdin_task = asyncio.create_task(stdin_reader())
+    stdout_task = asyncio.create_task(stdout_writer())
+    try:
         await server.run(read_stream, write_stream, server.create_initialization_options())
+    finally:
+        stdin_task.cancel()
+        stdout_task.cancel()
+        await asyncio.gather(stdin_task, stdout_task, return_exceptions=True)
 
 
 async def main_http(host: str = "127.0.0.1", port: int = 8770) -> None:
@@ -470,7 +504,7 @@ async def main_http(host: str = "127.0.0.1", port: int = 8770) -> None:
     logger.warning(f"WhiteMagic MCP HTTP server starting on http://{host}:{port}/mcp")
     print(f"\n  WhiteMagic MCP Server v{_VERSION}", file=sys.stderr)
     print(f"  HTTP endpoint: http://{host}:{port}/mcp", file=sys.stderr)
-    print(f"  28 Gana tools | 186 nested tools\n", file=sys.stderr)
+    print(f"  28 Gana tools | 285 nested tools\n", file=sys.stderr)
 
     config = uvicorn.Config(app, host=host, port=port, log_level="warning")
     uv_server = uvicorn.Server(config)
