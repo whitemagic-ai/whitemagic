@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package whitemagic;
+
+option go_package = "whitemagic-go/proto";
+
+service MeshService {
+    rpc BroadcastSignal (SignalRequest) returns (SignalResponse);
+    rpc BroadcastHologram (HolographicSignal) returns (SignalResponse);
+    rpc DiscoverPeers (DiscoveryRequest) returns (DiscoveryResponse);
+}
+
+message SignalRequest {
+    string source_id = 1;
+    string signal_type = 2;
+    string payload = 3;
+    int64 timestamp = 4;
+}
+
+message HolographicSignal {
+    string id = 1;
+    repeated float coordinates = 2; // 4D: [x (logic), y (micro), z (time), w (importance)]
+    string content_hash = 3;
+    float importance = 4;
+    int64 timestamp = 5;
+    string source_node = 6;
+}
+
+message SignalResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message DiscoveryRequest {
+    string node_id = 1;
+    string address = 2;
+}
+
+message DiscoveryResponse {
+    repeated NodeInfo peers = 1;
+}
+
+message NodeInfo {
+    string node_id = 1;
+    string address = 2;
+}

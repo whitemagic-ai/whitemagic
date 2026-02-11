@@ -1,0 +1,195 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  core:
+    name: Core (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    env:
+      WM_SILENT_INIT: "1"
+      WM_STATE_ROOT: /tmp/whitemagic_state
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Compile
+        run: |
+          python -m compileall -q whitemagic eval
+
+      - name: Telemetry Guard
+        run: |
+          pytest -q tests/unit/test_telemetry.py
+
+      - name: Test
+        run: |
+          pytest -q
+
+      - name: Eval Harness
+        run: |
+          python -m eval.run_eval --now 2026-01-01T00:00:00Z
+
+  lint:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ruff mypy
+          python -m pip install -e ".[dev]"
+
+      - name: Ruff Check
+        run: ruff check whitemagic/ --select E,F,W --ignore E501
+
+      - name: Mypy (public surface — strict)
+        run: |
+          mypy whitemagic/tools/ whitemagic/interfaces/ \
+            --ignore-missing-imports --no-error-summary \
+            --disallow-untyped-defs --warn-return-any 2>&1 | head -80
+        continue-on-error: true
+
+      - name: Mypy (full codebase — advisory)
+        run: mypy whitemagic/ --ignore-missing-imports --no-error-summary 2>&1 | tail -5
+        continue-on-error: true
+
+      - name: Check for large files
+        run: |
+          large_files=$(find . -type f -size +10M -not -path './.git/*' -not -path './.venv/*' -not -path './target/*' -not -path './*.db' 2>/dev/null || true)
+          if [ -n "$large_files" ]; then
+            echo "WARNING: Large files detected (>10MB):"
+            echo "$large_files"
+          fi
+
+  rust-quality:
+    name: Rust Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Clippy
+        run: cd whitemagic-rust && cargo clippy -- -D warnings
+
+      - name: Cargo Test
+        run: cd whitemagic-rust && cargo test
+
+  security:
+    name: Security Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]" bandit pip-audit
+
+      - name: Bandit (security scanner)
+        run: |
+          bandit -r whitemagic/tools/input_sanitizer.py \
+                    whitemagic/tools/tool_permissions.py \
+                    whitemagic/tools/rate_limiter.py \
+                    whitemagic/interfaces/ \
+            -ll -ii 2>&1 | tail -30
+
+      - name: pip-audit (dependency vulnerabilities)
+        run: pip-audit --strict --desc 2>&1 | tail -20
+
+  extras:
+    name: Extras (mcp+cli)
+    runs-on: ubuntu-latest
+    env:
+      WM_SILENT_INIT: "1"
+      WM_STATE_ROOT: /tmp/whitemagic_state_extras
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install (extras)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,mcp,cli]"
+
+      - name: Doctor Check
+        run: |
+          # Run doctor and fail if health check fails
+          wm doctor
+
+      - name: MCP Import Check
+        run: |
+          python -c "import fastmcp; print('fastmcp ok')"
+
+      - name: CLI JSON Smoke
+        run: |
+          python -m whitemagic.cli.cli_app --json status > /tmp/wm_status.json
+          python -c "import json; json.load(open('/tmp/wm_status.json')); print('cli json ok')"
+
+  packaging:
+    name: Build & Install Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+
+      - name: Install Wheel (Clean)
+        run: |
+          # Install the built wheel into a clean environment
+          python -m pip install dist/*.whl
+
+      - name: Verify Installation
+        run: |
+          WM_SILENT_INIT=1 WM_STATE_ROOT=/tmp/wm_pack_test wm --json status
+          # Verify core tools are callable
+          WM_SILENT_INIT=1 WM_STATE_ROOT=/tmp/wm_pack_test python -c "from whitemagic.tools.unified_api import call_tool; print(call_tool('capabilities')['status'])"
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whitemagic-wheel
+          path: dist/*.whl
+          retention-days: 30

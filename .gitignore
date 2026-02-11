@@ -1,0 +1,113 @@
+
+# Runtime / Data (Never Commit)
+/memory/
+/data/
+/logs/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.sqlite3-journal
+*.log
+*.bak
+/windsurf_conversations/
+/tmp/
+/.whitemagic/
+/reports/
+/temp_venv/
+/resonance_state.json
+/whitemagic_dream.log
+/.test_lock.txt.lock
+/dream_journal.md
+/docs/dream_journal.md
+/.mcp.json
+/wm
+
+# Secrets / Local Env (Never Commit)
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Archives / Internal Artifacts (Keep Local, Don't Ship)
+/_archived/
+/scripts/verification/*.txt
+/whitemagic-rust/check_output.txt
+
+# Build Artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Native / compiled outputs (polyglot)
+*.so
+*.dylib
+*.dll
+*.exe
+*.pyd
+*.a
+*.o
+*.beam
+*.rmeta
+
+# Rust
+**/target/
+whitemagic-rust/dist/
+whitemagic-rust/libwhitemagic_rs.so
+
+# Zig
+whitemagic-zig/.pixi/
+whitemagic-zig/.zig-cache/
+whitemagic-zig/zig-out/
+whitemagic-zig/bin/
+whitemagic-zig/libwhitemagic.so
+
+# Mojo
+whitemagic-mojo/mojo-env/
+whitemagic-mojo/bin/
+
+# Elixir
+elixir/_build/
+elixir/deps/
+
+# Haskell
+haskell/dist-newstyle/
+haskell/*.so
+
+# Go (mesh)
+mesh/whitemagic-go
+mesh/whitemagic-mesh
+whitemagic-go/whitemagic-go
+whitemagic-go/whitemagic-go.exe
+
+# Internal build outputs
+scripts/satkona_yang
+
+# Environments
+.venv/
+env/
+venv/
+.python-version
+
+# IDEs
+.vscode/
+.idea/
+.claude/
+.windsurf/
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db

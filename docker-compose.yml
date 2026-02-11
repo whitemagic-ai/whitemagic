@@ -1,0 +1,40 @@
+services:
+  core:
+    build: .
+    volumes:
+      - whitemagic_data:/data/whitemagic
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - WM_STATE_ROOT=/data/whitemagic
+      - WM_DB_PATH=/data/whitemagic/memory/whitemagic.db
+      - LOG_LEVEL=INFO
+    depends_on:
+      - redis
+    # MCP server (stdio) — use `docker exec` or stdin/stdout piping
+    command: python -m whitemagic.run_mcp
+
+  # CLI one-shot (run manually)
+  # Example:
+  #   docker compose run --rm cli --json status
+  cli:
+    build: .
+    volumes:
+      - whitemagic_data:/data/whitemagic
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - WM_STATE_ROOT=/data/whitemagic
+      - WM_DB_PATH=/data/whitemagic/memory/whitemagic.db
+    entrypoint: ["python", "-m", "whitemagic.cli.cli_app"]
+    profiles:
+      - cli
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+  whitemagic_data:

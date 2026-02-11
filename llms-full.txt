@@ -1,0 +1,343 @@
+# WhiteMagic — Full Documentation for LLMs
+
+> The Tool Substrate for Agentic AI — 181 MCP tools, tiered memory with 5D holographic coordinates, ethical governance, and polyglot accelerators in 9 languages.
+
+## Overview
+
+WhiteMagic is a high-performance memory and tool infrastructure for AI agents. It provides:
+- 181 MCP tools (or 28 PRAT Gana meta-tools) via unified dispatch pipeline
+- Tiered memory with SQLite backing, 5D holographic coordinates (XYZWV), Galactic Map lifecycle
+- Ethical governance: Dharma Rules Engine, Karma Ledger, Harmony Vector, Homeostatic Loop
+- Polyglot accelerators: Rust (PyO3), Zig (SIMD), Haskell (FFI), Elixir (OTP), Mojo, Go, Julia, TypeScript
+- Self-regulating: Circuit Breakers, Rate Limiter, RBAC, Maturity Gates, Agent Trust
+- Dream Cycle: 5-phase background processing (CONSOLIDATION → SERENDIPITY → KAIZEN → ORACLE → DECAY)
+- 28 Cognitive Engines mapped 1:1 to Gardens, Ganas, and Grimoire pages
+
+Version: 13.6.0
+License: MIT
+Python: 3.10–3.13
+
+## Installation
+
+```
+pip install whitemagic
+```
+
+### Optional extras
+```
+pip install whitemagic[mcp]        # MCP server (FastMCP)
+pip install whitemagic[cli]        # Rich CLI formatting
+pip install whitemagic[api]        # FastAPI server
+pip install whitemagic[embeddings] # Semantic search (sentence-transformers)
+pip install whitemagic[full]       # Everything
+```
+
+## Quick Start
+
+### Python API
+```python
+from whitemagic.tools.unified_api import call_tool
+
+# Store a memory
+call_tool("create_memory", title="Decision", content="Use SQLite for Phase 1", tags=["arch"])
+
+# Search memories (keyword + semantic hybrid)
+call_tool("search_memories", query="architecture", limit=5)
+
+# Full system introspection
+call_tool("gnosis", compact=True)
+
+# System capabilities
+call_tool("capabilities")
+```
+
+### MCP Server (stdio)
+```bash
+# PRAT mode — 28 Gana meta-tools (recommended for context-window efficiency)
+WM_MCP_PRAT=1 python -m whitemagic.run_mcp
+
+# Lite mode — 92 essential tools
+WM_MCP_LITE=1 python -m whitemagic.run_mcp
+
+# Classic mode — all 181 tools
+python -m whitemagic.run_mcp
+```
+
+### CLI
+```bash
+wm status          # System overview
+wm doctor          # Health check (immune scan, homeostasis, harmony vector)
+wm remember "important note" --title "Note" --tags note
+wm recall "note" --limit 5
+```
+
+## Architecture
+
+### Dispatch Pipeline
+Every tool call passes through a composable middleware pipeline:
+1. Input Sanitizer — prompt injection, path traversal, shell injection defense
+2. Circuit Breaker — per-tool failure tracking, cooldown, auto-recovery
+3. Rate Limiter — per-agent, per-tool throttling (Rust atomic pre-check: 452K ops/sec)
+4. Tool Permissions — per-agent RBAC (observer/agent/coordinator/admin)
+5. Maturity Gate — developmental stage gating (6 stages)
+6. Governor — ethical validation via Dharma Rules
+7. Core Router — Gana prefix → dispatch table → bridge fallback
+8. Compact Response — token-efficient output formatting
+
+### Memory System
+
+#### Memory Tiers
+- **SHORT_TERM**: Ephemeral, decays quickly, used for session context
+- **LONG_TERM**: Persistent, promoted via consolidation, the main working memory
+- **PATTERN**: Extracted insights from repeated observations
+- **CORE**: Crown jewels — protected, never decays, highest importance
+
+#### Galactic Map Lifecycle
+Memories occupy zones based on importance, activity, and retention scoring:
+- CORE (0–0.15): Highest value, always warm
+- INNER_RIM (0.15–0.40): Frequently accessed, high importance
+- MID_BAND (0.40–0.65): Standard working memory
+- OUTER_RIM (0.65–0.85): Cooling, less accessed
+- FAR_EDGE (0.85–1.0): Cold storage candidates
+
+**No memory is ever deleted** — only rotated outward via galactic drift. The `delete()` call redirects to `archive_to_edge()`.
+
+#### 5D Holographic Coordinates (XYZWV)
+Every memory is positioned in a 5-dimensional space:
+- **X**: Logic ↔ Emotion (-1.0 to +1.0)
+- **Y**: Micro ↔ Macro (-1.0 to +1.0)
+- **Z**: Time / Chronos (-1.0 to +1.0)
+- **W**: Importance / Gravity (0.0 to 2.0+)
+- **V**: Vitality / Galactic Distance (0.0=edge to 1.0=core)
+
+#### Semantic Search
+- MiniLM-L6-v2 embeddings (384 dims) for all LONG_TERM memories
+- In-memory vector cache with 28.6× speedup over cold search
+- Hybrid retrieval: BM25 keyword + semantic similarity + RRF fusion
+- Cross-database search (hot + cold DBs)
+- 19 constellations detected via density clustering in 5D space
+
+#### Association Graph
+- 19M+ bidirectional associations mined via keyword Jaccard overlap
+- Rust-accelerated BFS walk (association_walk.rs)
+- Used by SerendipityEngine and InsightPipeline
+
+### PRAT Mode (28 Ganas)
+Maps all 181 tools into 28 Ganas based on Chinese Lunar Mansions (二十八宿).
+Each Gana is a consciousness lens with:
+- Wu Xing elemental boost (Wood/Fire/Earth/Metal/Water)
+- Guna adaptation (Sattvic/Rajasic/Tamasic)
+- Resonance context (predecessor/successor mansion flow)
+- Garden mapping (each Gana maps to a thematic garden directory)
+
+### 28 Cognitive Engines
+Each engine reads from the StateBoard (Data Sea) and produces actionable output:
+
+| # | Mansion | Garden | Engine |
+|---|---------|--------|--------|
+| 1 | Horn 角 | courage | SessionEngine |
+| 2 | Neck 亢 | practice | ConsolidationEngine |
+| 3 | Root 氐 | truth | BoundaryEngine |
+| 4 | Room 房 | sanctuary | CircuitBreakerEngine |
+| 5 | Heart 心 | love | NurturingEngine |
+| 6 | Tail 尾 | metal | AccelerationEngine |
+| 7 | Basket 箕 | wisdom | SerendipityEngine |
+| 8 | Ghost 鬼 | grief | IntrospectionEngine |
+| 9 | Willow 柳 | play | ResilienceEngine |
+| 10 | Star 星 | beauty | GovernanceEngine |
+| 11 | Net 张 | connection | AssociationEngine |
+| 12 | Wings 翼 | adventure | ExportEngine |
+| 13 | Chariot 轸 | transformation | ArchaeologyEngine |
+| 14 | Abundance 豐 | joy | ResonanceEngine |
+| 15 | Legs 奎 | patience | DharmicSolver |
+| 16 | Mound 娄 | gratitude | EmbeddingEngine |
+| 17 | Stomach 胃 | healing | LifecycleEngine |
+| 18 | Head 昴 | presence | KaizenEngine |
+| 19 | Net 毕 | mystery | PatternEngine |
+| 20 | Beak 觜 | voice | NarrativeEngine |
+| 21 | Stars 参 | dharma | EthicsEngine |
+| 22 | Dipper 斗 | awe | PredictiveEngine |
+| 23 | Ox 牛 | reverence | GalacticEngine |
+| 24 | Girl 女 | wonder | CloneArmyEngine |
+| 25 | Void 虚 | stillness | ForgettingEngine |
+| 26 | Roof 危 | protection | SanitizationEngine |
+| 27 | Camp 室 | sangha | SwarmEngine |
+| 28 | Wall 壁 | air | EmergenceEngine |
+
+### Ethical Governance
+
+#### Dharma Rules Engine
+YAML-driven policy engine with graduated actions:
+LOG → TAG → WARN → THROTTLE → BLOCK
+Three profiles: permissive, balanced (default), strict.
+
+#### Karma Ledger
+Append-only audit trail tracking declared vs actual side-effects for every tool invocation. Supports forensic replay and drift detection.
+
+#### Harmony Vector
+7-dimension health metric: balance, throughput, latency, error_rate, dharma, karma_debt, energy. Updated every tick via the Homeostatic Loop.
+
+#### Homeostatic Loop
+4-phase auto-correction cycle: OBSERVE → ADVISE → CORRECT → INTERVENE.
+Monitors system health and triggers corrections when dimensions drift.
+
+### Dream Cycle
+5-phase background processing inspired by biological sleep:
+1. CONSOLIDATION — Short-term → Long-term memory promotion
+2. SERENDIPITY — Cross-link dormant memories, surface unexpected connections
+3. KAIZEN — Quality improvement proposals from pattern analysis
+4. ORACLE — Predictive forecasting from velocity and trend data
+5. DECAY — Galactic rotation, retention scoring, zone updates
+
+Runs on the Temporal Scheduler's SLOW lane, activates on idle periods.
+
+### Polyglot Accelerators
+
+| Language | LOC | Purpose |
+|----------|-----|---------|
+| Rust | ~11K | PyO3: StateBoard, EventRing, RRF, BFS walk, KD-tree, MinHash, SQLite accel |
+| Zig | ~2.2K | SIMD: cosine similarity, keyword extraction, distance matrix, dispatch core |
+| Haskell | ~2.8K | FFI: boundary detection, maturity gates, rule composition |
+| Elixir | ~2.6K | OTP: cascade executor, garden pub/sub, harmony monitor |
+| Mojo | ~1.9K | SIMD: batch encoding, embedding quantization, neuro batch |
+| Go | ~1.3K | libp2p: gossip protocol, agent streaming, mesh discovery |
+| Julia | ~890 | Subprocess: memory stats, forecasting |
+| TypeScript | ~4.6K | SDK: client, types, barrel exports |
+
+All bridges in `whitemagic/core/acceleration/*_bridge.py` with graceful Python fallbacks.
+
+## Tool Categories (181 total)
+
+### Memory (8 tools)
+create_memory, fast_read_memory, batch_read_memories, search_memories, read_memory, list_memories, update_memory, delete_memory
+
+### Session (10 tools)
+session_bootstrap, session_status, session_handoff, create_session, checkpoint_session, resume_session, session.handoff, session.handoff_transfer, session.accept_handoff, session.list_handoffs
+
+### Dharma & Ethics (10 tools)
+evaluate_ethics, check_boundaries, verify_consent, get_ethical_score, get_dharma_guidance, karma_report, karmic_trace, karma.verify_chain, dharma_rules, set_dharma_profile
+
+### Garden (4 tools)
+garden_activate, garden_status, garden_synergy, garden_health
+
+### Intelligence (7 tools)
+thought_clone, coherence_boost, anti_loop_check, token_report, solve_optimization, execute_cascade, get_agent_capabilities
+
+### Introspection (10 tools)
+gnosis, capabilities, manifest, state.paths, state.summary, repo.summary, ship.check, get_telemetry_summary, health_report, capability.matrix/status/suggest
+
+### Dream Cycle (5 tools)
+dream, dream_start, dream_stop, dream_status, dream_now
+
+### Archaeology (12 tools)
+archaeology (unified), archaeology_scan_directory, archaeology_mark_read, archaeology_mark_written, archaeology_have_read, archaeology_find_unread, archaeology_find_changed, archaeology_recent_reads, archaeology_stats, archaeology_report, archaeology_search, archaeology_process_wisdom
+
+### Governance (12 tools)
+memory.lifecycle, memory.lifecycle_sweep, memory.lifecycle_stats, memory.consolidate, memory.consolidation_stats, homeostasis, homeostasis.status, homeostasis.check, maturity.assess, tool.graph, tool.graph_full, dharma.reload
+
+### Swarm & Coordination (18 tools)
+swarm.decompose/route/complete/vote/resolve/plan/status, sangha_chat_send/read, sangha_lock/acquire/release/list, broker.publish/history/status, task.distribute/status/list/complete/route_smart
+
+### Agents (10 tools)
+agent.register, agent.heartbeat, agent.list, agent.capabilities, agent.deregister, agent.trust, mesh.status, mesh.broadcast, explain_this, starter_packs (unified)
+
+### Edge & ML (8 tools)
+edge_infer, edge_add_rule, edge_batch_infer, edge_stats, bitnet_infer, bitnet_status, vector.search/index/status
+
+### Grimoire (7 tools)
+grimoire_list, grimoire_suggest, grimoire_cast, grimoire_recommend, grimoire_auto_status, grimoire_walkthrough, grimoire_read
+
+### Observability (8 tools)
+anomaly (unified), anomaly.check/history/status, otel (unified), otel.spans/metrics/status
+
+### Economic (3 tools)
+whitemagic.tip, gratitude.stats, gratitude.benefits
+
+### Other (various)
+scratchpad (unified), context.pack/status, prompt.render/list/reload, galactic.dashboard, rust_audit/compress/similarity/status, learning.patterns/suggest/status, sandbox.status/violations/set_limits, watcher_add/remove/start/stop/status/recent_events/stats/list, windsurf_list/read/export/search_conversations/stats, browser_navigate/click/type/extract_dom/screenshot/get_interactables, balance tools, export/import, voting, ensemble, pipeline, ollama bridge, cyberbrain modules
+
+## Key Environment Variables
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| WM_STATE_ROOT | Runtime state directory | ~/.whitemagic |
+| WM_MCP_PRAT | Enable PRAT mode (28 Ganas) | unset |
+| WM_MCP_LITE | Enable lite mode (92 tools) | unset |
+| WM_SILENT_INIT | Suppress init logs | unset |
+| WM_DB_PATH | SQLite database path | ~/.whitemagic/whitemagic.db |
+| WM_COLD_DB_PATH | Cold storage database | ~/.whitemagic/whitemagic_cold.db |
+| WM_DREAM_INSIGHTS | Enable dream cycle insights | 1 |
+| WHITEMAGIC_AUTO_INIT | Auto-initialize consciousness | 0 |
+
+## Security
+
+WhiteMagic's 8-stage dispatch pipeline provides defense in depth:
+- Input sanitization (prompt injection, path traversal, shell injection)
+- Per-agent RBAC (observer/agent/coordinator/admin)
+- Rate limiting with Rust atomic pre-check (452K ops/sec)
+- Circuit breakers per tool (failure tracking, cooldown, auto-recovery)
+- Maturity gates (6-stage developmental gating)
+- Governor ethical validation (Dharma Rules)
+- Karma Ledger side-effect auditing (declared vs actual)
+- Tool sandboxing (resource limits, violation tracking)
+
+In the OpenClaw ecosystem where 230+ malicious skills have been found, this matters.
+
+## Economic Model
+
+Free and open (MIT). Gratitude-driven economics:
+- XRPL tip jar for human operators (whitemagic.tip tool)
+- x402 micropayments for AI agents (HTTP 402 + USDC on Base L2)
+- Proof of Gratitude via on-chain verification → higher rate limits, priority voting
+- All funds support Whitemagic Labs (MandalaOS, core development, micro-bounties)
+
+## Agent Discovery
+
+- skill.md: OpenClaw-ready skill file at repo root
+- .well-known/agent.json: A2A Agent Card for agent-to-agent discovery
+- llms.txt: This file (machine-readable docs per llms.txt standard)
+- MCP orientation resources: whitemagic://orientation/ai-primary
+
+## Repository Structure
+
+```
+whitemagic/              # Python core (~141K LOC, 763 files)
+  tools/                 # 181 MCP tools, dispatch pipeline, middleware
+  core/                  # Memory, intelligence, resonance, acceleration bridges
+  gardens/               # 28+ thematic garden directories
+  cli/                   # CLI commands (doctor, init, status)
+  dharma/                # Ethical governance rules
+  autonomous/            # Autonomous execution, diary, depth gauge
+  edge/                  # Edge inference, ONNX, SMOTE, thought clones
+whitemagic-rust/         # Rust accelerators (~11K LOC)
+whitemagic-zig/          # Zig SIMD accelerators (~2.2K LOC)
+whitemagic-mojo/         # Mojo SIMD accelerators (~1.9K LOC)
+haskell/                 # Haskell FFI modules (~2.8K LOC)
+elixir/                  # Elixir OTP modules (~2.6K LOC)
+whitemagic-go/           # Go mesh modules (~1.3K LOC)
+whitemagic-julia/        # Julia subprocess bridge (~890 LOC)
+nexus/                   # TypeScript SDK (~4.6K LOC)
+tests/                   # Test suite (1,367 passed, 9 skipped)
+docs/                    # Strategy, roadmap, API reference, polyglot status
+scripts/                 # Maintenance scripts (galactic sweep, embedding, ingestion)
+```
+
+## Documentation
+
+- AI Primary Spec: AI_PRIMARY.md (start here if you're an AI)
+- Strategic Roadmap: docs/STRATEGIC_ROADMAP.md
+- V14 Release Strategy: docs/V14_RELEASE_STRATEGY.md
+- Polyglot Status: docs/POLYGLOT_STATUS.md
+- Independent Audit: docs/INDEPENDENT_AUDIT_2026_02_10.md
+- API Reference: docs/API_REFERENCE.md
+- Architecture: docs/ARCHITECTURE.md
+- Contributing: CONTRIBUTING.md
+- MCP Configs: docs/MCP_CONFIG_EXAMPLES.md
+- Changelog: CHANGELOG.md
+- Vision: docs/VISION.md
+
+## Links
+
+- Repository: https://github.com/lbailey94/whitemagic
+- Issues: https://github.com/lbailey94/whitemagic/issues
+- License: MIT

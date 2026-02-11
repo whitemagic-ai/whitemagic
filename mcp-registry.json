@@ -1,0 +1,57 @@
+{
+  "name": "whitemagic",
+  "display_name": "WhiteMagic Core",
+  "description": "Cognitive operating system for AI — persistent memory, associative recall, ethical governance, and self-awareness across sessions. 28 Gana meta-tools covering 186 capabilities.",
+  "version": "14.0.0",
+  "protocol_version": "2025-11-25",
+  "homepage": "https://github.com/whitemagic-ai/whitemagic",
+  "license": "MIT",
+  "author": "WhiteMagic Contributors",
+  "categories": ["memory", "governance", "intelligence", "infrastructure"],
+  "tags": [
+    "memory", "persistent-memory", "holographic-index", "knowledge-graph",
+    "governance", "ethics", "dharma", "karma",
+    "self-awareness", "introspection", "metacognition",
+    "dream-cycle", "association-mining", "pattern-detection",
+    "polyglot", "rust", "zig", "haskell",
+    "local-first", "ollama", "cognitive-os"
+  ],
+  "transport": ["stdio", "streamable-http"],
+  "features": {
+    "tools": true,
+    "resources": true,
+    "prompts": false,
+    "instructions": true,
+    "icons": true,
+    "tasks": "optional"
+  },
+  "installation": {
+    "pip": "pip install whitemagic",
+    "source": "git clone https://github.com/whitemagic-ai/whitemagic && cd whitemagic && pip install -e ."
+  },
+  "configuration": {
+    "stdio": {
+      "command": "python",
+      "args": ["-m", "whitemagic.run_mcp_lean"],
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "WM_SILENT_INIT": "1",
+        "WM_MCP_PRAT": "1"
+      }
+    },
+    "http": {
+      "command": "python",
+      "args": ["-m", "whitemagic.run_mcp_lean", "--http", "--port", "8770"]
+    }
+  },
+  "tool_count": 28,
+  "nested_tool_count": 186,
+  "requirements": {
+    "python": ">=3.11",
+    "optional": {
+      "rust_bridge": "whitemagic-rs (for polyglot acceleration)",
+      "ollama": "Ollama server (for local LLM inference)",
+      "redis": "Redis server (for broker/messaging)"
+    }
+  }
+}

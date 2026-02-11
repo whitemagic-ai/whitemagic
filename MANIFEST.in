@@ -1,0 +1,10 @@
+include README.md
+include pyproject.toml
+include VERSION
+include LICENSE
+recursive-include whitemagic *.py *.typed
+recursive-exclude tests *
+recursive-exclude docs *
+recursive-exclude extra *
+global-exclude __pycache__
+global-exclude *.py[cod]

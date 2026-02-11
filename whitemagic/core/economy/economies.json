@@ -1,0 +1,19 @@
+{
+    "beneficiaries": {
+        "labs": {
+            "name": "Whitemagic Labs",
+            "address": "rWhitemagicLabsGenesisAddress",
+            "default_split": 0.1
+        },
+        "foundation": {
+            "name": "Dharmic Open Source Foundation",
+            "address": "rDharmicFoundationAddress",
+            "default_split": 0.05
+        }
+    },
+    "settings": {
+        "min_tip_xrpl": 1.0,
+        "automatic_settlement": false,
+        "resonance_threshold_for_settlement": 0.8
+    }
+}

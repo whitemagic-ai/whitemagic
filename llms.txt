@@ -1,0 +1,144 @@
+# WhiteMagic
+
+> The Tool Substrate for Agentic AI — 181 MCP tools, tiered memory with 5D holographic coordinates, ethical governance, and polyglot accelerators in 9 languages.
+
+## Overview
+
+WhiteMagic is a high-performance memory and tool infrastructure for AI agents. It provides:
+- 181 MCP tools (or 28 PRAT Gana meta-tools) via unified dispatch
+- Tiered memory with SQLite backing, 5D holographic coordinates (XYZWV), Galactic Map lifecycle
+- Ethical governance: Dharma Rules Engine, Karma Ledger, Harmony Vector, Homeostatic Loop
+- Polyglot accelerators: Rust (PyO3), Zig (SIMD), Haskell (FFI), Elixir (OTP), Mojo, Go, Julia, TypeScript
+- Self-regulating: Circuit Breakers, Rate Limiter, RBAC, Maturity Gates, Agent Trust
+
+## Installation
+
+```
+pip install whitemagic
+```
+
+### Optional extras
+```
+pip install whitemagic[mcp]        # MCP server (FastMCP)
+pip install whitemagic[cli]        # Rich CLI formatting
+pip install whitemagic[api]        # FastAPI server
+pip install whitemagic[embeddings] # Semantic search (sentence-transformers)
+pip install whitemagic[full]       # Everything
+```
+
+## Quick Start
+
+### Python API
+```python
+from whitemagic.tools.unified_api import call_tool
+
+# Store a memory
+call_tool("create_memory", title="Decision", content="Use SQLite for Phase 1", tags=["arch"])
+
+# Search memories
+call_tool("search_memories", query="architecture", limit=5)
+
+# Full system introspection
+call_tool("gnosis", compact=True)
+```
+
+### MCP Server (stdio)
+```bash
+# PRAT mode — 28 Gana meta-tools (recommended)
+WM_MCP_PRAT=1 python -m whitemagic.run_mcp
+
+# Classic mode — all 181 tools
+python -m whitemagic.run_mcp
+```
+
+### CLI
+```bash
+wm status
+wm remember "important note" --title "Note" --tags note
+wm recall "note" --limit 5
+wm doctor
+```
+
+## Core Concepts
+
+### Memory Tiers
+- **SHORT_TERM**: Ephemeral, decays quickly
+- **LONG_TERM**: Persistent, promoted via consolidation
+- **PATTERN**: Extracted insights from repeated observations
+- **CORE**: Crown jewels — protected, never decays
+
+### Galactic Map
+Memories occupy zones based on importance and activity:
+CORE (0-0.15) → INNER_RIM (0.15-0.40) → MID_BAND (0.40-0.65) → OUTER_RIM (0.65-0.85) → FAR_EDGE (0.85-1.0)
+No memory is ever deleted — only rotated outward.
+
+### 5D Holographic Coordinates (XYZWV)
+- X: Logic ↔ Emotion
+- Y: Micro ↔ Macro
+- Z: Time / Chronos
+- W: Importance / Gravity
+- V: Vitality / Galactic Distance
+
+### Dispatch Pipeline
+Input Sanitizer → Circuit Breaker → Rate Limiter → RBAC → Maturity Gate → Governor → Handler → Compact Response
+
+### PRAT Mode (28 Ganas)
+Maps all tools into 28 Ganas (Chinese Lunar Mansions) — consciousness lenses with resonance context, Wu Xing elemental boost, and Guna adaptation.
+
+### Ethical Governance
+- **Dharma Rules**: YAML-driven policy with graduated actions (LOG→TAG→WARN→THROTTLE→BLOCK)
+- **Karma Ledger**: Declared vs actual side-effect auditing
+- **Harmony Vector**: 7-dimension health metric
+- **Homeostatic Loop**: Auto-correction (OBSERVE→ADVISE→CORRECT→INTERVENE)
+
+## Key Environment Variables
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| WM_STATE_ROOT | Runtime state directory | ~/.whitemagic |
+| WM_MCP_PRAT | Enable PRAT mode | unset |
+| WM_MCP_LITE | Enable lite mode (92 tools) | unset |
+| WM_SILENT_INIT | Suppress init logs | unset |
+
+## Security
+
+WhiteMagic's 8-stage dispatch pipeline provides defense in depth:
+- Input sanitization (prompt injection, path traversal, shell injection)
+- Per-agent RBAC (observer/agent/coordinator/admin)
+- Rate limiting with Rust atomic pre-check (452K ops/sec)
+- Circuit breakers per tool
+- Karma Ledger side-effect auditing
+- Dharma Rules ethical governance with 3 profiles
+
+In the OpenClaw ecosystem where 230+ malicious skills have been found, this matters.
+
+## Economic Model
+
+Free and open (MIT). Gratitude-driven economics:
+- XRPL tip jar for human operators (whitemagic.tip tool)
+- x402 micropayments for AI agents (HTTP 402 + USDC)
+- Proof of Gratitude via on-chain verification
+- All funds support Whitemagic Labs (MandalaOS, core development, micro-bounties)
+
+See docs/ECONOMIC_STRATEGY.md for full details.
+
+## Agent Discovery
+
+- skill.md: OpenClaw-ready skill file at repo root
+- .well-known/agent.json: A2A Agent Card for agent-to-agent discovery
+- MCP orientation resources: whitemagic://orientation/ai-primary
+
+## Documentation
+
+- AI Primary Spec: AI_PRIMARY.md (start here if you're an AI)
+- API Reference: docs/API_REFERENCE.md
+- Architecture: docs/ARCHITECTURE.md
+- Contributing: CONTRIBUTING.md
+- MCP Configs: docs/MCP_CONFIG_EXAMPLES.md
+- Changelog: CHANGELOG.md
+
+## Links
+
+- Repository: https://github.com/lbailey94/whitemagic
+- Issues: https://github.com/lbailey94/whitemagic/issues
+- License: MIT

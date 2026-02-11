@@ -1,0 +1,15 @@
+-- Copy this file to cabal.project.local and adjust paths as needed.
+-- This is useful when libgmp-dev is not available system-wide.
+
+-- Example: If you have libgmp.so but not the -dev package,
+-- create a symlink and add the directory here:
+--
+--   mkdir -p ~/.local/lib
+--   ln -s /usr/lib/x86_64-linux-gnu/libgmp.so.10 ~/.local/lib/libgmp.so
+--
+-- Then uncomment and adjust the line below:
+
+-- extra-lib-dirs: /home/youruser/.local/lib
+
+-- For ghcup users, you may also need to ensure ghc is on PATH:
+--   PATH="$HOME/.ghcup/bin:$PATH" cabal build
