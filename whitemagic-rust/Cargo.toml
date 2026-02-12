@@ -51,7 +51,7 @@ kdtree = { version = "0.7", optional = true }
 rand = { version = "0.8", optional = true }
 sha2 = { version = "0.10", optional = true }
 hex = { version = "0.4", optional = true }
-rusqlite = { version = "0.31", features = ["bundled"], optional = true }
+rusqlite = { version = "0.38", features = ["bundled"], optional = true }
 arrow = { version = "53", optional = true }
 arrow-ipc = { version = "53", optional = true }
 iceoryx2 = { version = "0.4", optional = true }
