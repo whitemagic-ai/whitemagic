@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+
+# Rust
+target/
+**/*.rs.bk
+
+# Mojo
+**/*.mojo.bk
+
+# IDE
+.vscode
+.idea
+.windsurf
+
+# Project specific
+archive/
+tmp/
+memory/
+data/
+logs/
+reports/
+.whitemagic/
+windsurf_conversations/
+.mcp.json
+.env
+.env.*
+temp_venv/
+whitemagic.db*
+*.log
+*.sqlite
+markov_chain.json

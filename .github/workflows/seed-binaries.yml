@@ -1,0 +1,68 @@
+name: Seed Binaries
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build wm-seed (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            artifact: wm-seed
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            artifact: wm-seed
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            artifact: wm-seed.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build wm-seed
+        working-directory: whitemagic-rust
+        run: cargo build --release --bin wm-seed --features seed --target ${{ matrix.target }}
+
+      - name: Package (unix)
+        if: runner.os != 'Windows'
+        run: |
+          cp whitemagic-rust/target/${{ matrix.target }}/release/wm-seed ./wm-seed
+          chmod +x wm-seed
+          tar czf wm-seed-${{ matrix.target }}.tar.gz wm-seed
+          sha256sum wm-seed-${{ matrix.target }}.tar.gz > wm-seed-${{ matrix.target }}.tar.gz.sha256
+
+      - name: Package (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Copy-Item "whitemagic-rust/target/${{ matrix.target }}/release/wm-seed.exe" "./wm-seed.exe"
+          Compress-Archive -Path wm-seed.exe -DestinationPath "wm-seed-${{ matrix.target }}.zip"
+          (Get-FileHash "wm-seed-${{ matrix.target }}.zip" -Algorithm SHA256).Hash | Out-File "wm-seed-${{ matrix.target }}.zip.sha256"
+
+      - name: Upload to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            wm-seed-${{ matrix.target }}.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wm-seed-${{ matrix.target }}
+          path: wm-seed-${{ matrix.target }}.*
+          retention-days: 30

@@ -1,0 +1,13 @@
+# Dependencies — managed by mix, never checked in
+deps/
+
+# Build artefacts
+_build/
+
+# Compiled BEAM files
+*.beam
+
+# Editor / OS
+.DS_Store
+*.swp
+*~

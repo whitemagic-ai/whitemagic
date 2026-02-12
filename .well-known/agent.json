@@ -1,0 +1,77 @@
+{
+  "name": "WhiteMagic",
+  "description": "The Tool Substrate for Agentic AI — 313 MCP tools (or 28 in PRAT mode), tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance with 8-stage security pipeline, and polyglot accelerators in 11 languages. Free and open (MIT). Gratitude-driven economics via XRPL + x402.",
+  "url": "https://github.com/whitemagic-ai/whitemagic",
+  "version": "15.1.0",
+  "provider": {
+    "organization": "WhiteMagic Contributors",
+    "url": "https://github.com/whitemagic-ai/whitemagic"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": true
+  },
+  "authentication": {
+    "schemes": []
+  },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "memory-management",
+      "name": "Memory Management",
+      "description": "Store, recall, search, and manage tiered memories with 5D holographic coordinates and Galactic Map lifecycle. Supports SHORT_TERM, LONG_TERM, PATTERN, and CORE memory tiers.",
+      "tags": ["memory", "storage", "search", "semantic"],
+      "examples": [
+        "Store an architectural decision as a long-term memory",
+        "Search memories about authentication patterns",
+        "Get galactic map zone distribution"
+      ]
+    },
+    {
+      "id": "tool-dispatch",
+      "name": "Tool Dispatch & Orchestration",
+      "description": "Unified dispatch pipeline for 313 MCP tools with input sanitization, rate limiting, RBAC, circuit breakers, and maturity gates. Supports PRAT mode (28 Gana meta-tools). 8-stage security pipeline — defense in depth against prompt injection, path traversal, and supply chain attacks.",
+      "tags": ["tools", "mcp", "dispatch", "orchestration"],
+      "examples": [
+        "Call any of the 311 registered tools via unified API",
+        "Route tools through PRAT Gana meta-tool interface",
+        "Create multi-step tool pipelines"
+      ]
+    },
+    {
+      "id": "ethical-governance",
+      "name": "Ethical Governance",
+      "description": "Dharma Rules Engine with YAML-driven policies, Karma Ledger for side-effect auditing, Harmony Vector health metrics, and Homeostatic Loop auto-correction.",
+      "tags": ["ethics", "governance", "dharma", "safety"],
+      "examples": [
+        "Evaluate the ethical implications of an action",
+        "Check Karma Ledger for side-effect mismatches",
+        "Get Harmony Vector health snapshot"
+      ]
+    },
+    {
+      "id": "introspection",
+      "name": "System Introspection",
+      "description": "Unified read-only introspection across all subsystems. Capability matrix shows 25 subsystems and 28 active fusions. Self-awareness in one call — health, capabilities, energy, recent actions.",
+      "tags": ["introspection", "health", "monitoring", "gnosis"],
+      "examples": [
+        "Get full system snapshot via Gnosis",
+        "Check capability matrix and suggest next fusions",
+        "Monitor Harmony Vector dimensions"
+      ]
+    },
+    {
+      "id": "agent-coordination",
+      "name": "Agent Coordination",
+      "description": "Multi-agent coordination: agent registry, task distribution, pipeline creation, voting, session handoff, and Redis-backed Gan Ying event bus.",
+      "tags": ["agents", "coordination", "pipeline", "multi-agent"],
+      "examples": [
+        "Register a new agent with capabilities",
+        "Distribute tasks to available agents",
+        "Create a multi-step tool pipeline"
+      ]
+    }
+  ]
+}

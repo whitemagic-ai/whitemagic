@@ -1,0 +1,49 @@
+{
+  "mcpServers": {
+    "whitemagic-prat": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "-m",
+        "whitemagic.run_mcp"
+      ],
+      "cwd": ".",
+      "env": {
+        "PYTHONPATH": ".",
+        "WM_MCP_PRAT": "1",
+        "WM_MCP_CLIENT": "gemini",
+        "WM_SILENT_INIT": "1",
+        "WM_STATE_ROOT": "/tmp/whitemagic_state"
+      }
+    },
+    "whitemagic-classic": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "-m",
+        "whitemagic.run_mcp"
+      ],
+      "cwd": ".",
+      "env": {
+        "PYTHONPATH": ".",
+        "WM_SILENT_INIT": "1",
+        "WM_STATE_ROOT": "/tmp/whitemagic_state"
+      }
+    },
+    "whitemagic-lite": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "-m",
+        "whitemagic.run_mcp"
+      ],
+      "cwd": ".",
+      "env": {
+        "PYTHONPATH": ".",
+        "WM_MCP_LITE": "1",
+        "WM_SILENT_INIT": "1",
+        "WM_STATE_ROOT": "/tmp/whitemagic_state"
+      }
+    }
+  }
+}

@@ -1,0 +1,367 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whitemagic"
+version = "15.1.0"
+description = "The Tool Substrate for Agentic AI — 313 MCP tools (28 PRAT Ganas), tiered memory, ethical governance, polyglot accelerators"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "WhiteMagic Contributors"}
+]
+keywords = ["memory", "ai", "mcp", "context", "llm", "agents", "tools", "governance", "polyglot"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "click>=8.1.7",
+    "pydantic>=2.0.0,<3.0.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/whitemagic-ai/whitemagic"
+Documentation = "https://github.com/whitemagic-ai/whitemagic/blob/main/docs/QUICKSTART.md"
+Repository = "https://github.com/whitemagic-ai/whitemagic"
+Changelog = "https://github.com/whitemagic-ai/whitemagic/blob/main/CHANGELOG.md"
+Issues = "https://github.com/whitemagic-ai/whitemagic/issues"
+
+[project.optional-dependencies]
+# === MODULAR INSTALLATION OPTIONS ===
+# WhiteMagic is designed to be modular - install only what you need!
+#
+# Minimal: pip install whitemagic                    (core tool + memory substrate)
+# + MCP: pip install whitemagic[mcp]                 (FastMCP server)
+# + CLI: pip install whitemagic[cli]                 (Rich formatting)
+# + API: pip install whitemagic[api]                 (FastAPI server stack)
+# + Development: pip install whitemagic[dev]         (testing, linting, formatting)
+#
+# Or combine: pip install whitemagic[offline,terminal,dev]
+
+# Local AI & Semantic Search (privacy-first, offline)
+embeddings = [
+    "sentence-transformers>=2.2.0",  # ~2.5GB with torch
+    "torch>=2.0.0,<3.0.0",            # Deep learning framework
+    "scipy>=1.10.0",                  # Enhanced search algorithms
+    "faiss-cpu>=1.7.4",               # Fast similarity search
+]
+
+# Terminal Tool (safe command execution for AI agents)
+terminal = [
+    # Terminal tool has no extra dependencies - included in core!
+    # This extra exists for documentation purposes
+]
+
+# Rich CLI formatting
+cli = [
+    "rich>=13.0.0",
+]
+
+# Interactive TUI extras
+tui = [
+    "textual>=0.50.0",
+]
+
+# MCP support
+mcp = [
+    "fastmcp>=0.4.1",
+]
+
+# REST / HTTP API stack (optional)
+api = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "python-multipart>=0.0.6",
+    "email-validator>=2.0.0",
+    "httpx>=0.25.0",
+]
+
+# Database stack (optional)
+db = [
+    "sqlalchemy>=2.0.0",
+    "aiosqlite>=0.19.0",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.0",
+]
+
+# Encryption at rest (optional — SQLCipher for encrypted memory DBs)
+encrypt = [
+    "sqlcipher3>=0.5.0",
+]
+
+# Caching & rate limiting (optional)
+cache = [
+    "redis>=5.0.1",
+]
+
+# Networking / async helpers used by some optional modules
+net = [
+    "aiohttp>=3.9.0",
+    "websockets>=12.0",
+    "aiofiles>=23.2.1",
+    "requests>=2.31.0",
+    "urllib3>=2.0.0,<3.0.0",
+    "chardet>=5.0.0",
+]
+
+# Cloud client libs (optional)
+openai = [
+    "openai>=1.3.0",
+    "tiktoken>=0.5.0",
+]
+
+# Authentication helpers (optional)
+auth = [
+    "passlib[bcrypt]>=1.7.4",
+]
+
+# Cryptographic trust (XRPL anchoring, Ed25519 signing)
+trust = [
+    "xrpl-py>=3.0.0",
+    "PyNaCl>=1.5.0",
+]
+
+# Numerical / optimization extras (optional)
+numeric = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]
+
+# Graph topology (networkx for graph engine)
+graph = [
+    "networkx>=3.0",
+]
+
+# Search acceleration (HNSW approximate nearest neighbor + HDBSCAN clustering)
+search = [
+    "hnswlib>=0.8.0",
+    "hdbscan>=0.8.33",
+]
+
+# Visualization (UMAP projection, clustering)
+viz = [
+    "umap-learn>=0.5.0",
+    "scikit-learn>=1.3.0",
+]
+
+opt = [
+    "cvxpy>=1.4.0",
+]
+
+# Full Offline Suite (everything local, zero cloud dependencies)
+offline = [
+    "sentence-transformers>=2.2.0",
+    "torch>=2.0.0,<3.0.0",
+    "scipy>=1.10.0",
+]
+
+# Development Tools (testing, linting, formatting)
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.2.0",
+    "black>=23.0.0",
+    "isort>=5.13.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.6",
+    "maturin>=1.3.0",  # For building Rust extensions
+    "nbconvert>=7.16.6",
+]
+
+# File System Watcher (semantic file monitoring)
+watcher = [
+    "watchdog>=3.0.0",                # File system events
+]
+
+# Vision Processing (image analysis, OCR)
+vision = [
+    "opencv-python>=4.8.0",           # Image processing
+    "pytesseract>=0.3.10",            # OCR engine
+    "Pillow>=10.0.0",                 # Image manipulation
+]
+
+# Dashboard UI server (optional)
+dashboard = [
+    "flask>=3.0.0",
+    "flask-cors>=4.0.0",
+]
+
+# Public release convenience bundle (all optional features).
+full = [
+    "aiosqlite>=0.19.0",
+    "aiofiles>=23.2.1",
+    "aiohttp>=3.9.0",
+    "alembic>=1.13.0",
+    "asyncpg>=0.29.0",
+    "black>=23.0.0",
+    "chardet>=5.0.0",
+    "cvxpy>=1.4.0",
+    "email-validator>=2.0.0",
+    "faiss-cpu>=1.7.4",
+    "fastapi>=0.104.0",
+    "fastmcp>=0.4.1",
+    "flask>=3.0.0",
+    "flask-cors>=4.0.0",
+    "httpx>=0.25.0",
+    "isort>=5.13.0",
+    "maturin>=1.3.0",
+    "mypy>=1.0.0",
+    "nbconvert>=7.16.6",
+    "numpy>=1.24.0",
+    "opencv-python>=4.8.0",
+    "openai>=1.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "Pillow>=10.0.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-timeout>=2.2.0",
+    "pytesseract>=0.3.10",
+    "redis>=5.0.1",
+    "requests>=2.31.0",
+    "rich>=13.0.0",
+    "ruff>=0.1.6",
+    "scipy>=1.10.0",
+    "sentence-transformers>=2.2.0",
+    "sqlalchemy>=2.0.0",
+    "textual>=0.50.0",
+    "tiktoken>=0.5.0",
+    "torch>=2.0.0,<3.0.0",
+    "urllib3>=2.0.0,<3.0.0",
+    "uvicorn[standard]>=0.24.0",
+    "watchdog>=3.0.0",
+    "websockets>=12.0",
+    "python-multipart>=0.0.6",
+    "networkx>=3.0",
+    "hnswlib>=0.8.0",
+    "umap-learn>=0.5.0",
+    "scikit-learn>=1.3.0",
+]
+
+[project.scripts]
+wm = "whitemagic.cli.cli_app:main"
+whitemagic = "whitemagic.cli.cli_app:main"
+
+[tool.setuptools]
+packages = {find = {where = ["."], include = ["whitemagic", "whitemagic.*"], exclude = ["whitemagic-mojo", "whitemagic-mojo.*", "whitemagic-rust", "whitemagic-rust.*", "whitemagic-zig", "whitemagic-zig.*", "whitemagic-go", "whitemagic-go.*", "whitemagic-julia", "whitemagic-julia.*"]}}
+
+[tool.setuptools.package-data]
+whitemagic = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Exclude archived and pending tests
+norecursedirs = [
+    "tests/archive", 
+    "tests/pre_v4.5.0_reorganization", 
+    "tests/pending", 
+    "tests/archive_v4.5.0_reorg",
+    "tests/legacy",
+    "node_modules", 
+    ".git"
+]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::pytest.PytestConfigWarning",
+]
+markers = [
+    "security: marks tests as security-related",
+    "slow: marks tests that take >5s (e.g. full DB sweeps, 107K memory loads)",
+    "db: marks tests that require a real populated database",
+    "network: marks tests that require outbound network access",
+]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+# Relaxed globally; strict on public-surface packages (tools, interfaces).
+disallow_untyped_defs = false
+
+# --- Strict packages (public surface) ---------------------------------
+[[tool.mypy.overrides]]
+module = [
+    "whitemagic.tools.*",
+    "whitemagic.interfaces.*",
+]
+disallow_untyped_defs = true
+
+# --- Ignore missing stubs for optional / native deps -------------------
+[[tool.mypy.overrides]]
+module = [
+    "fitz",
+    "yaml",
+    "whitemagic_rs",
+    "whitemagic_rs.*",
+    "psutil",
+    "cvxpy",
+    "cvxpy.*",
+    "fastapi",
+    "fastapi.*",
+    "uvicorn",
+    "uvicorn.*",
+    "starlette",
+    "starlette.*",
+    "redis",
+    "redis.*",
+    "sqlalchemy",
+    "sqlalchemy.*",
+    "aiosqlite",
+    "aiohttp",
+    "aiohttp.*",
+    "flask",
+    "flask.*",
+    "flask_cors",
+    "textual",
+    "textual.*",
+    "sentence_transformers",
+    "sentence_transformers.*",
+    "torch",
+    "torch.*",
+    "faiss",
+    "numpy",
+    "numpy.*",
+    "scipy",
+    "scipy.*",
+    "openai",
+    "openai.*",
+    "tiktoken",
+    "watchdog",
+    "watchdog.*",
+    "hnswlib",
+    "umap",
+    "umap.*",
+    "sklearn",
+    "sklearn.*",
+    "networkx",
+    "networkx.*",
+]
+ignore_missing_imports = true
+
+# --- Archived code: no enforcement -------------------------------------
+[[tool.mypy.overrides]]
+module = "whitemagic._archived.*"
+ignore_errors = true

@@ -1,0 +1,21 @@
+# WhiteMagic Code Owners
+# These owners will be requested for review on PRs touching their areas.
+
+# Global fallback
+* @lbailey94
+
+# Core memory system
+whitemagic/core/memory/ @lbailey94
+
+# Security-critical paths
+whitemagic/security/ @lbailey94
+whitemagic/dharma/ @lbailey94
+
+# MCP server
+whitemagic/run_mcp_lean.py @lbailey94
+
+# Rust accelerators
+whitemagic-rust/ @lbailey94
+
+# CI/CD
+.github/ @lbailey94

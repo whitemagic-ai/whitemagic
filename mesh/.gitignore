@@ -1,0 +1,7 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# Compiled binaries (built locally, never committed)
+whitemagic-go
+whitemagic-mesh

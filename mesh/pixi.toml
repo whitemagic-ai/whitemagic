@@ -1,0 +1,15 @@
+[workspace]
+authors = ["lucas <lucas@example.com>"]
+channels = ["conda-forge"]
+name = "whitemagic-go"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+go = ">=1.25.6,<2"
+protobuf = ">=6.33.4,<7"
+gcc_linux-64 = ">=14.3.0,<15"
+gxx_linux-64 = ">=14.3.0,<15"
+buf = ">=1.63.0,<2"
