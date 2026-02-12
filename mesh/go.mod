@@ -5,7 +5,7 @@ go 1.25.5
 require (
 	github.com/libp2p/go-libp2p v0.46.0
 	github.com/libp2p/go-libp2p-pubsub v0.15.0
-	github.com/redis/go-redis/v9 v9.17.2
+	github.com/redis/go-redis/v9 v9.17.3
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
