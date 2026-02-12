@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import threading
 import time
 from dataclasses import asdict, dataclass, field
@@ -153,7 +152,7 @@ class GalaxyManager:
         self._save_registry()
 
         # Pre-initialize the database
-        um = self._get_memory(name)
+        self._get_memory(name)
         info.memory_count = 0
 
         logger.info(f"Created galaxy '{name}' at {db_path}")

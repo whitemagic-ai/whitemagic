@@ -2,12 +2,12 @@
     "beneficiaries": {
         "labs": {
             "name": "Whitemagic Labs",
-            "address": "rWhitemagicLabsGenesisAddress",
+            "address": "raakfKn96zVmXqKwRTDTH5K3j5eTBp1hPy",
             "default_split": 0.1
         },
         "foundation": {
             "name": "Dharmic Open Source Foundation",
-            "address": "rDharmicFoundationAddress",
+            "address": "raakfKn96zVmXqKwRTDTH5K3j5eTBp1hPy",
             "default_split": 0.05
         }
     },

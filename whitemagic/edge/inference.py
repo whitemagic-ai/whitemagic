@@ -146,17 +146,17 @@ class EdgeInference:
 
             # === Core Info ===
             CompiledRule(id="version", pattern="version|what version",
-                response="WhiteMagic version 14.3.1 — The Tool Substrate for Agentic AI", confidence=1.0),
+                response="WhiteMagic version 15.0.0 — The Tool Substrate for Agentic AI", confidence=1.0),
             CompiledRule(id="gardens", pattern="garden|how many garden",
                 response="WhiteMagic has 17 gardens: joy, love, beauty, truth, wisdom, mystery, play, wonder, connection, sangha, practice, presence, voice, dharma, courage, gratitude, patience", confidence=1.0),
             CompiledRule(id="tests", pattern="test|how many test|test count",
-                response="WhiteMagic has 1,060+ passing unit tests.", confidence=0.95),
+                response="WhiteMagic has 1,955+ passing unit tests.", confidence=0.95),
             CompiledRule(id="chapters", pattern="chapter|grimoire|how many chapter",
                 response="The WhiteMagic Grimoire has 28 chapters, aligned 1:1 with the Lunar Mansions and Ganas.", confidence=0.95),
 
             # === Capabilities ===
             CompiledRule(id="help", pattern="help|what can you do|capabilities",
-                response="I can answer questions locally without cloud AI. 285 MCP tools across 28 PRAT Ganas. Ask about version, gardens, architecture, edge AI, or WhiteMagic concepts.", confidence=0.9),
+                response="I can answer questions locally without cloud AI. 313 MCP tools across 28 PRAT Ganas. Ask about version, gardens, architecture, edge AI, or WhiteMagic concepts.", confidence=0.9),
             CompiledRule(id="offline", pattern="offline|work offline|no internet",
                 response="Yes! This inference runs entirely locally. No cloud, no API calls, no tokens burned.", confidence=1.0),
             CompiledRule(id="edge_ai", pattern="edge ai|edge inference|local ai",

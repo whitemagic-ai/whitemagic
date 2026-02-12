@@ -51,6 +51,9 @@ class DispatchContext:
     kwargs: dict[str, Any]
     agent_id: str = "default"
     compact: bool = False
+    # When True, Zig dispatch already validated circuit breaker, rate limit,
+    # and maturity — Python middleware can skip those redundant checks.
+    zig_prevalidated: bool = False
     # Stash for cross-middleware communication (e.g. circuit breaker ref)
     meta: dict[str, Any] = field(default_factory=dict)
 
@@ -81,6 +84,7 @@ class DispatchPipeline:
             kwargs=kwargs,
             agent_id=kwargs.pop("_agent_id", "default"),
             compact=kwargs.pop("_compact", False),
+            zig_prevalidated=bool(kwargs.pop("_zig_prevalidated", False)),
         )
 
         # Build the chain from innermost → outermost
@@ -146,7 +150,8 @@ def mw_circuit_breaker(ctx: DispatchContext, next_fn: NextFn) -> dict[str, Any] 
     try:
         from whitemagic.tools.circuit_breaker import get_breaker_registry
         breaker = get_breaker_registry().get(ctx.tool_name)
-        if breaker.is_open():
+        # Skip pre-check if Zig dispatch already validated circuit state
+        if not ctx.zig_prevalidated and breaker.is_open():
             return breaker.calm_response()
     except Exception:
         breaker = None
@@ -169,6 +174,8 @@ def mw_circuit_breaker(ctx: DispatchContext, next_fn: NextFn) -> dict[str, Any] 
 
 def mw_rate_limiter(ctx: DispatchContext, next_fn: NextFn) -> dict[str, Any] | None:
     """Per-agent, per-tool rate limiting."""
+    if ctx.zig_prevalidated:
+        return next_fn(ctx)  # Zig already checked rate limit
     try:
         from whitemagic.tools.rate_limiter import get_rate_limiter
         rate_result = get_rate_limiter().check(ctx.agent_id, ctx.tool_name)
@@ -193,6 +200,8 @@ def mw_tool_permissions(ctx: DispatchContext, next_fn: NextFn) -> dict[str, Any]
 
 def mw_maturity_gate(ctx: DispatchContext, next_fn: NextFn) -> dict[str, Any] | None:
     """Block tools that require a higher maturity stage than currently reached."""
+    if ctx.zig_prevalidated:
+        return next_fn(ctx)  # Zig already checked maturity
     try:
         from whitemagic.tools.maturity_check import check_maturity_for_tool
         gate_result = check_maturity_for_tool(ctx.tool_name)

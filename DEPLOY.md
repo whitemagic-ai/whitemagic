@@ -1,6 +1,6 @@
 # WhiteMagic Deployment Guide
 
-> **Version:** 14.3+ | **Last Updated:** February 2026
+> **Version:** 15.0.0 | **Last Updated:** February 2026
 
 ---
 
@@ -29,13 +29,13 @@ Tag-driven release via GitHub Actions. Triggers `.github/workflows/release.yml`.
 
 ```bash
 # 1. Bump version
-echo "14.3.1" > VERSION
+echo "15.0.0" > VERSION
 # Update pyproject.toml version field to match
 
 # 2. Commit and tag
 git add -A
-git commit -m "release: v14.3.1"
-git tag v14.3.1
+git commit -m "release: v15.0.0"
+git tag v15.0.0
 
 # 3. Push (triggers CI + release workflow)
 git push origin main --tags
@@ -99,8 +99,8 @@ docker run --rm whitemagic:latest wm status
 ### GHCR (after release workflow runs)
 
 ```bash
-docker pull ghcr.io/lbailey94/whitemagic:latest
-docker run --rm -i ghcr.io/lbailey94/whitemagic:latest
+docker pull ghcr.io/whitemagic-ai/whitemagic:latest
+docker run --rm -i ghcr.io/whitemagic-ai/whitemagic:latest
 ```
 
 ---

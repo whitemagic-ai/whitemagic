@@ -24,6 +24,15 @@ from .actions import BrowserActions, BrowserSession
 from .cdp import CDPConnection, connect_to_chrome
 from .distiller import DOMDistiller, SimplifiedElement
 from .screenshot import capture_element, capture_screenshot
+from .web_research import (
+    BrowserSessionManager,
+    FetchResult,
+    SearchResponse,
+    SearchResult,
+    research_topic,
+    web_fetch,
+    web_search,
+)
 
 __all__ = [
     # CDP Connection
@@ -38,6 +47,14 @@ __all__ = [
     # Actions
     "BrowserActions",
     "BrowserSession",
+    # Web Research
+    "web_fetch",
+    "web_search",
+    "research_topic",
+    "FetchResult",
+    "SearchResult",
+    "SearchResponse",
+    "BrowserSessionManager",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

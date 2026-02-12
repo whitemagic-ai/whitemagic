@@ -1,4 +1,4 @@
-# Whitemagic v14.1.0 System Map
+# Whitemagic v15.0.0 System Map
 
 This file is the **canonical repo map** for humans and AIs.
 
@@ -25,7 +25,7 @@ wm recall "hello" --limit 5
 # MCP server — PRAT mode (recommended: 28 Gana meta-tools)
 WM_MCP_PRAT=1 python -m whitemagic.run_mcp
 
-# MCP server — classic mode (285 individual tools)
+# MCP server — classic mode (311 individual tools)
 python -m whitemagic.run_mcp
 
 # MCP server — lean mode (28 Gana meta-tools, recommended for new clients)
@@ -208,6 +208,18 @@ Closes cross-system synthesis gaps and resolves structural debt:
 New MCP tools: `explain_this`, `agent.trust`, `mesh.status`, `mesh.broadcast`.
 
 Total MCP tools: **195** (across 26 domain files + 28 GANA tools).
+
+## Cognitive Architecture (v14.6)
+
+Five new subsystems adding iterative memory research, dream-phase narrative compression, encrypted self-protection, sustainability telemetry, and switchable cognitive behavior profiles. 17 new tools across 5 Ganas.
+
+- `whitemagic/core/intelligence/researcher.py`: **JIT Memory Researcher** — Iterative plan-search-reflect loop. Decomposes queries → sub-questions, hybrid recall per sub-question, reflects on gaps, synthesizes. Tools: `jit_research`, `jit_research.stats` → gana_winnowing_basket.
+- `whitemagic/core/dreaming/narrative_compressor.py`: **Narrative Compressor** — Dream phase clustering temporally-adjacent memories into narrative summaries. Jaccard tag similarity + temporal proximity. Wired as `DreamPhase.NARRATIVE`. Tools: `narrative.compress`, `narrative.stats` → gana_abundance.
+- `whitemagic/security/hermit_crab.py`: **Hermit Crab Mode** — Encrypted memory withdrawal with tamper-evident HMAC-SHA256 ledger. States: OPEN → GUARDED → WITHDRAWN → MEDIATING. Tools: `hermit.status`, `hermit.assess`, `hermit.withdraw`, `hermit.mediate`, `hermit.resolve`, `hermit.verify_ledger`, `hermit.check_access` → gana_room.
+- `whitemagic/core/monitoring/green_score.py`: **Green Score Telemetry** — Edge vs cloud ratio, tokens saved, CO2 estimates. Composite green score (0-100). Tools: `green.report`, `green.record` → gana_mound.
+- `whitemagic/core/intelligence/cognitive_modes.py`: **Cognitive Modes** — Switchable profiles: Explorer, Executor, Reflector, Balanced, Guardian. Integrates with Guna classification. Tools: `cognitive.mode`, `cognitive.set`, `cognitive.hints`, `cognitive.stats` → gana_dipper.
+
+Tests: `tests/unit/test_v14_2_features.py` (69 tests)
 
 Tests: `tests/unit/test_synthesis_gaps.py` (43 tests), 920 total passing.
 

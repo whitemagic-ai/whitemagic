@@ -18,37 +18,38 @@
 
 const std = @import("std");
 
-// --- Tool ID enum (28 engines, matches StateBoard slot indices) ---
-pub const ToolId = enum(u32) {
-    session = 0,
-    consolidation = 1,
-    boundary = 2,
-    circuit_breaker = 3,
-    nurturing = 4,
-    acceleration = 5,
-    serendipity = 6,
-    introspection = 7,
-    resilience = 8,
-    governance = 9,
-    association = 10,
-    exporter = 11,
-    archaeology = 12,
-    resonance = 13,
-    solver = 14,
-    embedding = 15,
-    lifecycle = 16,
-    kaizen = 17,
-    pattern = 18,
-    narrative = 19,
-    ethics = 20,
-    predictive = 21,
-    galactic = 22,
-    clone_army = 23,
-    forgetting = 24,
-    sanitization = 25,
-    swarm = 26,
-    emergence = 27,
-    unknown = 255,
+// --- Gana ID enum (28 Lunar Mansions, matches PRAT router indices) ---
+// Canonical ordering from prat_resonance._GANA_META.
+pub const GanaId = enum(u32) {
+    horn             = 0,  // 角 Jiǎo  — Session Initiation
+    neck             = 1,  // 亢 Kàng  — Memory Stability
+    root             = 2,  // 氐 Dǐ    — System Foundation
+    room             = 3,  // 房 Fáng  — Resource Sanctuary
+    heart            = 4,  // 心 Xīn   — Context & Pulse
+    tail             = 5,  // 尾 Wěi   — Performance & Acceleration
+    winnowing_basket = 6,  // 箕 Jī    — Wisdom & Search
+    ghost            = 7,  // 鬼 Guǐ   — Introspection
+    willow           = 8,  // 柳 Liǔ   — Resilience & Play
+    star             = 9,  // 星 Xīng  — Governance & Illumination
+    extended_net     = 10, // 张 Zhāng — Pattern Connectivity
+    wings            = 11, // 翼 Yì    — Expansion & Export
+    chariot          = 12, // 轸 Zhěn  — Archaeology & KG
+    abundance        = 13, // 豐 Fēng  — Regeneration
+    straddling_legs  = 14, // 奎 Kuí   — Ethical Balance
+    mound            = 15, // 娄 Lóu   — Metrics & Accumulation
+    stomach          = 16, // 胃 Wèi   — Energy & Tasks
+    hairy_head       = 17, // 昴 Mǎo   — Detail & Debug
+    net              = 18, // 毕 Bì    — Pattern Capture
+    turtle_beak      = 19, // 觜 Zī    — Precision & Inference
+    three_stars      = 20, // 参 Shēn  — Wisdom Council
+    dipper           = 21, // 斗 Dǒu   — Strategy
+    ox               = 22, // 牛 Niú   — Endurance & Swarm
+    girl             = 23, // 女 Nǚ    — Nurture & Agents
+    void_            = 24, // 虚 Xū    — Stillness & Galaxy
+    roof             = 25, // 危 Wēi   — Shelter & Local AI
+    encampment       = 26, // 室 Shì   — Community
+    wall             = 27, // 壁 Bì    — Boundaries
+    unknown          = 255,
 };
 
 // --- Dispatch result codes ---
@@ -72,70 +73,70 @@ const MaturityLevel = enum(u8) {
 // Minimum required maturity to dispatch (configurable at compile time)
 const MIN_MATURITY: MaturityLevel = .beta;
 
-// Comptime maturity table for all 28 engines
+// Comptime maturity table for all 28 Ganas (Lunar Mansions)
 const maturity_table: [28]MaturityLevel = .{
-    .mature, // 0: session
-    .mature, // 1: consolidation
-    .stable, // 2: boundary
-    .stable, // 3: circuit_breaker
-    .stable, // 4: nurturing
-    .stable, // 5: acceleration
-    .mature, // 6: serendipity
-    .mature, // 7: introspection
-    .stable, // 8: resilience
-    .mature, // 9: governance
-    .mature, // 10: association
-    .stable, // 11: export
-    .stable, // 12: archaeology
-    .mature, // 13: resonance
-    .beta, // 14: solver
-    .mature, // 15: embedding
-    .stable, // 16: lifecycle
-    .mature, // 17: kaizen
-    .mature, // 18: pattern
-    .stable, // 19: narrative
-    .stable, // 20: ethics
-    .mature, // 21: predictive
-    .stable, // 22: galactic
-    .stable, // 23: clone_army
-    .stable, // 24: forgetting
-    .stable, // 25: sanitization
-    .stable, // 26: swarm
-    .beta, // 27: emergence
+    .mature,       // 0:  horn             — Session (bootstrap/create/resume/checkpoint)
+    .mature,       // 1:  neck             — Memory CRUD
+    .mature,       // 2:  root             — System health
+    .mature,       // 3:  room             — Security & locks
+    .mature,       // 4:  heart            — Context & scratchpad
+    .stable,       // 5:  tail             — Acceleration (Rust/Zig/Mojo)
+    .mature,       // 6:  winnowing_basket — Search & retrieval
+    .mature,       // 7:  ghost            — Introspection & gnosis
+    .stable,       // 8:  willow           — Grimoire & rate limiting
+    .mature,       // 9:  star             — Governance & forge
+    .stable,       // 10: extended_net     — Pattern & learning
+    .stable,       // 11: wings            — Export & mesh
+    .stable,       // 12: chariot          — Archaeology & KG
+    .stable,       // 13: abundance        — Dream cycle & lifecycle
+    .mature,       // 14: straddling_legs  — Ethics & harmony
+    .mature,       // 15: mound            — Metrics & yin-yang
+    .stable,       // 16: stomach          — Pipeline & tasks
+    .mature,       // 17: hairy_head       — Debug & karma
+    .stable,       // 18: net              — Prompts & filtering
+    .beta,         // 19: turtle_beak      — Edge/bitnet inference
+    .stable,       // 20: three_stars      — Council & ensemble
+    .stable,       // 21: dipper           — Strategy & homeostasis
+    .stable,       // 22: ox               — Swarm intelligence
+    .stable,       // 23: girl             — Agent management
+    .stable,       // 24: void_            — Galaxy & gardens
+    .stable,       // 25: roof             — Ollama & model signing
+    .stable,       // 26: encampment       — Sangha & broker
+    .stable,       // 27: wall             — Voting & engagement
 };
 
 // --- Handler ID routing table (comptime) ---
-// Maps tool_id -> handler_id. In practice, the handler_id maps to a
-// Python handler function or a Rust accelerated path.
+// Maps gana_id -> handler_id. The handler_id maps to a Python handler
+// function via the dispatch table, or a Rust/Zig accelerated path.
 const handler_table: [28]u32 = .{
-    100, // session -> handler 100
-    101, // consolidation
-    102, // boundary
-    103, // circuit_breaker
-    104, // nurturing
-    105, // acceleration
-    106, // serendipity
-    107, // introspection
-    108, // resilience
-    109, // governance
-    110, // association
-    111, // export
-    112, // archaeology
-    113, // resonance
-    114, // solver
-    115, // embedding
-    116, // lifecycle
-    117, // kaizen
-    118, // pattern
-    119, // narrative
-    120, // ethics
-    121, // predictive
-    122, // galactic
-    123, // clone_army
-    124, // forgetting
-    125, // sanitization
-    126, // swarm
-    127, // emergence
+    100, // horn             → session handlers
+    101, // neck             → memory handlers
+    102, // root             → health handlers
+    103, // room             → security handlers
+    104, // heart            → context handlers
+    105, // tail             → acceleration handlers
+    106, // winnowing_basket → search handlers
+    107, // ghost            → introspection handlers
+    108, // willow           → grimoire handlers
+    109, // star             → governance handlers
+    110, // extended_net     → pattern handlers
+    111, // wings            → export handlers
+    112, // chariot          → archaeology handlers
+    113, // abundance        → dream/lifecycle handlers
+    114, // straddling_legs  → ethics handlers
+    115, // mound            → metrics handlers
+    116, // stomach          → pipeline handlers
+    117, // hairy_head       → debug handlers
+    118, // net              → prompt handlers
+    119, // turtle_beak      → inference handlers
+    120, // three_stars      → ensemble handlers
+    121, // dipper           → strategy handlers
+    122, // ox               → swarm handlers
+    123, // girl             → agent handlers
+    124, // void_            → galaxy handlers
+    125, // roof             → ollama handlers
+    126, // encampment       → community handlers
+    127, // wall             → voting handlers
 };
 
 // --- StateBoard offsets (must match state_board.rs layout) ---

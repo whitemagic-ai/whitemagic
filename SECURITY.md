@@ -16,7 +16,7 @@ Currently only the latest version of Whitemagic is supported for security update
 
 Instead, use one of these private channels:
 
-1. **GitHub Security Advisories** (preferred): Go to the [Security tab](https://github.com/lbailey94/whitemagic/security/advisories) and click "Report a vulnerability."
+1. **GitHub Security Advisories** (preferred): Go to the [Security tab](https://github.com/whitemagic-ai/whitemagic/security/advisories) and click "Report a vulnerability."
 2. **Email**: Send details to the maintainers via the email listed on their GitHub profile.
 
 Please include:

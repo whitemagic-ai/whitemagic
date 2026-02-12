@@ -475,3 +475,48 @@ def get_harmony_vector() -> HarmonyVector:
                 _harmony_vector = HarmonyVector()
                 logger.info("Harmony Vector initialized (5-min rolling window)")
     return _harmony_vector
+
+
+def read_harmony_fast() -> HarmonySnapshot:
+    """Read the Harmony Vector via the fastest available path.
+
+    Priority:
+      1. StateBoard shared-memory (sub-microsecond, works cross-process)
+      2. Python singleton (in-process, full snapshot)
+      3. Empty snapshot (no data yet)
+
+    This is the recommended read path for consumers that only need the
+    7 core dimensions + harmony_score (gnosis compact, dispatch bridge,
+    dashboard polling, etc.).  It avoids importing/initializing the full
+    HarmonyVector when the StateBoard already has fresh data.
+    """
+    # Fast path: StateBoard
+    try:
+        from whitemagic.core.acceleration.state_board_bridge import get_state_board
+        board = get_state_board()
+        tick = board.read_tick()
+        if tick > 0:  # Board has been written to at least once
+            hs = board.read_harmony()
+            # Compute composite from the 7 dimensions using default weights
+            dims = [hs.balance, hs.throughput, hs.latency, hs.error_rate,
+                    hs.dharma, hs.karma_debt, hs.energy]
+            harmony_score = sum(d * w for d, w in zip(dims, [0.15, 0.15, 0.15, 0.15, 0.15, 0.10, 0.15]))
+            return HarmonySnapshot(
+                balance=hs.balance,
+                throughput=hs.throughput,
+                latency=hs.latency,
+                error_rate=hs.error_rate,
+                dharma=hs.dharma,
+                karma_debt=hs.karma_debt,
+                energy=hs.energy,
+                harmony_score=round(harmony_score, 4),
+            )
+    except Exception:
+        pass
+
+    # Fallback: Python singleton (if already initialized)
+    if _harmony_vector is not None:
+        return _harmony_vector.snapshot()
+
+    # No data yet
+    return HarmonySnapshot()

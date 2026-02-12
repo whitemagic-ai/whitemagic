@@ -101,6 +101,11 @@ def ensure_paths() -> Any:
         log.info(f"Ensuring paths exist at {WM_ROOT}...")
     for path in [WM_ROOT, DATA_DIR, MEMORY_DIR, CACHE_DIR, SESSIONS_DIR, LOGS_DIR, ARTIFACTS_DIR, RESTORE_DIR]:
         path.mkdir(parents=True, exist_ok=True)
+    # Restrict state root to owner-only (protects memory DB, ledger, secrets)
+    try:
+        WM_ROOT.chmod(0o700)
+    except OSError:
+        pass  # Best-effort; some filesystems don't support chmod
     # DB path may be overridden (e.g., containers); ensure its parent exists.
     try:
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)

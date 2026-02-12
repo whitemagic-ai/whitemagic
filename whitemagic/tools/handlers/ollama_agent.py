@@ -21,6 +21,27 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# --- Context sanitization patterns ---
+# Redact secrets before sending context to models (defense-in-depth)
+_SANITIZE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r'sk-[A-Za-z0-9]{20,}'), '[REDACTED_API_KEY]'),
+    (re.compile(r'sk-proj-[A-Za-z0-9_-]{40,}'), '[REDACTED_API_KEY]'),
+    (re.compile(r'ghp_[A-Za-z0-9]{36,}'), '[REDACTED_GITHUB_TOKEN]'),
+    (re.compile(r'gho_[A-Za-z0-9]{36,}'), '[REDACTED_GITHUB_TOKEN]'),
+    (re.compile(r'xox[bpsar]-[A-Za-z0-9-]{10,}'), '[REDACTED_SLACK_TOKEN]'),
+    (re.compile(r'-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----', re.DOTALL), '[REDACTED_PRIVATE_KEY]'),
+    (re.compile(r'eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}'), '[REDACTED_JWT]'),
+    (re.compile(r'AKIA[0-9A-Z]{16}'), '[REDACTED_AWS_KEY]'),
+    (re.compile(r's[A-Za-z0-9]{48,}'), '[REDACTED_SECRET]'),  # Generic long secret strings
+]
+
+
+def _sanitize_context(text: str) -> str:
+    """Redact likely secrets/tokens from text before sending to LLM."""
+    for pattern, replacement in _SANITIZE_PATTERNS:
+        text = pattern.sub(replacement, text)
+    return text
+
 # Maximum iterations to prevent infinite loops
 _MAX_ITERATIONS = 10
 
@@ -43,7 +64,7 @@ def _build_system_prompt(task: str, context_memories: list[dict] | None = None) 
         mem_lines = []
         for m in context_memories[:5]:
             title = m.get("title", "untitled")
-            content = str(m.get("content", ""))[:200]
+            content = _sanitize_context(str(m.get("content", ""))[:200])
             mem_lines.append(f"  [{title}]: {content}")
         mem_section = "\n\nRelevant memories from WhiteMagic:\n" + "\n".join(mem_lines)
 
@@ -204,6 +225,7 @@ def handle_ollama_agent(**kwargs: Any) -> dict[str, Any]:
 
             # Feed result back as a "tool" message
             result_text = json.dumps(tc_result, indent=2, default=str)
+            result_text = _sanitize_context(result_text)
             if len(result_text) > 3000:
                 result_text = result_text[:3000] + "\n... (truncated)"
 

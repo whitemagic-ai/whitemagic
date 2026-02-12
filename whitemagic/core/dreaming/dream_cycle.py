@@ -46,6 +46,7 @@ class DreamPhase(Enum):
     CONSOLIDATION = "consolidation"
     SERENDIPITY = "serendipity"
     GOVERNANCE = "governance"  # v14.0: Echo chamber detection
+    NARRATIVE = "narrative"    # v14.2: Narrative compression
     KAIZEN = "kaizen"
     ORACLE = "oracle"
     DECAY = "decay"
@@ -174,6 +175,8 @@ class DreamCycle:
                 report.details = self._dream_serendipity()
             elif phase == DreamPhase.GOVERNANCE:
                 report.details = self._dream_governance()
+            elif phase == DreamPhase.NARRATIVE:
+                report.details = self._dream_narrative()
             elif phase == DreamPhase.KAIZEN:
                 report.details = self._dream_kaizen()
             elif phase == DreamPhase.ORACLE:
@@ -387,8 +390,23 @@ class DreamCycle:
 
         return result
 
+    def _dream_narrative(self) -> dict[str, Any]:
+        """Phase 4 (v14.2): Narrative compression of episodic memory clusters.
+
+        Compresses clusters of temporally-adjacent, tag-similar memories
+        into coherent narrative summaries. This reduces memory fragmentation
+        and creates high-quality recall anchors.
+        """
+        try:
+            from whitemagic.core.dreaming.narrative_compressor import get_narrative_compressor
+            nc = get_narrative_compressor()
+            result = nc.compress(max_clusters=3, sample_limit=200)
+            return result.to_dict()
+        except Exception as e:
+            return {"skipped": True, "reason": str(e)}
+
     def _dream_kaizen(self) -> dict[str, Any]:
-        """Phase 3: Analyze patterns for improvement hints + run Emergence scan.
+        """Phase 5: Analyze patterns for improvement hints + run Emergence scan.
 
         New in v14: Emergence insights are persisted as memories, creating
         a self-reinforcing intelligence loop where dream discoveries feed

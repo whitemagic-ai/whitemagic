@@ -14,7 +14,7 @@ pip install whitemagic[cli]
 pip install whitemagic[mcp,cli]
 
 # From source (this repo)
-git clone https://github.com/lbailey94/whitemagic.git
+git clone https://github.com/whitemagic-ai/whitemagic.git
 cd whitemagic
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev,mcp,cli]"

@@ -160,7 +160,7 @@ function handleCommand(term: Terminal, cmd: string) {
       term.writeln("  \x1b[38;2;74;222;128m●\x1b[0m Maturity Stage:   \x1b[38;2;251;191;36mAPPRENTICE\x1b[0m");
       break;
 
-    case "tools":
+    case "tools": {
       const tools = [
         "create_memory", "search_memories", "read_memory", "fast_read_memory",
         "batch_read_memories", "list_memories", "update_memory", "delete_memory",
@@ -184,6 +184,7 @@ function handleCommand(term: Terminal, cmd: string) {
         term.writeln(row);
       }
       break;
+    }
 
     case "gnosis":
       term.writeln("\x1b[1m  🔭 Gnosis — Unified Introspection\x1b[0m");
@@ -207,7 +208,7 @@ function handleCommand(term: Terminal, cmd: string) {
       term.writeln("  deep_archive:      \x1b[38;2;107;114;128m85,892\x1b[0m");
       break;
 
-    case "gardens":
+    case "gardens": {
       const gardens = [
         "Joy 🌟", "Love 🌸", "Wisdom 🔮", "Truth 💎", "Beauty 🌺",
         "Mystery 🌌", "Play 🎭", "Wonder ✨", "Connection 🤝",
@@ -222,8 +223,9 @@ function handleCommand(term: Terminal, cmd: string) {
       });
       term.writeln("  \x1b[38;2;107;114;128m... and 10 more\x1b[0m");
       break;
+    }
 
-    case "harmony":
+    case "harmony": {
       term.writeln("\x1b[1m  ⚖️ Harmony Vector\x1b[0m");
       term.writeln("");
       const bars: [string, number, string][] = [
@@ -235,7 +237,7 @@ function handleCommand(term: Terminal, cmd: string) {
         ["Karma Debt ", 0.99, "#4ade80"],
         ["Energy     ", 0.91, "#3b82f6"],
       ];
-      bars.forEach(([label, val, _color]) => {
+      bars.forEach(([label, val]) => {
         const filled = Math.round(val * 20);
         const bar = "█".repeat(filled) + "░".repeat(20 - filled);
         const pct = (val * 100).toFixed(0);
@@ -244,6 +246,7 @@ function handleCommand(term: Terminal, cmd: string) {
       term.writeln("");
       term.writeln("  Guna: \x1b[38;2;74;222;128msattvic\x1b[0m (harmonious)");
       break;
+    }
 
     case "dharma":
       term.writeln("\x1b[1m  ☸️ Dharma & Karma\x1b[0m");

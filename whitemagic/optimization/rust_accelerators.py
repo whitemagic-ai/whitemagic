@@ -979,3 +979,172 @@ def keyword_extract_batch(texts: list[str], max_keywords: int = 50) -> list[set[
     except Exception as e:
         logger.debug(f"Rust keyword_extract_batch failed: {e}")
         return None
+
+
+# ---------------------------------------------------------------------------
+# v14.5 — Arrow IPC Bridge (zero-copy columnar interchange)
+# ---------------------------------------------------------------------------
+
+_RUST_ARROW = False
+try:
+    if _rs is not None and hasattr(_rs, "arrow_encode_memories"):
+        _RUST_ARROW = True
+        logger.debug("Rust Arrow IPC bridge available")
+except Exception:
+    pass
+
+
+def arrow_available() -> bool:
+    """Check if Rust Arrow IPC bridge is available."""
+    return _RUST_ARROW
+
+
+def arrow_encode_memories(memories_json: str) -> bytes | None:
+    """Encode memory JSON to Arrow IPC bytes (zero-copy columnar format).
+
+    Input: JSON array of memory objects with fields:
+        id, title, content, importance, memory_type, x, y, z, w, v, tags.
+    Returns: Arrow IPC file bytes, or None if Rust/Arrow unavailable.
+    """
+    if not _RUST_ARROW:
+        return None
+    try:
+        return cast(bytes, _rs.arrow_encode_memories(memories_json))
+    except Exception as e:
+        logger.debug(f"Rust arrow_encode_memories failed: {e}")
+        return None
+
+
+def arrow_decode_memories(ipc_bytes: bytes) -> str | None:
+    """Decode Arrow IPC bytes back to memory JSON string.
+
+    Returns: JSON string of memory objects, or None if unavailable.
+    """
+    if not _RUST_ARROW:
+        return None
+    try:
+        return cast(str, _rs.arrow_decode_memories(ipc_bytes))
+    except Exception as e:
+        logger.debug(f"Rust arrow_decode_memories failed: {e}")
+        return None
+
+
+def arrow_schema_info() -> dict[str, Any] | None:
+    """Get Arrow schema metadata as a dict."""
+    if not _RUST_ARROW:
+        return None
+    try:
+        return cast(dict[str, Any], json.loads(_rs.arrow_schema_info()))
+    except Exception as e:
+        logger.debug(f"Rust arrow_schema_info failed: {e}")
+        return None
+
+
+def arrow_roundtrip_bench(n: int = 1000) -> tuple[int, int, int] | None:
+    """Benchmark: encode N memories to Arrow IPC and back.
+
+    Returns (encode_ns, decode_ns, ipc_size_bytes), or None.
+    """
+    if not _RUST_ARROW:
+        return None
+    try:
+        return cast(tuple[int, int, int], _rs.arrow_roundtrip_bench(n))
+    except Exception as e:
+        logger.debug(f"Rust arrow_roundtrip_bench failed: {e}")
+        return None
+
+
+# ---------------------------------------------------------------------------
+# v14.5 — Tokio Clone Army (massively parallel exploration)
+# ---------------------------------------------------------------------------
+
+_RUST_TOKIO_CLONES = False
+try:
+    if _rs is not None and hasattr(_rs, "tokio_deploy_clones"):
+        _RUST_TOKIO_CLONES = True
+        logger.debug("Rust Tokio Clone Army available")
+except Exception:
+    pass
+
+
+def tokio_clones_available() -> bool:
+    """Check if Rust Tokio Clone Army is available."""
+    return _RUST_TOKIO_CLONES
+
+
+def tokio_deploy_clones(
+    prompt: str,
+    num_clones: int = 100,
+    strategies: list[str] | None = None,
+) -> dict[str, Any] | None:
+    """Deploy a Rust tokio clone army for parallel exploration.
+
+    Args:
+        prompt: The exploration prompt.
+        num_clones: Number of clones to deploy (1-100,000).
+        strategies: List of strategy names. Default: mixed
+            (direct, chain_of_thought, analytical, creative, synthesis).
+
+    Returns:
+        Dict with keys: winner, total_clones, strategy_votes,
+        avg_confidence, total_tokens, elapsed_ms. Or None.
+    """
+    if not _RUST_TOKIO_CLONES:
+        return None
+    try:
+        result_json = _rs.tokio_deploy_clones(prompt, num_clones, strategies or [])
+        return cast(dict[str, Any], json.loads(result_json))
+    except Exception as e:
+        logger.debug(f"Rust tokio_deploy_clones failed: {e}")
+        return None
+
+
+def tokio_clone_bench(num_clones: int = 1000) -> tuple[float, float] | None:
+    """Benchmark: deploy N clones and return (elapsed_ms, clones_per_sec)."""
+    if not _RUST_TOKIO_CLONES:
+        return None
+    try:
+        return cast(tuple[float, float], _rs.tokio_clone_bench(num_clones))
+    except Exception as e:
+        logger.debug(f"Rust tokio_clone_bench failed: {e}")
+        return None
+
+
+def tokio_clone_stats() -> dict[str, Any] | None:
+    """Get global Tokio clone army statistics."""
+    if not _RUST_TOKIO_CLONES:
+        return None
+    try:
+        return cast(dict[str, Any], json.loads(_rs.tokio_clone_stats()))
+    except Exception as e:
+        logger.debug(f"Rust tokio_clone_stats failed: {e}")
+        return None
+
+
+# ---------------------------------------------------------------------------
+# v14.5 — IPC Bridge (Iceoryx2 shared memory)
+# ---------------------------------------------------------------------------
+
+_RUST_IPC = False
+try:
+    if _rs is not None and hasattr(_rs, "ipc_bridge_status"):
+        _RUST_IPC = True
+        logger.debug("Rust IPC bridge available")
+except Exception:
+    pass
+
+
+def ipc_available() -> bool:
+    """Check if Rust IPC bridge is available."""
+    return _RUST_IPC
+
+
+def ipc_status() -> dict[str, Any] | None:
+    """Get IPC bridge status (backend, channels, stats)."""
+    if not _RUST_IPC:
+        return None
+    try:
+        return cast(dict[str, Any], json.loads(_rs.ipc_bridge_status()))
+    except Exception as e:
+        logger.debug(f"Rust ipc_bridge_status failed: {e}")
+        return None

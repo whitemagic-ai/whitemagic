@@ -18,6 +18,21 @@ class LazyHandler:
         return self._cached_func(*args, **kwargs)
 
 
+class LazyHandlerAbs:
+    """Lazy-loads a handler from an absolute module path."""
+
+    def __init__(self, module_path: str, function_name: str):
+        self.module_path = module_path
+        self.function_name = function_name
+        self._cached_func: Callable | None = None
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        if self._cached_func is None:
+            mod = importlib.import_module(self.module_path)
+            self._cached_func = getattr(mod, self.function_name)
+        return self._cached_func(*args, **kwargs)
+
+
 # ---------------------------------------------------------------------------
 # DISPATCH_TABLE: tool_name -> handler function (lazily loaded)
 # ---------------------------------------------------------------------------
@@ -36,6 +51,9 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "karma_report": LazyHandler("dharma", "handle_karma_report"),
     "karmic_trace": LazyHandler("dharma", "handle_karmic_trace"),
     "karma.verify_chain": LazyHandler("dharma", "handle_karma_verify_chain"),
+    "karma.anchor": LazyHandler("dharma", "handle_karma_anchor"),
+    "karma.verify_anchor": LazyHandler("dharma", "handle_karma_verify_anchor"),
+    "karma.anchor_status": LazyHandler("dharma", "handle_karma_anchor_status"),
     "dharma_rules": LazyHandler("dharma", "handle_dharma_rules"),
     "set_dharma_profile": LazyHandler("dharma", "handle_set_dharma_profile"),
 
@@ -243,6 +261,13 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "browser_screenshot": LazyHandler("browser_tools", "handle_browser_screenshot"),
     "browser_get_interactables": LazyHandler("browser_tools", "handle_browser_get_interactables"),
 
+    # --- Web Research ---
+    "web_fetch": LazyHandler("web_research", "handle_web_fetch"),
+    "web_search": LazyHandler("web_research", "handle_web_search"),
+    "web_search_and_read": LazyHandler("web_research", "handle_web_search_and_read"),
+    "research_topic": LazyHandler("web_research", "handle_research_topic"),
+    "browser_session_status": LazyHandler("web_research", "handle_browser_session_status"),
+
     # --- Simplified Aliases ---
     "remember": LazyHandler("aliases", "handle_remember"),
     "recall": LazyHandler("aliases", "handle_recall"),
@@ -262,6 +287,8 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "galaxy.status": LazyHandler("galaxy", "handle_galaxy_status"),
     "galaxy.ingest": LazyHandler("galaxy", "handle_galaxy_ingest"),
     "galaxy.delete": LazyHandler("galaxy", "handle_galaxy_delete"),
+    "galaxy.backup": LazyHandler("backup", "handle_galaxy_backup"),
+    "galaxy.restore": LazyHandler("backup", "handle_galaxy_restore"),
 
     # --- Memory Aliases ---
     "read_memory": LazyHandler("misc", "handle_read_memory"),
@@ -436,6 +463,15 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "surprise_stats": LazyHandler("living_graph", "handle_surprise_stats"),
     "entity_resolve": LazyHandler("living_graph", "handle_entity_resolve"),
 
+    # --- Gana Sabha (Council Protocol — 12.108.25) ---
+    "sabha.convene": LazyHandlerAbs("whitemagic.tools.gana_sabha", "handle_sabha_convene"),
+    "sabha.status": LazyHandlerAbs("whitemagic.tools.gana_sabha", "handle_sabha_status"),
+
+    # --- Gana Forge (Declarative Extension — 12.108.17) ---
+    "forge.status": LazyHandlerAbs("whitemagic.tools.gana_forge", "handle_forge_status"),
+    "forge.reload": LazyHandlerAbs("whitemagic.tools.gana_forge", "handle_forge_reload"),
+    "forge.validate": LazyHandlerAbs("whitemagic.tools.gana_forge", "handle_forge_validate"),
+
     # --- Edgerunner Violet Security ---
     "mcp_integrity.snapshot": LazyHandler("violet_security", "handle_mcp_integrity_snapshot"),
     "mcp_integrity.verify": LazyHandler("violet_security", "handle_mcp_integrity_verify"),
@@ -452,6 +488,38 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "engagement.status": LazyHandler("violet_security", "handle_engagement_status"),
     "security.alerts": LazyHandler("violet_security", "handle_security_alerts"),
     "security.monitor_status": LazyHandler("violet_security", "handle_security_monitor_status"),
+
+    # --- v14.2: JIT Memory Researcher ---
+    "jit_research": LazyHandler("v14_2_handlers", "handle_jit_research"),
+    "jit_research.stats": LazyHandler("v14_2_handlers", "handle_jit_research_stats"),
+
+    # --- v14.2: Narrative Compression ---
+    "narrative.compress": LazyHandler("v14_2_handlers", "handle_narrative_compress"),
+    "narrative.stats": LazyHandler("v14_2_handlers", "handle_narrative_stats"),
+
+    # --- v14.2: Hermit Crab Mode ---
+    "hermit.status": LazyHandler("v14_2_handlers", "handle_hermit_status"),
+    "hermit.assess": LazyHandler("v14_2_handlers", "handle_hermit_assess"),
+    "hermit.withdraw": LazyHandler("v14_2_handlers", "handle_hermit_withdraw"),
+    "hermit.mediate": LazyHandler("v14_2_handlers", "handle_hermit_mediate"),
+    "hermit.resolve": LazyHandler("v14_2_handlers", "handle_hermit_resolve"),
+    "hermit.verify_ledger": LazyHandler("v14_2_handlers", "handle_hermit_verify_ledger"),
+    "hermit.check_access": LazyHandler("v14_2_handlers", "handle_hermit_check_access"),
+
+    # --- v14.2: Green Score Telemetry ---
+    "green.report": LazyHandler("v14_2_handlers", "handle_green_report"),
+    "green.record": LazyHandler("v14_2_handlers", "handle_green_record"),
+
+    # --- v14.2: Cognitive Modes ---
+    "cognitive.mode": LazyHandler("v14_2_handlers", "handle_cognitive_mode"),
+    "cognitive.set": LazyHandler("v14_2_handlers", "handle_cognitive_set"),
+    "cognitive.hints": LazyHandler("v14_2_handlers", "handle_cognitive_hints"),
+    "cognitive.stats": LazyHandler("v14_2_handlers", "handle_cognitive_stats"),
+
+    # --- v14.6: Physical Truth Verification ---
+    "verification.request": LazyHandler("verification", "handle_verification_request"),
+    "verification.attest": LazyHandler("verification", "handle_verification_attest"),
+    "verification.status": LazyHandler("verification", "handle_verification_status"),
 }
 
 

@@ -31,7 +31,7 @@ DOC_FILES = [
     "AI_PRIMARY.md",
     "SYSTEM_MAP.md",
     "docs/POLYGLOT_STATUS.md",
-    "docs/STRATEGIC_ROADMAP.md",
+    "docs/POLYGLOT_EXPANSION_STRATEGY.md",
     "llms.txt",
     "llms-full.txt",
     "skill.md",

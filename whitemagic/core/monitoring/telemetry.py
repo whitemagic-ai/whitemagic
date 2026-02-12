@@ -29,7 +29,17 @@ class Telemetry:
             "error_count": 0,
             "total_latency": 0.0,
             "errors_by_code": {},
+            "context_reuse_hits": 0,
+            "context_reuse_misses": 0,
+            "per_tool": {},
         }
+
+    def record_context_reuse(self, hit: bool) -> None:
+        """Record whether a tool call used recalled memory (hit) or fresh context (miss)."""
+        if hit:
+            self.stats["context_reuse_hits"] += 1
+        else:
+            self.stats["context_reuse_misses"] += 1
 
     def record_call(self, tool: str, duration: float, status: str, error_code: str | None = None) -> None:
         """Record a tool execution event."""
@@ -53,6 +63,15 @@ class Telemetry:
                 errors_by_code = cast("dict[str, int]", self.stats["errors_by_code"])
                 errors_by_code[error_code] = errors_by_code.get(error_code, 0) + 1
 
+        # Per-tool stats
+        per_tool = cast("dict[str, dict[str, Any]]", self.stats["per_tool"])
+        if tool not in per_tool:
+            per_tool[tool] = {"calls": 0, "total_latency": 0.0, "errors": 0}
+        per_tool[tool]["calls"] += 1
+        per_tool[tool]["total_latency"] += duration
+        if status != "success":
+            per_tool[tool]["errors"] += 1
+
         self.recent_calls.append(event)
 
         # 2. Persist to JSON-L
@@ -67,12 +86,30 @@ class Telemetry:
         avg_latency = self.stats["total_latency"] / max(1, self.stats["total_calls"])
         success_rate = self.stats["success_count"] / max(1, self.stats["total_calls"])
 
+        hits = self.stats["context_reuse_hits"]
+        misses = self.stats["context_reuse_misses"]
+        reuse_total = hits + misses
+        reuse_rate = hits / max(1, reuse_total)
+
+        # Top 5 most-called tools
+        per_tool = cast("dict[str, dict[str, Any]]", self.stats["per_tool"])
+        top_tools = sorted(per_tool.items(), key=lambda x: x[1]["calls"], reverse=True)[:5]
+
         return {
             "total_calls": self.stats["total_calls"],
             "avg_latency_ms": round(avg_latency * 1000, 2),
             "success_rate": round(success_rate, 4),
             "error_count": self.stats["error_count"],
             "errors_by_code": self.stats["errors_by_code"],
+            "context_reuse": {
+                "hits": hits,
+                "misses": misses,
+                "reuse_rate": round(reuse_rate, 4),
+            },
+            "top_tools": [
+                {"tool": name, "calls": stats["calls"], "avg_ms": round(stats["total_latency"] / max(1, stats["calls"]) * 1000, 2)}
+                for name, stats in top_tools
+            ],
             "recent_events": list(self.recent_calls)[-10:],
         }
 

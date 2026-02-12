@@ -670,6 +670,87 @@ def init_command(ctx, galaxy: str, skip_seed: bool, skip_ollama: bool):
     _echo('  wm gana invoke gnosis \'{"compact": true}\'  # introspection')
     _echo("")
 
+@main.command(name="backup")
+@click.option("--output", "-o", default=None, help="Output path for backup archive")
+@click.option("--galaxy", default=None, help="Backup a specific galaxy (default: all)")
+def backup_command(output: str | None, galaxy: str | None):
+    """📦 Backup WhiteMagic memory databases.
+
+    Creates a timestamped .tar.gz archive of the memory directory.
+    """
+    import tarfile
+
+    from whitemagic.config import paths as cfg_paths
+
+    state_root = cfg_paths.get_state_root()  # type: ignore[attr-defined]
+    memory_dir = state_root / "memory"
+
+    if not memory_dir.exists():
+        click.echo("❌ No memory directory found. Nothing to backup.")
+        raise SystemExit(1)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    if output:
+        out_path = Path(output)
+    else:
+        out_path = Path.cwd() / f"whitemagic_backup_{timestamp}.tar.gz"
+
+    if galaxy:
+        # Backup specific galaxy
+        galaxy_dir = memory_dir / "galaxies" / galaxy
+        if not galaxy_dir.exists():
+            click.echo(f"❌ Galaxy '{galaxy}' not found at {galaxy_dir}")
+            raise SystemExit(1)
+        source = galaxy_dir
+        label = f"galaxy:{galaxy}"
+    else:
+        source = memory_dir
+        label = "all memories"
+
+    click.echo(f"📦 Backing up {label} from {source}")
+    try:
+        with tarfile.open(str(out_path), "w:gz") as tar:
+            tar.add(str(source), arcname=source.name)
+        size_mb = out_path.stat().st_size / (1024 * 1024)
+        click.echo(f"✅ Backup saved: {out_path} ({size_mb:.1f} MB)")
+    except Exception as e:
+        click.echo(f"❌ Backup failed: {e}")
+        raise SystemExit(1)
+
+
+@main.command(name="restore")
+@click.argument("archive_path")
+@click.option("--force", is_flag=True, help="Overwrite existing data")
+def restore_command(archive_path: str, force: bool):
+    """📦 Restore WhiteMagic memory from a backup archive."""
+    import tarfile
+
+    from whitemagic.config import paths as cfg_paths
+
+    archive = Path(archive_path)
+    if not archive.exists():
+        click.echo(f"❌ Archive not found: {archive}")
+        raise SystemExit(1)
+
+    state_root = cfg_paths.get_state_root()  # type: ignore[attr-defined]
+    memory_dir = state_root / "memory"
+
+    if memory_dir.exists() and not force:
+        click.echo("❌ Memory directory already exists. Use --force to overwrite.")
+        raise SystemExit(1)
+
+    click.echo(f"📦 Restoring from {archive}")
+    try:
+        memory_dir.mkdir(parents=True, exist_ok=True)
+        with tarfile.open(str(archive), "r:gz") as tar:
+            tar.extractall(str(memory_dir.parent))
+        click.echo(f"✅ Restored to {memory_dir}")
+    except Exception as e:
+        click.echo(f"❌ Restore failed: {e}")
+        raise SystemExit(1)
+
+
 # --- Global Memory Helper ---
 
 _memory = None
@@ -996,6 +1077,42 @@ def infer_local_status():
                 click.echo(f"{backend}: {available} ({len(models)} models)")
     except Exception as e:
         click.echo(f"❌ Error: {e}")
+
+# --- Convenience Aliases (commands the test AI tried) ---
+
+@main.command(name="rules")
+def rules_command():
+    """☸️  Show active Dharma rules (alias for `wm dharma principles`)"""
+    from whitemagic.tools.dispatch_table import dispatch
+    try:
+        result = dispatch("dharma_rules") or {}
+        rules = result.get("rules", result.get("principles", []))
+        if isinstance(rules, list):
+            for r in rules[:20]:
+                if isinstance(r, dict):
+                    click.echo(f"  {r.get('name', '?')}: {r.get('level', '?')} (weight: {r.get('weight', '?')})")
+                else:
+                    click.echo(f"  {r}")
+        else:
+            click.echo(json.dumps(result, indent=2, default=str)[:2000])
+    except Exception as e:
+        click.echo(f"❌ {e}")
+
+
+@main.command(name="systemmap")
+def systemmap_command():
+    """🗺️  Display the system map overview"""
+    try:
+        from whitemagic.config.paths import get_project_root
+        sm = get_project_root() / "SYSTEM_MAP.md"
+        if sm.exists():
+            text = sm.read_text()
+            click.echo(text[:3000])
+        else:
+            click.echo("System map not found. Try: wm status")
+    except Exception as e:
+        click.echo(f"❌ {e}")
+
 
 # --- Wisdom & Reasoning ---
 
@@ -2617,6 +2734,91 @@ if HAS_RUST_CLI:
             console.print(f"[yellow]Warning: Failed to load Rust CLI: {e}[/yellow]")
         else:
             click.echo(f"Warning: Failed to load Rust CLI: {e}", err=True)
+
+
+# ── Vault CLI ─────────────────────────────────────────────────────
+@main.group(name="vault")
+def vault_group():
+    """Encrypted local secret storage."""
+    pass
+
+
+@vault_group.command(name="init")
+@click.option("--passphrase", "-p", prompt=True, hide_input=True, confirmation_prompt=True, help="Passphrase for vault encryption")
+def vault_init(passphrase: str):
+    """Initialize the encrypted vault."""
+    from whitemagic.security.vault import Vault
+    from whitemagic.config.paths import WM_ROOT
+    Vault(passphrase=passphrase)  # creates DB + schema as side effect
+    click.echo(f"Vault initialized at {WM_ROOT / 'vault' / 'secrets.db'}")
+    click.echo("Your secrets are encrypted with AES-256.")
+
+
+@vault_group.command(name="set")
+@click.argument("name")
+@click.argument("value", required=False)
+@click.option("--passphrase", "-p", envvar="WM_VAULT_PASSPHRASE", default=None, help="Vault passphrase")
+def vault_set(name: str, value: str | None, passphrase: str | None):
+    """Store an encrypted secret. VALUE can be omitted to prompt securely."""
+    from whitemagic.security.vault import get_vault
+    if value is None:
+        value = click.prompt(f"Value for {name}", hide_input=True)
+    vault = get_vault(passphrase=passphrase)
+    vault.set(name, value)
+    click.echo(f"Stored: {name}")
+
+
+@vault_group.command(name="get")
+@click.argument("name")
+@click.option("--passphrase", "-p", envvar="WM_VAULT_PASSPHRASE", default=None, help="Vault passphrase")
+def vault_get(name: str, passphrase: str | None):
+    """Retrieve a decrypted secret."""
+    from whitemagic.security.vault import get_vault
+    vault = get_vault(passphrase=passphrase)
+    val = vault.get(name)
+    if val is None:
+        click.echo(f"Not found: {name}", err=True)
+        raise SystemExit(1)
+    click.echo(val)
+
+
+@vault_group.command(name="list")
+@click.option("--passphrase", "-p", envvar="WM_VAULT_PASSPHRASE", default=None, help="Vault passphrase")
+def vault_list(passphrase: str | None):
+    """List stored secret names (values are never shown)."""
+    from whitemagic.security.vault import get_vault
+    vault = get_vault(passphrase=passphrase)
+    names = vault.list()
+    if not names:
+        click.echo("Vault is empty.")
+        return
+    for n in names:
+        click.echo(f"  {n}")
+
+
+@vault_group.command(name="delete")
+@click.argument("name")
+@click.option("--passphrase", "-p", envvar="WM_VAULT_PASSPHRASE", default=None, help="Vault passphrase")
+def vault_delete(name: str, passphrase: str | None):
+    """Delete a secret from the vault."""
+    from whitemagic.security.vault import get_vault
+    vault = get_vault(passphrase=passphrase)
+    if vault.delete(name):
+        click.echo(f"Deleted: {name}")
+    else:
+        click.echo(f"Not found: {name}", err=True)
+
+
+@vault_group.command(name="rekey")
+@click.option("--new-passphrase", prompt=True, hide_input=True, confirmation_prompt=True, help="New passphrase")
+@click.option("--passphrase", "-p", envvar="WM_VAULT_PASSPHRASE", default=None, help="Current vault passphrase")
+def vault_rekey(new_passphrase: str, passphrase: str | None):
+    """Re-encrypt all secrets with a new passphrase."""
+    from whitemagic.security.vault import get_vault
+    vault = get_vault(passphrase=passphrase)
+    count = vault.rekey(new_passphrase)
+    click.echo(f"Re-keyed {count} secret(s) with new passphrase.")
+
 
 if __name__ == "__main__":
     main()

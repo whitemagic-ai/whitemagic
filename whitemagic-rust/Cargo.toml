@@ -1,14 +1,22 @@
 [package]
 name = "whitemagic"
-version = "14.3.1"
+version = "15.0.0"
 edition = "2021"
 authors = ["WhiteMagic Contributors"]
 description = "High-performance Rust core for WhiteMagic memory management"
 license = "MIT"
 
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
 [lib]
 name = "whitemagic_rs"
 crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "wm-seed"
+path = "src/bin/wm_seed.rs"
+required-features = ["seed"]
 
 [dependencies]
 pyo3 = { version = "0.21.1", features = ["extension-module"], optional = true }
@@ -16,34 +24,51 @@ wasm-bindgen = { version = "0.2", optional = true }
 js-sys = { version = "0.3", optional = true }
 web-sys = { version = "0.3", optional = true }
 tokio = { version = "1.35", features = ["full"], optional = true }
-uuid = { version = "1.6", features = ["v4", "serde"] }
-chrono = { version = "0.4", features = ["serde"] }
-libc = "0.2"
-rayon = "1.8"  # Parallel processing
-sysinfo = "0.30"
+# Minimal universal dependencies (WASM-safe)
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-bincode = "1.3"  # Fast binary serialization
-flate2 = "1.0"  # Fast compression (using zlib/gzip instead of lz4)
-memmap2 = "0.9"  # Memory-mapped files
-regex = "1.10"  # Pattern matching for data lake
-aho-corasick = "1.1" # Fast multi-pattern search
-walkdir = "2.4"  # Directory traversal
-dashmap = "5.5"  # Concurrent hashmap
-crossbeam = "0.8"  # Lock-free data structures
-lazy_static = "1.4"
-ndarray = "0.15"  # N-dimensional arrays for coordinate vectors
-kdtree = "0.7"    # Stable K-D Tree implementation
-rusqlite = { version = "0.31", features = ["bundled"], optional = true }  # SQLite accelerator
-rand = "0.8"      # Random number generation for synthesis
+
+# These are used by native modules but NOT by the WASM module
+uuid = { version = "1.6", features = ["v4", "serde"], optional = true }
+chrono = { version = "0.4", features = ["serde"], optional = true }
+lazy_static = { version = "1.4", optional = true }
 getrandom = { version = "0.2", optional = true }
-sha2 = "0.10"     # Hashing for signatures
-hex = "0.4"      # Hex encoding for signatures
+
+# Native-only dependencies (do NOT compile for wasm32)
+libc = { version = "0.2", optional = true }
+rayon = { version = "1.8", optional = true }
+sysinfo = { version = "0.30", optional = true }
+bincode = { version = "1.3", optional = true }
+flate2 = { version = "1.0", optional = true }
+memmap2 = { version = "0.9", optional = true }
+regex = { version = "1.10", optional = true }
+aho-corasick = { version = "1.1", optional = true }
+walkdir = { version = "2.4", optional = true }
+dashmap = { version = "5.5", optional = true }
+crossbeam = { version = "0.8", optional = true }
+ndarray = { version = "0.15", optional = true }
+kdtree = { version = "0.7", optional = true }
+rand = { version = "0.8", optional = true }
+sha2 = { version = "0.10", optional = true }
+hex = { version = "0.4", optional = true }
+rusqlite = { version = "0.31", features = ["bundled"], optional = true }
+arrow = { version = "53", optional = true }
+arrow-ipc = { version = "53", optional = true }
+iceoryx2 = { version = "0.4", optional = true }
 
 [features]
 default = ["python"]
-python = ["pyo3", "tokio", "rusqlite"]
+# Native deps bundle — everything needed for the full Python extension
+native-deps = [
+    "uuid", "chrono", "lazy_static",
+    "libc", "rayon", "sysinfo", "bincode", "flate2", "memmap2",
+    "regex", "aho-corasick", "walkdir", "dashmap", "crossbeam",
+    "ndarray", "kdtree", "rand", "sha2", "hex",
+]
+python = ["pyo3", "tokio", "rusqlite", "arrow", "arrow-ipc", "native-deps"]
+ipc = ["iceoryx2"]  # Requires libclang-dev: apt install libclang-dev
 wasm = ["wasm-bindgen", "js-sys", "web-sys", "getrandom/js"]
+seed = ["rusqlite", "uuid", "chrono", "sha2", "hex", "rand"]
 
 [dev-dependencies]
 criterion = "0.5"

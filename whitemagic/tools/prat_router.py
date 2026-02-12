@@ -176,6 +176,9 @@ TOOL_TO_GANA: dict[str, str] = {
     "prompt.list":             "gana_net",
     "prompt.reload":           "gana_net",
     "karma.verify_chain":      "gana_net",
+    "karma.anchor":            "gana_hairy_head",
+    "karma.verify_anchor":     "gana_hairy_head",
+    "karma.anchor_status":     "gana_hairy_head",
 
     # ═══ TURTLE BEAK — Precision & Protection ═══
     "edge_infer":              "gana_turtle_beak",
@@ -225,6 +228,8 @@ TOOL_TO_GANA: dict[str, str] = {
     "galaxy.status":           "gana_void",
     "galaxy.ingest":           "gana_void",
     "galaxy.delete":           "gana_void",
+    "galaxy.backup":           "gana_void",
+    "galaxy.restore":          "gana_void",
 
     # ═══ SIMPLIFIED ALIASES ═══
     "remember":                "gana_neck",
@@ -270,6 +275,193 @@ TOOL_TO_GANA: dict[str, str] = {
     "model.list":              "gana_roof",
     "model.hash":              "gana_roof",
     "model.signing_status":    "gana_roof",
+
+    # ═══ THREE STARS — Gana Sabha (Council Protocol — 12.108.25) ═══
+    "sabha.convene":           "gana_three_stars",
+    "sabha.status":            "gana_three_stars",
+
+    # ═══ STAR — Gana Forge (Declarative Extension — 12.108.17) ═══
+    "forge.status":            "gana_star",
+    "forge.reload":            "gana_star",
+    "forge.validate":          "gana_star",
+
+    # ═══════════════════════════════════════════════════════════
+    # ORPHAN RESOLUTION — 94 dispatch tools mapped to Ganas
+    # Ensures full coherence between dispatch_table and PRAT.
+    # ═══════════════════════════════════════════════════════════
+
+    # ── HORN — Additional session tools ──
+    "session_status":              "gana_horn",
+    "session_handoff":             "gana_horn",
+    "session.handoff_transfer":    "gana_horn",
+    "session.accept_handoff":      "gana_horn",
+    "session.list_handoffs":       "gana_horn",
+    "focus_session":               "gana_horn",
+
+    # ── NECK — Memory mutation ──
+    "thought_clone":               "gana_neck",
+
+    # ── ROOT — Rust acceleration status ──
+    "rust_audit":                  "gana_root",
+    "rust_compress":               "gana_root",
+
+    # ── ROOM — Security & locking sub-tools ──
+    "sangha_lock_acquire":         "gana_room",
+    "sangha_lock_release":         "gana_room",
+    "sangha_lock_list":            "gana_room",
+    "anti_loop_check":             "gana_room",
+    "immune_scan":                 "gana_room",
+    "immune_heal":                 "gana_room",
+
+    # ── HEART — Scratchpad sub-tools ──
+    "scratchpad_create":           "gana_heart",
+    "scratchpad_update":           "gana_heart",
+    "scratchpad_finalize":         "gana_heart",
+    "analyze_scratchpad":          "gana_heart",
+
+    # ── TAIL — Acceleration sub-tools ──
+    "token_report":                "gana_tail",
+
+    # ── GHOST — Introspection sub-tools + watchers ──
+    "capability_harness":          "gana_ghost",
+    "get_agent_capabilities":      "gana_ghost",
+    "watcher_add":                 "gana_ghost",
+    "watcher_remove":              "gana_ghost",
+    "watcher_start":               "gana_ghost",
+    "watcher_stop":                "gana_ghost",
+    "watcher_list":                "gana_ghost",
+    "watcher_status":              "gana_ghost",
+    "watcher_stats":               "gana_ghost",
+    "watcher_recent_events":       "gana_ghost",
+
+    # ── WILLOW — Grimoire sub-tools ──
+    "grimoire_list":               "gana_willow",
+    "grimoire_read":               "gana_willow",
+    "cast_oracle":                 "gana_willow",
+
+    # ── STAR — Governor sub-tools ──
+    "governor_check_budget":       "gana_star",
+    "governor_check_dharma":       "gana_star",
+    "governor_stats":              "gana_star",
+    "governor_validate_path":      "gana_star",
+
+    # ── EXTENDED NET — Pattern & graph sub-tools ──
+    "tool.graph_full":             "gana_extended_net",
+    "coherence_boost":             "gana_extended_net",
+    "resonance_trace":             "gana_extended_net",
+
+    # ── CHARIOT — Archaeology sub-tools + Windsurf ──
+    "archaeology_scan_directory":  "gana_chariot",
+    "archaeology_search":          "gana_chariot",
+    "archaeology_stats":           "gana_chariot",
+    "archaeology_report":          "gana_chariot",
+    "archaeology_daily_digest":    "gana_chariot",
+    "archaeology_process_wisdom":  "gana_chariot",
+    "archaeology_mark_read":       "gana_chariot",
+    "archaeology_mark_written":    "gana_chariot",
+    "archaeology_have_read":       "gana_chariot",
+    "archaeology_find_unread":     "gana_chariot",
+    "archaeology_find_changed":    "gana_chariot",
+    "archaeology_recent_reads":    "gana_chariot",
+    "windsurf_list_conversations": "gana_chariot",
+    "windsurf_read_conversation":  "gana_chariot",
+    "windsurf_search_conversations": "gana_chariot",
+    "windsurf_export_conversation": "gana_chariot",
+    "windsurf_stats":              "gana_chariot",
+
+    # ── ABUNDANCE — Dream cycle + lifecycle sub-tools ──
+    "dream_start":                 "gana_abundance",
+    "dream_stop":                  "gana_abundance",
+    "dream_status":                "gana_abundance",
+    "dream_now":                   "gana_abundance",
+    "memory.lifecycle_sweep":      "gana_abundance",
+    "memory.lifecycle_stats":      "gana_abundance",
+    "memory.consolidate":          "gana_abundance",
+    "memory.consolidation_stats":  "gana_abundance",
+
+    # ── STRADDLING LEGS — Wu Xing balance ──
+    "wu_xing_balance":             "gana_straddling_legs",
+
+    # ── STOMACH — Pipeline sub-tools ──
+    "pipeline.create":             "gana_stomach",
+    "pipeline.list":               "gana_stomach",
+    "pipeline.status":             "gana_stomach",
+
+    # ── HAIRY HEAD — Anomaly & OTel sub-tools ──
+    "anomaly.check":               "gana_hairy_head",
+    "anomaly.history":             "gana_hairy_head",
+    "anomaly.status":              "gana_hairy_head",
+    "otel.metrics":                "gana_hairy_head",
+    "otel.spans":                  "gana_hairy_head",
+    "otel.status":                 "gana_hairy_head",
+
+    # ── TURTLE BEAK — Edge inference sub-tools ──
+    "edge_add_rule":               "gana_turtle_beak",
+
+    # ── THREE STARS — Ensemble sub-tools ──
+    "ensemble.query":              "gana_three_stars",
+    "ensemble.history":            "gana_three_stars",
+    "ensemble.status":             "gana_three_stars",
+
+    # ── DIPPER — Homeostasis + starter packs sub-tools ──
+    "homeostasis.check":           "gana_dipper",
+    "homeostasis.status":          "gana_dipper",
+    "starter_packs.get":           "gana_dipper",
+    "starter_packs.list":          "gana_dipper",
+    "starter_packs.suggest":       "gana_dipper",
+
+    # ── VOID — Garden sub-tools ──
+    "garden_synergy":              "gana_void",
+
+    # ── ENCAMPMENT — Gan Ying sub-tools ──
+    "ganying_emit":                "gana_encampment",
+    "ganying_history":             "gana_encampment",
+    "ganying_listeners":           "gana_encampment",
+
+    # ── v14.2: JIT Memory Researcher (Winnowing Basket — Wisdom & Search) ──
+    "jit_research":                "gana_winnowing_basket",
+    "jit_research.stats":          "gana_winnowing_basket",
+
+    # ── v14.2: Narrative Compression (Abundance — Dream Cycle) ──
+    "narrative.compress":          "gana_abundance",
+    "narrative.stats":             "gana_abundance",
+
+    # ── v14.2: Hermit Crab Mode (Room — Resource Locks & Privacy) ──
+    "hermit.status":               "gana_room",
+    "hermit.assess":               "gana_room",
+    "hermit.withdraw":             "gana_room",
+    "hermit.mediate":              "gana_room",
+    "hermit.resolve":              "gana_room",
+    "hermit.verify_ledger":        "gana_room",
+    "hermit.check_access":         "gana_room",
+
+    # ── v14.2: Green Score Telemetry (Mound — Metrics & Caching) ──
+    "green.report":                "gana_mound",
+    "green.record":                "gana_mound",
+
+    # ── v14.2: Cognitive Modes (Dipper — Strategy) ──
+    "cognitive.mode":              "gana_dipper",
+    "cognitive.set":               "gana_dipper",
+    "cognitive.hints":             "gana_dipper",
+    "cognitive.stats":             "gana_dipper",
+
+    # ── v14.6: Physical Truth Verification (Straddling Legs — Ethics & Balance) ──
+    "verification.request":        "gana_straddling_legs",
+    "verification.attest":         "gana_straddling_legs",
+    "verification.status":         "gana_straddling_legs",
+
+    # ── Cross-cutting: Browser & Web Research (route to Ghost) ──
+    "browser_navigate":            "gana_ghost",
+    "browser_screenshot":          "gana_ghost",
+    "browser_click":               "gana_ghost",
+    "browser_type":                "gana_ghost",
+    "browser_extract_dom":         "gana_ghost",
+    "browser_get_interactables":   "gana_ghost",
+    "web_fetch":                   "gana_ghost",
+    "web_search":                  "gana_ghost",
+    "web_search_and_read":         "gana_ghost",
+    "research_topic":              "gana_ghost",
+    "browser_session_status":      "gana_ghost",
 }
 
 # Reverse: Gana → list of nested tools
@@ -429,9 +621,22 @@ def route_prat_call(gana_name: str, tool: str | None = None,
         if kwargs.get("context"):
             tool_args.setdefault("_resonance_context", kwargs["context"])
 
+        _call_start = __import__("time").time()
+        _call_success = False
         try:
             result = call_tool(tool, **tool_args)
+            _call_success = not (isinstance(result, dict) and result.get("status") == "error")
         except Exception as e:
+            _call_success = False
+            # Record vitality before returning error
+            try:
+                from whitemagic.tools.gana_vitality import get_vitality_monitor
+                get_vitality_monitor().record_call(
+                    gana_name, success=False,
+                    latency_ms=(__import__("time").time() - _call_start) * 1000,
+                )
+            except Exception:
+                pass
             return {"status": "error", "error": str(e), "tool": tool}
 
         # ── Step 3: Record resonance state ──
@@ -471,6 +676,16 @@ def route_prat_call(gana_name: str, tool: str | None = None,
             }
             if _garden_instance:
                 result["_garden"] = resonance_ctx.get("garden", "unknown")
+
+        # ── Gana Vitality: record call outcome (12.108.20 + 12.108.29) ──
+        try:
+            from whitemagic.tools.gana_vitality import get_vitality_monitor
+            get_vitality_monitor().record_call(
+                gana_name, success=_call_success,
+                latency_ms=(__import__("time").time() - _call_start) * 1000,
+            )
+        except Exception:
+            pass
 
         # ── v14: Speculative prefetch — record transition, predict next ──
         try:
@@ -514,6 +729,13 @@ def route_prat_call(gana_name: str, tool: str | None = None,
     resonance_meta = record_resonance(gana_name, None, operation, native_result)
     native_result["_resonance"] = resonance_meta
 
+    # ── Gana Vitality: record native operation ──
+    try:
+        from whitemagic.tools.gana_vitality import get_vitality_monitor
+        get_vitality_monitor().record_call(gana_name, success=True)
+    except Exception:
+        pass
+
     # ── Fusion: Resonance → Emotion/Drive (native ops too) ──
     try:
         from whitemagic.core.fusions import modulate_drive_from_resonance
@@ -525,7 +747,15 @@ def route_prat_call(gana_name: str, tool: str | None = None,
 
 
 def validate_mapping(tool_registry: list) -> dict[str, Any]:
-    """Check that all non-Gana tools are mapped to a Gana."""
+    """Check that all non-Gana tools are mapped to a Gana.
+
+    A PRAT mapping is considered valid if the tool exists in either
+    the formal registry OR the dispatch table (many sub-tools are
+    internal and accessed through Gana meta-tools without needing
+    their own registry entry).
+    """
+    from whitemagic.tools.dispatch_table import DISPATCH_TABLE
+
     mapped = set(TOOL_TO_GANA.keys())
     all_tools = set()
     gana_tools = set()
@@ -535,9 +765,12 @@ def validate_mapping(tool_registry: list) -> dict[str, Any]:
         if td.name.startswith("gana_"):
             gana_tools.add(td.name)
 
+    # Dispatch tools are also valid (internal sub-tools)
+    known_tools = all_tools | set(DISPATCH_TABLE.keys())
+
     non_gana = all_tools - gana_tools
     unmapped = non_gana - mapped
-    orphaned = mapped - all_tools  # Tools in mapping but not in registry
+    orphaned = mapped - known_tools  # In PRAT but not in registry OR dispatch
 
     return {
         "total_tools": len(all_tools),

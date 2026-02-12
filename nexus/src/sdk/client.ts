@@ -376,11 +376,13 @@ export class GovernanceClient {
 // ---------------------------------------------------------------------------
 
 export class WhiteMagicError extends Error {
+  public readonly statusCode: number;
   constructor(
     message: string,
-    public readonly statusCode: number,
+    statusCode: number,
   ) {
     super(message);
     this.name = 'WhiteMagicError';
+    this.statusCode = statusCode;
   }
 }

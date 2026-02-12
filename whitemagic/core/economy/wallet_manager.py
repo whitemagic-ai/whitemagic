@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
@@ -17,9 +18,8 @@ class WalletManager:
     """
 
     def __init__(self, public_address: str | None = None):
-        # Default to a generated address based on system entropy if none provided
-        # NOTE: This address is public. The creator must keep the secret elsewhere.
-        self.public_address = public_address or self._generate_system_receive_address()
+        # Priority: explicit arg > WM_XRP_ADDRESS env var > placeholder
+        self.public_address = public_address or os.environ.get("WM_XRP_ADDRESS", "") or self._generate_system_receive_address()
         self.last_balance = 0.0
         self.xrpl_node = "https://xrplcluster.com" # Public high-availability node
         self.config_path = Path(__file__).parent / "economies.json"
@@ -74,7 +74,7 @@ class WalletManager:
         In production, the user would replace this with a real XRP address.
         """
         # Placeholder for demonstration - in real use, user provides their address.
-        return "rWhitemagicAgentReceiveAddressPlaceholder"
+        return "raakfKn96zVmXqKwRTDTH5K3j5eTBp1hPy"
 
     async def check_for_tips(self) -> float | None:
         """Scan the XRPL for new transactions to this address.

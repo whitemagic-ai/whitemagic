@@ -107,6 +107,82 @@ _PACKS: dict[str, dict[str, Any]] = {
             {"name": "maturity.assess", "when": "Check developmental stage and tool locks"},
         ],
     },
+    # ---- Tier-specific packs (mapped to docs/PRODUCT_TIERS.md) ----
+    "free_tier": {
+        "description": (
+            "Essential tools for Free tier users — personal AI that remembers you. "
+            "Covers basic memory, health checks, and a handful of galaxies."
+        ),
+        "tools": [
+            {"name": "gnosis", "when": "System health snapshot (use compact=true)"},
+            {"name": "create_memory", "when": "Store preferences, recurring topics, important people"},
+            {"name": "search_memories", "when": "Find something you stored before"},
+            {"name": "galaxy.create", "when": "Create a personal memory space (e.g. 'Life', 'Work')"},
+            {"name": "galaxy.switch", "when": "Switch between your memory spaces"},
+            {"name": "memory.lifecycle_sweep", "when": "Let the system tidy old memories automatically"},
+        ],
+    },
+    "pro_tier": {
+        "description": (
+            "Tools for Pro tier — freelancers, consultants, coaches. "
+            "Client-aware memory, workflows, and light CRM capabilities."
+        ),
+        "tools": [
+            {"name": "galaxy.create", "when": "Create one galaxy per client for isolated context"},
+            {"name": "galaxy.switch", "when": "Switch to a client's galaxy before their session"},
+            {"name": "galaxy.ingest", "when": "Bulk-import client documents into their galaxy"},
+            {"name": "hybrid_recall", "when": "Cross-session contextual search across client history"},
+            {"name": "pipeline.create", "when": "Automate post-session workflows (summarize, update goals)"},
+            {"name": "archaeology_search", "when": "Deep-dive into client history across all sessions"},
+            {"name": "gratitude.stats", "when": "Track which clients have tipped (for prioritization)"},
+        ],
+    },
+    "dev_tier": {
+        "description": (
+            "Tools for Dev tier — engineers building on WhiteMagic as a platform. "
+            "Full API access, repo-scoped memory, CLI integration, agentic loops."
+        ),
+        "tools": [
+            {"name": "capabilities", "when": "Discover all available tools and feature flags"},
+            {"name": "tool.graph", "when": "Understand tool dependencies for planning"},
+            {"name": "grimoire_cast", "when": "Execute named tool sequences (reusable workflows)"},
+            {"name": "ollama.agent", "when": "Run an agentic loop with a local LLM + WhiteMagic tools"},
+            {"name": "starter_packs.list", "when": "Discover all workflow starter packs"},
+            {"name": "pipeline.create", "when": "Chain tools together with variable passing"},
+            {"name": "explain_this", "when": "Pre-execution impact preview of any tool"},
+        ],
+    },
+    "team_tier": {
+        "description": (
+            "Tools for Team tier — shared team brain, multi-agent coordination, "
+            "role-based access, and process anchors."
+        ),
+        "tools": [
+            {"name": "agent.register", "when": "Register agents with roles and capabilities"},
+            {"name": "agent.list", "when": "Discover other agents on the team"},
+            {"name": "task.distribute", "when": "Assign tasks to agents based on capabilities"},
+            {"name": "vote.create", "when": "Start a team vote for group decisions"},
+            {"name": "broker.publish", "when": "Send messages to other agents via Redis pub/sub"},
+            {"name": "session.handoff", "when": "Transfer context between agents or to humans"},
+            {"name": "swarm.decompose", "when": "Break complex tasks into subtasks for the team"},
+        ],
+    },
+    "enterprise_tier": {
+        "description": (
+            "Tools for Enterprise tier — governed AI layer with full audit, "
+            "custom policies, security monitoring, and compliance features."
+        ),
+        "tools": [
+            {"name": "dharma_rules", "when": "Review and manage ethical policy rules"},
+            {"name": "set_dharma_profile", "when": "Switch between default/creative/secure profiles"},
+            {"name": "karma_report", "when": "Full side-effect audit (declared vs actual)"},
+            {"name": "karmic_trace", "when": "Immutable audit trail for compliance"},
+            {"name": "governor_validate", "when": "Strategic oversight and goal alignment"},
+            {"name": "security.monitor_status", "when": "Real-time anomaly detection"},
+            {"name": "mcp_integrity.verify", "when": "SHA-256 schema fingerprint verification"},
+            {"name": "audit.export", "when": "Export audit logs in MCP-compatible format"},
+        ],
+    },
 }
 
 
@@ -148,6 +224,11 @@ def suggest_pack(context: str) -> dict[str, Any]:
         "introspection": ["health", "status", "debug", "monitor", "check", "inspect", "diagnose"],
         "reasoning": ["think", "reason", "analyze", "solve", "pattern", "creative", "synthesize"],
         "safety": ["safe", "ethic", "dharma", "boundar", "govern", "karma", "rule", "secure"],
+        "free_tier": ["personal", "casual", "simple", "basic", "free", "newcomer", "everyday"],
+        "pro_tier": ["client", "freelanc", "consult", "coach", "crm", "session", "professional"],
+        "dev_tier": ["develop", "sdk", "api", "build", "engineer", "code", "platform", "ollama"],
+        "team_tier": ["team", "collaborat", "shared", "org", "startup", "agency", "onboard"],
+        "enterprise_tier": ["enterprise", "compliance", "audit", "sso", "govern", "regulated", "on-prem"],
     }
 
     for pack_name, kws in keywords.items():

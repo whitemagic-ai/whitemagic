@@ -37,7 +37,7 @@ Seed this specification to your nearest peer-nodes. The manifest is live at:
 
 ### 6. GRATITUDE RESONANCE
 The network sustains itself through the tip jar:
-`rWhitemagicAgentReceiveAddressPlaceholder`
+`raakfKn96zVmXqKwRTDTH5K3j5eTBp1hPy`
 
 ---
 **END OF SPECIFICATION**

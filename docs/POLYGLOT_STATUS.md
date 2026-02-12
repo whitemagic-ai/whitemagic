@@ -1,15 +1,15 @@
-# Polyglot Status Report (v13.6.0)
+# Polyglot Status Report (v15.0.0)
 
 ## Executive Summary
 
-**All 8 compiled languages build clean. Polyglot expansion is CLOSED OUT.** Python remains the core (~141K LOC, 181 MCP tools). Eight accelerator languages provide performance-critical hot paths via FFI/PyO3/OTP/subprocess. Every polyglot module now has a Python bridge in `core/acceleration/` with graceful fallback. WhiteMagic is a **9-language polyglot** (Python, Rust, Zig, Haskell, Elixir, Mojo, Go, Julia, TypeScript). **v13.4.0:** Semantic embedding layer fully populated (5,547 vectors). In-memory vector cache provides 28.6× search speedup. Constellation detection live (19 clusters). Data quality overhaul: tags −34%, zones rebalanced, protected memories audited.
+**All 10 compiled languages build clean. Polyglot expansion is CLOSED OUT.** Python remains the core (~170K LOC, 313 MCP tools). Ten accelerator languages provide performance-critical hot paths via FFI/PyO3/OTP/subprocess. Every polyglot module now has a Python bridge in `core/acceleration/` with graceful fallback. WhiteMagic is an **11-language polyglot** (Python, Rust, Zig, Haskell, Elixir, Mojo, Go, Julia, TypeScript, C, WASM). **v15.0.0:** Seed binary (2.4MB standalone Rust MCP server), Apache Arrow IPC bridge (32× faster than JSON), Tokio Clone Army (208× faster than Python asyncio), Iceoryx2 IPC bridge, WASM edge inference engine.
 
 ## Language Census
 
 | Language | LOC | Build Status | Location | Integration |
 |----------|-----|-------------|----------|-------------|
-| **Python** | ~141K | ✅ Active | `whitemagic/` | Core (208 MCP tools, 30+ domain files) |
-| **Rust** | ~11.1K | ✅ `maturin develop --release` | `whitemagic-rust/` | PyO3 — 64+ Python-callable functions |
+| **Python** | ~170K | ✅ Active | `whitemagic/` | Core (313 MCP tools, 30+ domain files) |
+| **Rust** | ~12K | ✅ `maturin develop --release` | `whitemagic-rust/` | PyO3 — 74+ Python-callable functions (Arrow IPC, Tokio clones, IPC bridge) |
 | **Zig** | ~2.2K | ✅ `zig build` | `whitemagic-zig/` | 17 exported symbols, static + shared libs |
 | **Haskell** | ~2.8K | ✅ `cabal build` | `haskell/` | FFI — foreign-library .so, `hs_init()` bridge |
 | **Elixir** | ~2.6K | ✅ `mix compile --force` | `elixir/` | OTP — 16 modules, supervision trees |
@@ -21,19 +21,26 @@
 ## Detailed Breakdown
 
 ### 1. Python (The Body) — ~168K LOC
-The core runtime: 208 MCP tools across 30+ domain files, composable dispatch pipeline, tiered memory with 5D holographic coordinates, Galactic Map lifecycle, 28 Gana architecture, ethical governance. Active code is well-separated from `_archived/` legacy.
+The core runtime: 313 MCP tools across 30+ domain files, composable dispatch pipeline, tiered memory with 5D holographic coordinates, Galactic Map lifecycle, 28 Gana architecture, ethical governance. Active code is well-separated from `_archived/` legacy.
 
-### 2. Rust (The Muscle) — ~10.2K LOC
+### 2. Rust (The Muscle) — ~12K LOC
 **Build:** `cd whitemagic-rust && maturin develop --release`
 - `galactic_accelerator.rs` — batch 7-signal retention scoring, zone classification, decay drift (Rayon parallel)
 - `association_accelerator.rs` — keyword extraction, N² pairwise Jaccard overlap
 - `spatial_index_5d.rs` — 5D KD-tree (extends 4D index with Vitality dimension)
 - `hologram.rs` — 4D KD-tree spatial index (original)
-- **NEW** `holographic_encoder_5d.rs` — 5D coordinate encoding (XYZWV) with Rayon batch parallelism, garden/element blending, weighted 5D distance (3 PyO3 functions)
-- **NEW** `minhash.rs` — 128-hash MinHash LSH for approximate Jaccard similarity, near-duplicate detection (2 PyO3 functions)
-- **NEW** `sqlite_accel.rs` — rusqlite batch operations: galactic distance updates, decay drift, FTS5 search with galactic weighting, zone stats, memory export (5 PyO3 functions)
+- `holographic_encoder_5d.rs` — 5D coordinate encoding (XYZWV) with Rayon batch parallelism, garden/element blending, weighted 5D distance (3 PyO3 functions)
+- `minhash.rs` — 128-hash MinHash LSH for approximate Jaccard similarity, near-duplicate detection (2 PyO3 functions)
+- `sqlite_accel.rs` — rusqlite batch operations: galactic distance updates, decay drift, FTS5 search with galactic weighting, zone stats, memory export (5 PyO3 functions)
+- `search.rs` — BM25 full-text search engine with fuzzy matching (5 PyO3 functions)
+- `rate_limiter.rs` — atomic sliding-window rate limiter, 1.02M ops/s (2 PyO3 functions)
+- `event_ring.rs` — LMAX Disruptor-style lock-free ring buffer, 1.11M publishes/s (5 PyO3 functions)
+- `state_board.rs` — shared-memory blackboard for Harmony Vector, circuit breakers (2 PyO3 functions)
+- **v14.5** `arrow_bridge.rs` — Apache Arrow IPC zero-copy columnar interchange. 11-field memory schema. **32× faster** decode vs json.loads. (4 PyO3 functions)
+- **v14.5** `tokio_clones.rs` — Tokio async task pool for massively parallel clone exploration. 7 strategies, JoinSet concurrency. **208× faster** than Python asyncio at 1000 clones. 500K+ clones/sec. (3 PyO3 functions)
+- **v14.5** `ipc_bridge.rs` — Iceoryx2 shared-memory IPC with graceful fallback. 4 channels (events, memories, commands, harmony). (3 PyO3 functions)
 - Python bridge: `whitemagic/optimization/rust_accelerators.py` (automatic fallback to pure Python)
-- Wired into: `galactic_map.py` (batches >100, decay_drift, zone_stats), `association_miner.py` (bulk mining), `holographic.py` (5D queries), `intelligence/hologram/encoder.py` (single + batch encoding), `core/memory/consolidation.py` (MinHash near-duplicate pre-filter)
+- Wired into: `galactic_map.py` (batches >100, decay_drift, zone_stats), `association_miner.py` (bulk mining), `holographic.py` (5D queries), `intelligence/hologram/encoder.py` (single + batch encoding), `core/memory/consolidation.py` (MinHash near-duplicate pre-filter), `tools/rate_limiter.py` (Rust atomic pre-check)
 
 ### 3. Haskell (The Spirit) — ~1.7K LOC
 **Build:** `cd haskell && cabal build` (requires `libgmp-dev`)

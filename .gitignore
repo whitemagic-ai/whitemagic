@@ -39,7 +39,20 @@
 # Archives / Internal Artifacts (Keep Local, Don't Ship)
 /_archived/
 /scripts/verification/*.txt
+/scripts/benchmark_*_results.json
+/scripts/__pycache__/
 /whitemagic-rust/check_output.txt
+/whitemagic-rust/data/
+/whitemagic-rust/logs/
+whitemagic/playground.py
+
+# Type checking / linting caches
+.mypy_cache/
+.ruff_cache/
+
+# Node (nexus / SDK)
+node_modules/
+.next/
 
 # Build Artifacts
 __pycache__/
@@ -66,6 +79,7 @@ build/
 **/target/
 whitemagic-rust/dist/
 whitemagic-rust/libwhitemagic_rs.so
+whitemagic-rust/wm-seed
 
 # Zig
 whitemagic-zig/.pixi/
@@ -73,6 +87,10 @@ whitemagic-zig/.zig-cache/
 whitemagic-zig/zig-out/
 whitemagic-zig/bin/
 whitemagic-zig/libwhitemagic.so
+
+# Julia
+whitemagic-julia/.pixi/
+whitemagic-julia/whitemagic-julia-legacy/
 
 # Mojo
 whitemagic-mojo/mojo-env/

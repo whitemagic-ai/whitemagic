@@ -255,10 +255,11 @@ class TestDreamCycle:
     def test_dream_phases_enum(self):
         from whitemagic.core.dreaming.dream_cycle import DreamPhase
         phases = list(DreamPhase)
-        assert len(phases) == 6
+        assert len(phases) == 7
         assert DreamPhase.CONSOLIDATION in phases
         assert DreamPhase.SERENDIPITY in phases
         assert DreamPhase.GOVERNANCE in phases
+        assert DreamPhase.NARRATIVE in phases
         assert DreamPhase.KAIZEN in phases
         assert DreamPhase.ORACLE in phases
         assert DreamPhase.DECAY in phases

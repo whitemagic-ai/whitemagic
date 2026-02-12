@@ -184,9 +184,36 @@ def handle_batch_read_memories(**kwargs: Any) -> dict[str, Any]:
 
 def handle_search_memories(**kwargs: Any) -> dict[str, Any]:
     from whitemagic.core.memory.unified import recall
+
+    def _flag_enabled(value: Any) -> bool:
+        """Treat only explicit bool/int values as privacy flags."""
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int):
+            return value != 0
+        return False
+
     query = kwargs.get("query", "")
     limit = kwargs.get("limit", 20)
+    include_private = kwargs.get("include_private", False)
     memories = recall(query=query, limit=limit)
+
+    # v15: Filter out private and model_exclude memories from MCP responses
+    if not include_private:
+        memories = [
+            m
+            for m in memories
+            if not _flag_enabled(getattr(m, "is_private", False))
+            and not _flag_enabled(getattr(m, "model_exclude", False))
+        ]
+
+    # Track context reuse in telemetry
+    try:
+        from whitemagic.core.monitoring.telemetry import get_telemetry
+        get_telemetry().record_context_reuse(hit=len(memories) > 0)
+    except Exception:
+        pass
+
     return {
         "status": "success",
         "count": len(memories),

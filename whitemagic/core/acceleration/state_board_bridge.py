@@ -19,7 +19,7 @@ import struct
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
-from typing import IO, Any
+from typing import IO
 
 logger = logging.getLogger(__name__)
 

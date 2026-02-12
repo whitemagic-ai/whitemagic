@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import queue
 import sqlite3
 import threading
@@ -8,6 +9,12 @@ from collections.abc import Generator
 from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
+
+try:
+    import sqlcipher3  # type: ignore[import-untyped]  # noqa: F401
+    _SQLCIPHER_AVAILABLE = True
+except ImportError:
+    _SQLCIPHER_AVAILABLE = False
 
 class ConnectionPool:
     """Thread-safe SQLite connection pool."""
@@ -20,8 +27,19 @@ class ConnectionPool:
         self._connections_created = 0
 
     def _create_connection(self) -> sqlite3.Connection:
-        """Create a new SQLite connection with best-practice settings."""
-        conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        """Create a new SQLite connection with best-practice settings.
+
+        If WM_DB_PASSPHRASE is set and sqlcipher3 is available, uses
+        SQLCipher for encryption at rest (AES-256-CBC).
+        """
+        passphrase = os.environ.get("WM_DB_PASSPHRASE", "")
+        if passphrase and _SQLCIPHER_AVAILABLE:
+            import sqlcipher3  # type: ignore[import-untyped]
+            conn = sqlcipher3.connect(self.db_path, check_same_thread=False)
+            conn.execute(f"PRAGMA key='{passphrase}'")
+            logger.debug("SQLCipher encryption active for %s", self.db_path)
+        else:
+            conn = sqlite3.connect(self.db_path, check_same_thread=False)
         # --- P6: Aggressive PRAGMA tuning (v13.3.3) ---
         # WAL mode for concurrent readers + single writer
         conn.execute("PRAGMA journal_mode=WAL")

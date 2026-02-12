@@ -2,9 +2,14 @@ include README.md
 include pyproject.toml
 include VERSION
 include LICENSE
-recursive-include whitemagic *.py *.typed
+recursive-include whitemagic *.py *.typed *.md
 recursive-exclude tests *
 recursive-exclude docs *
 recursive-exclude extra *
+recursive-exclude whitemagic-mojo *
+recursive-exclude whitemagic-rust *
+recursive-exclude whitemagic-zig *
+recursive-exclude whitemagic-go *
+recursive-exclude whitemagic-julia *
 global-exclude __pycache__
 global-exclude *.py[cod]

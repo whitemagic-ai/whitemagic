@@ -177,13 +177,16 @@ pub fn event_bus_reset() -> PyResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
+    lazy_static::lazy_static! {
+        static ref TEST_LOCK: Mutex<()> = Mutex::new(());
+    }
 
     #[test]
     fn test_dampening_allows_first_emit() {
-        EVENT_STATES.clear();
-        TOTAL_EMISSIONS.store(0, Ordering::Relaxed);
-        TOTAL_DAMPENED.store(0, Ordering::Relaxed);
-        IS_STILL.store(false, Ordering::Relaxed);
+        let _guard = TEST_LOCK.lock().unwrap();
+        event_bus_reset().unwrap();
 
         let result = event_bus_try_emit("test_event", 1.0, "test").unwrap();
         assert!(result);
@@ -192,10 +195,8 @@ mod tests {
 
     #[test]
     fn test_dampening_blocks_rapid_repeat() {
-        EVENT_STATES.clear();
-        TOTAL_EMISSIONS.store(0, Ordering::Relaxed);
-        TOTAL_DAMPENED.store(0, Ordering::Relaxed);
-        IS_STILL.store(false, Ordering::Relaxed);
+        let _guard = TEST_LOCK.lock().unwrap();
+        event_bus_reset().unwrap();
 
         // First emit passes
         assert!(event_bus_try_emit("rapid_event", 1.0, "test").unwrap());
@@ -206,8 +207,8 @@ mod tests {
 
     #[test]
     fn test_stillness_blocks_non_critical() {
-        EVENT_STATES.clear();
-        TOTAL_STILLNESS_BLOCKED.store(0, Ordering::Relaxed);
+        let _guard = TEST_LOCK.lock().unwrap();
+        event_bus_reset().unwrap();
         IS_STILL.store(true, Ordering::Relaxed);
 
         // Non-critical event should be blocked
@@ -226,9 +227,8 @@ mod tests {
 
     #[test]
     fn test_critical_events_bypass_dampening() {
-        EVENT_STATES.clear();
-        TOTAL_DAMPENED.store(0, Ordering::Relaxed);
-        IS_STILL.store(false, Ordering::Relaxed);
+        let _guard = TEST_LOCK.lock().unwrap();
+        event_bus_reset().unwrap();
 
         // First emit
         assert!(event_bus_try_emit("sympathetic_resonance", 1.0, "test").unwrap());

@@ -1,6 +1,6 @@
 # Grimoire Index - The 28-Fold Mandala
 
-**Version**: 14.0.0 "Holographic Intelligence"
+**Version**: 15.0.0 "Holographic Intelligence"
 **Structure**: 28 Chapters (Lunar Mansions)
 **Flow**: Cyclical (28 → 1 → 2 → ... → 28 → 1)
 

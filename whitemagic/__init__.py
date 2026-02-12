@@ -16,13 +16,17 @@ from pathlib import Path
 from typing import Any
 
 # Single source of truth for version:
-# 1) Installed package metadata (works for pip installs / wheels)
-# 2) Repo `VERSION` file (works for editable/source checkouts without metadata)
-try:
-    __version__ = _pkg_version("whitemagic")
-except PackageNotFoundError:
-    _version_file = Path(__file__).resolve().parent.parent / "VERSION"
-    __version__ = _version_file.read_text().strip() if _version_file.exists() else "unknown"
+# 1) Repo `VERSION` file (always fresh for source/editable checkouts)
+# 2) Installed package metadata (works for pip installs / wheels)
+# 3) "unknown" fallback
+_version_file = Path(__file__).resolve().parent.parent / "VERSION"
+if _version_file.exists():
+    __version__ = _version_file.read_text().strip()
+else:
+    try:
+        __version__ = _pkg_version("whitemagic")
+    except PackageNotFoundError:
+        __version__ = "unknown"
 
 # Lazy imports to keep base import fast.
 _LAZY_MODULES: dict[str, str] = {

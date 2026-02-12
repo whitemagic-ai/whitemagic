@@ -310,6 +310,7 @@ pub fn sqlite_export_for_mining(
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
     #[test]

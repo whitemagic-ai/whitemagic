@@ -90,7 +90,7 @@ class HolographicIntake:
     into the memory system with holographic coordinates.
     """
 
-    # Supported file types for memory ingestion
+    # Supported text file types for memory ingestion
     SUPPORTED_TYPES = {
         ".md": "markdown",
         ".txt": "text",
@@ -102,6 +102,15 @@ class HolographicIntake:
         ".js": "javascript",
         ".html": "html",
     }
+
+    @staticmethod
+    def _get_media_chain() -> Any:
+        """Lazy-load the multimodal processor chain."""
+        try:
+            from whitemagic.core.intake.media_processor import get_processor_chain
+            return get_processor_chain()
+        except Exception:
+            return None
 
     def __init__(self, config_path: Path | None = None):
         if config_path is None:
@@ -254,8 +263,11 @@ class HolographicIntake:
             if not file_path.is_file():
                 continue
 
-            # Check if supported type
-            if file_path.suffix.lower() not in self.SUPPORTED_TYPES:
+            # Check if supported type (text OR multimodal)
+            ext = file_path.suffix.lower()
+            media_chain = self._get_media_chain()
+            media_exts = media_chain.supported_extensions() if media_chain else set()
+            if ext not in self.SUPPORTED_TYPES and ext not in media_exts:
                 continue
 
             # Skip if already in queue
@@ -322,21 +334,47 @@ class HolographicIntake:
                 self._save_queue()
                 return False
 
-            # Read content
-            content = file_path.read_text(encoding="utf-8", errors="ignore")[:10000]
+            # Try multimodal processor first, then fall back to text
+            media_chain = self._get_media_chain()
+            media_result = None
+            if media_chain and file_path.suffix.lower() not in self.SUPPORTED_TYPES:
+                media_result = media_chain.process(file_path)
+
+            if media_result:
+                content = media_result.text
+                extra_tags = {media_result.media_type, "multimodal"}
+                extra_metadata = media_result.metadata
+                holo_bias = media_result.holographic_bias
+            else:
+                # Standard text file reading
+                content = file_path.read_text(encoding="utf-8", errors="ignore")[:10000]
+                extra_tags = set()
+                extra_metadata = {}
+                holo_bias = {}
 
             # Generate holographic coordinates
             encoder = CoordinateEncoder()
-            coords = encoder.encode({
+            encode_input: dict[str, Any] = {
                 "content": content,
                 "title": file_path.stem,
                 "tags": [item.file_type],
                 "memory_type": "long_term",
                 "created": item.detected_at,
-            })
+            }
+            coords = encoder.encode(encode_input)
 
             # Create memory
             memory_id = hashlib.sha256(f"{path}:{item.detected_at}".encode()).hexdigest()[:16]
+            base_tags = {item.file_type, "auto-ingested"}
+            base_tags.update(extra_tags)
+            mem_metadata: dict[str, Any] = {
+                "source_path": path,
+                "holographic_coordinates": coords,
+            }
+            mem_metadata.update(extra_metadata)
+            if holo_bias:
+                mem_metadata["holographic_bias"] = holo_bias
+
             memory = Memory(
                 id=memory_id,
                 content=content,
@@ -345,11 +383,11 @@ class HolographicIntake:
                 created_at=parse_datetime(item.detected_at.replace("Z", "+00:00")),
                 accessed_at=datetime.now(),
                 access_count=1,
-                tags={item.file_type, "auto-ingested"},
+                tags=base_tags,
                 associations={},
                 emotional_valence=0.0,
                 importance=getattr(coords, "w", 0.5),
-                metadata={"source_path": path, "holographic_coordinates": coords},
+                metadata=mem_metadata,
             )
 
             # Store in SQLite

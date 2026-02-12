@@ -13,7 +13,7 @@ Thank you for your interest in contributing to WhiteMagic! This document provide
 ## Quick Start
 
 ```bash
-git clone https://github.com/lbailey94/whitemagic.git
+git clone https://github.com/whitemagic-ai/whitemagic.git
 cd whitemagic
 python3 -m venv .venv && source .venv/bin/activate
 
@@ -52,13 +52,13 @@ python -m pytest tests -q   # Run test suite
 
 ```bash
 # Rust bridge
-cd rust && maturin develop --release && cd ..
+cd whitemagic-rust && maturin develop --release --features python && cd ..
 
 # Haskell FFI
 cd haskell && cabal build && cd ..
 
 # Mojo SIMD
-cd mojo && mojo build coordinate_encoder.mojo && cd ..
+cd whitemagic-mojo && mojo build src/coordinate_encoder.mojo && cd ..
 ```
 
 ---
@@ -109,8 +109,8 @@ pytest tests/ --cov=whitemagic --cov-report=term
 # Specific test
 pytest tests/unit/test_fusions.py -v
 
-# Smoke test (all 208 tools)
-python audit/tool_smoke.py
+# Verify install
+python -c "from whitemagic.tools.dispatch_table import DISPATCH_TABLE; print(f'{len(DISPATCH_TABLE)} tools registered')"
 ```
 
 ### Test Structure

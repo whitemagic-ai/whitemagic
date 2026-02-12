@@ -1,8 +1,8 @@
 {
   "name": "whitemagic",
   "display_name": "WhiteMagic Core",
-  "description": "Cognitive operating system for AI — persistent memory, associative recall, ethical governance, and self-awareness across sessions. 28 Gana meta-tools covering 285 capabilities.",
-  "version": "14.3.1",
+  "description": "Cognitive operating system for AI — persistent memory, associative recall, ethical governance, and self-awareness across sessions. 28 Gana meta-tools covering 311 capabilities.",
+  "version": "15.0.0",
   "protocol_version": "2025-11-25",
   "homepage": "https://github.com/whitemagic-ai/whitemagic",
   "license": "MIT",
@@ -45,7 +45,7 @@
     }
   },
   "tool_count": 28,
-  "nested_tool_count": 285,
+  "nested_tool_count": 311,
   "requirements": {
     "python": ">=3.11",
     "optional": {

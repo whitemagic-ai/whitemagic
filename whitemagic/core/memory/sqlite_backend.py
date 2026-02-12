@@ -90,6 +90,11 @@ class SQLiteBackend:
                 "galactic_distance": "REAL DEFAULT 0.0",
                 "retention_score": "REAL DEFAULT 0.5",
                 "last_retention_sweep": "TEXT",
+                "content_hash": "TEXT",  # v14.1.1: SHA-256 for dedup
+                "event_time": "TEXT",       # v14.2: bitemporal — when the fact became true
+                "ingestion_time": "TEXT",   # v14.2: bitemporal — when WM learned it
+                "is_private": "INTEGER DEFAULT 0",    # v15: exclude from MCP responses
+                "model_exclude": "INTEGER DEFAULT 0", # v15: exclude from AI context
             }
 
             for col_name, col_type in new_columns.items():
@@ -178,7 +183,19 @@ class SQLiteBackend:
                 except sqlite3.OperationalError:
                     pass
 
-            # 6. Akashic Seeds table (v5.0 Integration)
+            # 6. Constellation Membership table (v14.3 — Recall Boost)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS constellation_membership (
+                    memory_id TEXT PRIMARY KEY,
+                    constellation_name TEXT NOT NULL,
+                    membership_confidence REAL DEFAULT 1.0,
+                    updated_at TEXT,
+                    FOREIGN KEY (memory_id) REFERENCES memories(id) ON DELETE CASCADE
+                )
+            """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_constellation_name ON constellation_membership(constellation_name)")
+
+            # 7. Akashic Seeds table (v5.0 Integration)
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS akashic_seeds (
                     id TEXT PRIMARY KEY,
@@ -213,6 +230,7 @@ class SQLiteBackend:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_updated_at ON memories(updated_at)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_tags_composite ON tags(tag, memory_id)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_dharma_timestamp ON dharma_audit(timestamp)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_content_hash ON memories(content_hash)")
             # P6: Additional indexes for hot query patterns (v13.3.3)
             conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_galactic ON memories(galactic_distance)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_type ON memories(memory_type)")
@@ -226,7 +244,20 @@ class SQLiteBackend:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_assoc_direction ON associations(direction)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_assoc_strength ON associations(strength)")
 
-    def store(self, memory: Memory) -> str:
+    def find_by_content_hash(self, content_hash: str) -> str | None:
+        """Find an existing memory ID by content SHA-256 hash.
+
+        Returns the memory ID if a match is found, None otherwise.
+        Used for dedup at ingest (v14.1.1).
+        """
+        with self.pool.connection() as conn:
+            row = conn.execute(
+                "SELECT id FROM memories WHERE content_hash = ? LIMIT 1",
+                (content_hash,),
+            ).fetchone()
+            return row[0] if row else None
+
+    def store(self, memory: Memory, content_hash: str | None = None) -> str:
         """Store or update a memory."""
         with self.pool.connection() as conn:
             with conn: # Standard transaction context manager
@@ -237,8 +268,10 @@ class SQLiteBackend:
                         access_count, emotional_valence, importance,
                         neuro_score, novelty_score, recall_count, half_life_days, is_protected,
                         metadata, title,
-                        galactic_distance, retention_score, last_retention_sweep
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        galactic_distance, retention_score, last_retention_sweep,
+                        content_hash, event_time, ingestion_time,
+                        is_private, model_exclude
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     memory.id,
                     json.dumps(memory.content) if not isinstance(memory.content, str) else memory.content,
@@ -259,6 +292,11 @@ class SQLiteBackend:
                     memory.galactic_distance,
                     memory.retention_score,
                     memory.last_retention_sweep.isoformat() if memory.last_retention_sweep else None,
+                    content_hash,
+                    memory.metadata.get("event_time"),  # caller-provided or None
+                    datetime.now().isoformat(),          # always set at ingestion
+                    1 if memory.is_private else 0,
+                    1 if memory.model_exclude else 0,
                 ))
 
                 # Update Tags
@@ -340,6 +378,8 @@ class SQLiteBackend:
                 recall_count=row["recall_count"] if "recall_count" in row.keys() else 0,
                 half_life_days=row["half_life_days"] if "half_life_days" in row.keys() else 30.0,
                 is_protected=bool(row["is_protected"]) if "is_protected" in row.keys() else False,
+                is_private=bool(row["is_private"]) if "is_private" in row.keys() else False,
+                model_exclude=bool(row["model_exclude"]) if "model_exclude" in row.keys() else False,
                 galactic_distance=row["galactic_distance"] if "galactic_distance" in row.keys() else 0.0,
                 retention_score=row["retention_score"] if "retention_score" in row.keys() else 0.5,
                 last_retention_sweep=parse_datetime(row["last_retention_sweep"]) if "last_retention_sweep" in row.keys() and row["last_retention_sweep"] else None,
@@ -371,10 +411,17 @@ class SQLiteBackend:
             if query:
                 # FTS search with BM25 ranking (lower rank = better match)
                 fts_query = query.strip()
+                # Sanitize FTS5-unsafe characters (brackets, quotes, etc.)
+                for ch in '[]{}()^~*':
+                    fts_query = fts_query.replace(ch, '')
+                fts_query = fts_query.strip()
+                if not fts_query:
+                    fts_query = query.strip().replace('[', '').replace(']', '')
                 if " " in fts_query and not (fts_query.startswith('"') and fts_query.endswith('"')):
                     # Multi-word query: try as phrase OR individual keywords
-                    keywords = fts_query.split()
-                    fts_query = f'"{fts_query}" OR {" OR ".join(keywords)}'
+                    keywords = [k for k in fts_query.split() if k]
+                    if keywords:
+                        fts_query = f'"{fts_query}" OR {" OR ".join(keywords)}'
 
                 sql = """
                     SELECT m.*, fts.rank
@@ -892,6 +939,167 @@ class SQLiteBackend:
                 f"🔗 Association decay: {decayed} decayed, {pruned} pruned out of {total} evaluated",
             )
         return result
+
+    # ------------------------------------------------------------------
+    # Constellation Membership (v14.3 — Recall Boost)
+    # ------------------------------------------------------------------
+
+    def update_constellation_membership(
+        self,
+        memberships: list[tuple[str, str, float]],
+    ) -> int:
+        """Bulk-update constellation membership for memories.
+
+        Args:
+            memberships: List of (memory_id, constellation_name, confidence) tuples.
+
+        Returns:
+            Number of rows upserted.
+        """
+        if not memberships:
+            return 0
+        ts = datetime.now().isoformat()
+        with self.pool.connection() as conn:
+            with conn:
+                conn.executemany(
+                    """INSERT OR REPLACE INTO constellation_membership
+                       (memory_id, constellation_name, membership_confidence, updated_at)
+                       VALUES (?, ?, ?, ?)""",
+                    [(mid, name, conf, ts) for mid, name, conf in memberships],
+                )
+        return len(memberships)
+
+    def get_constellation_membership(self, memory_id: str) -> dict[str, Any] | None:
+        """Get the constellation membership for a single memory.
+
+        Returns dict with constellation_name, membership_confidence, or None.
+        """
+        with self.pool.connection() as conn:
+            row = conn.execute(
+                "SELECT constellation_name, membership_confidence FROM constellation_membership WHERE memory_id = ?",
+                (memory_id,),
+            ).fetchone()
+            if row:
+                return {"constellation_name": row[0], "membership_confidence": row[1]}
+        return None
+
+    def get_constellation_members(self, constellation_name: str) -> list[str]:
+        """Get all memory IDs belonging to a constellation."""
+        with self.pool.connection() as conn:
+            rows = conn.execute(
+                "SELECT memory_id FROM constellation_membership WHERE constellation_name = ?",
+                (constellation_name,),
+            ).fetchall()
+            return [r[0] for r in rows]
+
+    def prune_associations(self, min_strength: float = 0.3) -> dict[str, Any]:
+        """Delete weak association edges below min_strength threshold.
+
+        Returns:
+            Dict with pruning stats (total, pruned, remaining, db_size_delta).
+        """
+        with self.pool.connection() as conn:
+            total = conn.execute("SELECT COUNT(*) FROM associations").fetchone()[0]
+
+            # Get DB size before
+            db_path = self.pool._db_path if hasattr(self.pool, "_db_path") else None
+            size_before = 0
+            if db_path:
+                from pathlib import Path
+                p = Path(db_path)
+                size_before = p.stat().st_size if p.exists() else 0
+
+            # Count orphaned associations (referencing non-existent memories)
+            orphaned = conn.execute("""
+                SELECT COUNT(*) FROM associations
+                WHERE source_id NOT IN (SELECT id FROM memories)
+                   OR target_id NOT IN (SELECT id FROM memories)
+            """).fetchone()[0]
+
+            with conn:
+                # Delete orphaned associations
+                if orphaned > 0:
+                    conn.execute("""
+                        DELETE FROM associations
+                        WHERE source_id NOT IN (SELECT id FROM memories)
+                           OR target_id NOT IN (SELECT id FROM memories)
+                    """)
+
+                # Delete weak associations
+                cursor = conn.execute(
+                    "DELETE FROM associations WHERE strength < ?",
+                    (min_strength,),
+                )
+                weak_pruned = cursor.rowcount
+
+            remaining = conn.execute("SELECT COUNT(*) FROM associations").fetchone()[0]
+
+            # VACUUM to reclaim space
+            try:
+                conn.execute("VACUUM")
+            except Exception:
+                pass
+
+            size_after = 0
+            if db_path:
+                from pathlib import Path
+                p = Path(db_path)
+                size_after = p.stat().st_size if p.exists() else 0
+
+        result = {
+            "status": "success",
+            "total_before": total,
+            "orphaned_pruned": orphaned,
+            "weak_pruned": weak_pruned,
+            "remaining": remaining,
+            "size_before_mb": round(size_before / 1048576, 2),
+            "size_after_mb": round(size_after / 1048576, 2),
+            "size_delta_mb": round((size_before - size_after) / 1048576, 2),
+        }
+        logger.info(
+            f"✂️ Association pruning: {orphaned} orphaned + {weak_pruned} weak "
+            f"(< {min_strength}) pruned. {total} → {remaining}",
+        )
+        return result
+
+    def get_tag_stats(self) -> list[tuple[str, int]]:
+        """Get tag frequency distribution (tag, count) sorted descending."""
+        with self.pool.connection() as conn:
+            rows = conn.execute(
+                "SELECT tag, COUNT(*) as cnt FROM tags GROUP BY tag ORDER BY cnt DESC"
+            ).fetchall()
+            return [(row[0], row[1]) for row in rows]
+
+    def rename_tag(self, old_tag: str, new_tag: str) -> int:
+        """Rename a tag across all memories. Returns count of updated rows."""
+        with self.pool.connection() as conn:
+            with conn:
+                # Delete conflicts where memory already has new_tag
+                conn.execute("""
+                    DELETE FROM tags WHERE tag = ? AND memory_id IN (
+                        SELECT memory_id FROM tags WHERE tag = ?
+                    )
+                """, (old_tag, new_tag))
+                # Rename remaining
+                cursor = conn.execute(
+                    "UPDATE tags SET tag = ? WHERE tag = ?",
+                    (new_tag, old_tag),
+                )
+                count = cursor.rowcount
+                # Update FTS
+                conn.execute("""
+                    UPDATE memories_fts SET tags_text = (
+                        SELECT GROUP_CONCAT(tag, ' ') FROM tags WHERE tags.memory_id = memories_fts.id
+                    ) WHERE id IN (SELECT memory_id FROM tags WHERE tag = ?)
+                """, (new_tag,))
+                return count
+
+    def delete_tag(self, tag: str) -> int:
+        """Delete a tag from all memories. Returns count of deleted rows."""
+        with self.pool.connection() as conn:
+            with conn:
+                cursor = conn.execute("DELETE FROM tags WHERE tag = ?", (tag,))
+                return cursor.rowcount
 
     def hebbian_strengthen(self, source_id: str, target_id: str) -> None:
         """Hebbian strengthening: co-accessed memories get stronger edges.

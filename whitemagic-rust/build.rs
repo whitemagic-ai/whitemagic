@@ -1,7 +1,66 @@
 use std::env;
 use std::path::PathBuf;
+use std::process::Command;
+
+fn maybe_link_python() {
+    // Only needed when Python bindings are enabled.
+    if env::var("CARGO_FEATURE_PYTHON").is_err() {
+        return;
+    }
+
+    // Query Python's build config for libdir + ldlibrary.
+    let output = Command::new("python3")
+        .arg("-c")
+        .arg(
+            "import sysconfig; \
+print(sysconfig.get_config_var('LIBDIR') or ''); \
+print(sysconfig.get_config_var('LDLIBRARY') or '')",
+        )
+        .output();
+
+    let Ok(output) = output else {
+        println!("cargo:warning=Could not execute python3 to resolve libpython link flags");
+        return;
+    };
+    if !output.status.success() {
+        println!("cargo:warning=python3 config query failed while resolving libpython");
+        return;
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let mut lines = stdout.lines();
+    let libdir = lines.next().unwrap_or("").trim();
+    let ldlib = lines.next().unwrap_or("").trim();
+
+    if !libdir.is_empty() {
+        println!("cargo:rustc-link-search=native={}", libdir);
+    }
+
+    // Convert "libpython3.12.so" -> "python3.12" for rustc-link-lib.
+    if let Some(name) = ldlib.strip_prefix("lib") {
+        let short = name
+            .trim_end_matches(".so")
+            .trim_end_matches(".a")
+            .trim_end_matches(".dylib");
+        if !short.is_empty() {
+            println!("cargo:rustc-link-lib=dylib={short}");
+            return;
+        }
+    }
+
+    // Safe fallback for Linux dev environments.
+    println!("cargo:rustc-link-lib=dylib=python3.12");
+}
 
 fn main() {
+    let target = env::var("TARGET").unwrap_or_default();
+
+    // Skip Zig linking for WASM targets — wasm-lld doesn't support these flags
+    if target.contains("wasm32") {
+        println!("cargo:rerun-if-changed=build.rs");
+        return;
+    }
+
     let project_root = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
     // Path to the Zig static library
@@ -48,4 +107,7 @@ fn main() {
 
     // Rerun if build script changes or if the Zig library changes
     println!("cargo:rerun-if-changed=build.rs");
+
+    // Ensure libpython is linkable for Rust test binaries that include PyO3 code.
+    maybe_link_python();
 }

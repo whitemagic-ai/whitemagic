@@ -6,64 +6,156 @@ use pyo3::prelude::*;
 #[cfg(feature = "python")]
 use pyo3::wrap_pyfunction;
 
-// Core modules
+// ── WASM-only module (browser / edge runtime) ────────────────────────
+#[cfg(feature = "wasm")]
+pub mod wasm;
+
+// ── Native modules (require rayon, libc, memmap2, sysinfo, etc.) ─────
+// These do NOT compile for wasm32 targets.
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::new_without_default)]
 pub mod async_memory;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod audit;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::empty_line_after_doc_comments, clippy::implicit_saturating_sub)]
 pub mod clones;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod compression;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod consolidation;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::type_complexity, clippy::useless_vec)]
 pub mod data_lake;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod embeddings;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::unwrap_or_default)]
 pub mod event_processor;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::needless_as_bytes)]
 pub mod file_ops;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::empty_line_after_doc_comments)]
 pub mod graph;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::new_without_default)]
 pub mod harmony;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::new_without_default)]
 pub mod hologram;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::redundant_pattern_matching)]
 pub mod holographic;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::empty_line_after_doc_comments)]
 pub mod iching;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(
+    clippy::empty_line_after_doc_comments,
+    clippy::type_complexity,
+    clippy::redundant_closure
+)]
 pub mod memory_consolidation;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::new_without_default)]
 pub mod pattern_engine;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(
+    clippy::empty_line_after_doc_comments,
+    clippy::type_complexity,
+    clippy::redundant_closure
+)]
 pub mod pattern_extraction;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::type_complexity)]
 pub mod pattern_matcher;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(
+    clippy::manual_pattern_char_comparison,
+    clippy::type_complexity,
+    clippy::useless_conversion
+)]
 pub mod patterns;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod python_bindings;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::needless_range_loop)]
 pub mod search;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::needless_question_mark)]
 pub mod signature;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::new_without_default, clippy::needless_range_loop)]
 pub mod simd_inference;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod simd_search;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::type_complexity, clippy::new_without_default)]
 pub mod spatial_index;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::needless_range_loop, clippy::unwrap_or_default)]
 pub mod synthesis;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod zig_bridge;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod zig_ffi;
 
 // v12.3 Accelerators
+#[cfg(not(target_arch = "wasm32"))]
 pub mod galactic_accelerator;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod association_accelerator;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::type_complexity, clippy::new_without_default)]
 pub mod spatial_index_5d;
 
 // v13 Polyglot Expansion
+#[cfg(not(target_arch = "wasm32"))]
 pub mod rate_limiter;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod event_bus;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod holographic_encoder_5d;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::redundant_closure)]
 pub mod minhash;
 #[cfg(feature = "rusqlite")]
+#[allow(clippy::redundant_closure)]
 pub mod sqlite_accel;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod keyword_extract;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::ptr_arg)]
 pub mod retrieval_pipeline;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::collapsible_else_if)]
 pub mod shared_state;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod state_board;
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(clippy::type_complexity)]
 pub mod event_ring;
 
 // v14 — Hybrid RRF + Association Walk accelerators
+#[cfg(not(target_arch = "wasm32"))]
 pub mod hybrid_rrf;
 #[cfg(feature = "rusqlite")]
 pub mod association_walk;
+
+// v14.5 — Arrow IPC, Tokio Clone Army, Iceoryx2 IPC
+#[cfg(not(target_arch = "wasm32"))]
+pub mod arrow_bridge;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod tokio_clones;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod ipc_bridge;
 
 // Python bindings - minimal export
 #[cfg(feature = "python")]
 #[pymodule]
 fn whitemagic_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add("__version__", "14.1.0")?;
+    m.add("__version__", "14.5.0")?;
     // Audit utilities for fast parallel reads
     m.add_function(wrap_pyfunction!(audit::audit_directory, m)?)?;
     m.add_function(wrap_pyfunction!(audit::read_files_fast, m)?)?;
@@ -262,6 +354,22 @@ fn whitemagic_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
         m.add_class::<association_walk::WalkNode>()?;
         m.add_function(wrap_pyfunction!(association_walk::association_walk, m)?)?;
     }
+
+    // v14.5 — Arrow IPC Bridge (zero-copy columnar interchange)
+    m.add_function(wrap_pyfunction!(arrow_bridge::arrow_encode_memories, m)?)?;
+    m.add_function(wrap_pyfunction!(arrow_bridge::arrow_decode_memories, m)?)?;
+    m.add_function(wrap_pyfunction!(arrow_bridge::arrow_schema_info, m)?)?;
+    m.add_function(wrap_pyfunction!(arrow_bridge::arrow_roundtrip_bench, m)?)?;
+
+    // v14.5 — Tokio Clone Army (massively parallel exploration)
+    m.add_function(wrap_pyfunction!(tokio_clones::tokio_deploy_clones, m)?)?;
+    m.add_function(wrap_pyfunction!(tokio_clones::tokio_clone_bench, m)?)?;
+    m.add_function(wrap_pyfunction!(tokio_clones::tokio_clone_stats, m)?)?;
+
+    // v14.5 — Iceoryx2 IPC Bridge (cross-process zero-copy)
+    m.add_function(wrap_pyfunction!(ipc_bridge::ipc_bridge_init, m)?)?;
+    m.add_function(wrap_pyfunction!(ipc_bridge::ipc_bridge_publish, m)?)?;
+    m.add_function(wrap_pyfunction!(ipc_bridge::ipc_bridge_status, m)?)?;
 
     Ok(())
 }

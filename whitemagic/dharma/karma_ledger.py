@@ -305,10 +305,79 @@ class KarmaLedger:
             return
         try:
             ledger_file = self._storage_dir / "karma_ledger.jsonl"
+            # v14.3: Auto-rotate when file exceeds 10MB
+            self._maybe_rotate(ledger_file)
             with open(ledger_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(entry.to_dict()) + "\n")
         except Exception as e:
             logger.debug(f"Karma ledger persist failed: {e}")
+
+    def _maybe_rotate(
+        self,
+        ledger_file: Path,
+        max_bytes: int = 10 * 1024 * 1024,
+        keep_rotated: int = 3,
+    ) -> bool:
+        """Rotate the ledger file if it exceeds max_bytes (v14.3).
+
+        Renames current file to karma_ledger.1.jsonl, shifts older
+        rotations (1→2, 2→3), and deletes beyond keep_rotated.
+        Returns True if rotation occurred.
+        """
+        if not ledger_file.exists():
+            return False
+        try:
+            if ledger_file.stat().st_size < max_bytes:
+                return False
+        except OSError:
+            return False
+
+        # Shift existing rotated files
+        for i in range(keep_rotated, 0, -1):
+            src = ledger_file.parent / f"karma_ledger.{i}.jsonl"
+            if i == keep_rotated:
+                # Delete the oldest
+                if src.exists():
+                    src.unlink()
+            else:
+                dst = ledger_file.parent / f"karma_ledger.{i + 1}.jsonl"
+                if src.exists():
+                    src.rename(dst)
+
+        # Rotate current → .1
+        rotated = ledger_file.parent / "karma_ledger.1.jsonl"
+        ledger_file.rename(rotated)
+        logger.info(f"Karma ledger rotated: {ledger_file.name} → {rotated.name}")
+        return True
+
+    def rotation_stats(self) -> dict[str, Any]:
+        """Report on ledger file sizes and rotation status (v14.3)."""
+        if not self._storage_dir:
+            return {"status": "in_memory_only"}
+        ledger_file = self._storage_dir / "karma_ledger.jsonl"
+        stats: dict[str, Any] = {"current_file": str(ledger_file)}
+        try:
+            if ledger_file.exists():
+                stats["current_size_bytes"] = ledger_file.stat().st_size
+                stats["current_size_mb"] = round(stats["current_size_bytes"] / 1024 / 1024, 2)
+            else:
+                stats["current_size_bytes"] = 0
+        except OSError:
+            stats["current_size_bytes"] = 0
+
+        rotated_files = []
+        for i in range(1, 10):
+            rf = self._storage_dir / f"karma_ledger.{i}.jsonl"
+            if rf.exists():
+                rotated_files.append({
+                    "file": rf.name,
+                    "size_bytes": rf.stat().st_size,
+                })
+            else:
+                break
+        stats["rotated_files"] = rotated_files
+        stats["total_files"] = 1 + len(rotated_files)
+        return stats
 
     def _load_recent(self) -> None:
         """Load recent entries from disk on startup."""

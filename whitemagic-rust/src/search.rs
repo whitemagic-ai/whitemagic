@@ -43,7 +43,7 @@ fn tokenize(text: &str) -> Vec<String> {
 }
 
 /// Generate character n-grams for fuzzy matching.
-fn char_ngrams(term: &str, n: usize) -> HashSet<String> {
+fn _char_ngrams(term: &str, n: usize) -> HashSet<String> {
     let chars: Vec<char> = term.chars().collect();
     if chars.len() < n {
         let mut set = HashSet::new();

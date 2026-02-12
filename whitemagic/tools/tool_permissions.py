@@ -19,8 +19,11 @@ Usage:
         return result  # blocked — insufficient permissions
 """
 
+import json
 import logging
+import os
 import threading
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -68,22 +71,55 @@ _ALWAYS_ALLOWED: set[str] = {
 
 
 # ---------------------------------------------------------------------------
-# Agent role registry (in-memory, can be backed by persistent store)
+# Agent role registry — persistent via JSON file in WM_STATE_ROOT
 # ---------------------------------------------------------------------------
 
+def _rbac_path() -> Path:
+    """Resolve the persistent RBAC storage path."""
+    try:
+        from whitemagic.config.paths import get_state_root
+        return get_state_root() / "rbac_roles.json"
+    except Exception:
+        return Path(os.environ.get("WM_STATE_ROOT", Path.home() / ".whitemagic")) / "rbac_roles.json"
+
+
 class AgentRoleRegistry:
-    """Tracks which roles each agent has."""
+    """Tracks which roles each agent has. Persists to disk."""
 
     def __init__(self) -> None:
         self._agent_roles: dict[str, list[str]] = {}
         self._lock = threading.Lock()
-        # Default role for unregistered agents — coordinator gives full access
-        # Use set_roles() to restrict specific agents to observer/agent roles
         self._default_roles = ["coordinator"]
+        self._load()
+
+    def _load(self) -> None:
+        """Load persisted roles from disk."""
+        try:
+            p = _rbac_path()
+            if p.exists():
+                data = json.loads(p.read_text())
+                self._agent_roles = data.get("agent_roles", {})
+                self._default_roles = data.get("default_roles", ["coordinator"])
+                logger.debug("Loaded %d agent roles from %s", len(self._agent_roles), p)
+        except Exception as e:
+            logger.debug("Could not load RBAC roles: %s", e)
+
+    def _save(self) -> None:
+        """Persist current roles to disk."""
+        try:
+            p = _rbac_path()
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps({
+                "agent_roles": self._agent_roles,
+                "default_roles": self._default_roles,
+            }, indent=2))
+        except Exception as e:
+            logger.debug("Could not save RBAC roles: %s", e)
 
     def set_roles(self, agent_id: str, roles: list[str]) -> None:
         with self._lock:
             self._agent_roles[agent_id] = roles
+            self._save()
 
     def get_roles(self, agent_id: str) -> list[str]:
         with self._lock:
@@ -92,6 +128,7 @@ class AgentRoleRegistry:
     def set_default_roles(self, roles: list[str]) -> None:
         with self._lock:
             self._default_roles = roles
+            self._save()
 
     def list_agents(self) -> dict[str, list[str]]:
         with self._lock:

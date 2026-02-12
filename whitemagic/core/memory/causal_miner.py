@@ -250,7 +250,6 @@ class CausalMiner:
         # Get existing directed associations to avoid duplicates
         existing_directed: set[tuple[str, str]] = set()
         try:
-            import sqlite3
             with um.backend.pool.connection() as conn:
                 rows = conn.execute(
                     """SELECT source_id, target_id FROM associations

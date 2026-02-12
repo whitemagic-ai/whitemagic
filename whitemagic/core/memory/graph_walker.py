@@ -23,6 +23,7 @@ Usage:
 from __future__ import annotations
 
 import logging
+import math
 import sqlite3
 import threading
 import time
@@ -95,17 +96,19 @@ class Neighbor:
     traversal_count: int
     created_at: str | None
     last_traversed_at: str | None
+    neuro_score: float = 1.0  # Hebbian strength of target memory
 
 
 class GraphWalker:
     """Multi-hop weighted graph traversal engine.
 
     Transition probability for edge (u → v):
-        P(v|u) ∝ Strength × Gravity^α × Recency × (1 - Staleness)^β
+        P(v|u) ∝ SemanticSim^σ × Strength × FusedGravity^α × Recency × (1 - Staleness)^β
 
     Where:
+        - SemanticSim: cosine(query_embedding, neighbor_embedding) — semantic steering
         - Strength: association edge weight [0, 1]
-        - Gravity: 1 / (1 + galactic_distance_v), attracting toward CORE
+        - FusedGravity: weighted blend of galactic proximity + neuro_score + pagerank
         - Recency: 1 / (1 + days_since_edge_creation)
         - Staleness: traversal_count / max_traversals (penalize over-walked paths)
     """
@@ -114,36 +117,44 @@ class GraphWalker:
         self,
         gravity_alpha: float = 0.5,
         staleness_beta: float = 0.3,
+        semantic_sigma: float = 1.0,
         max_paths_per_hop: int = 10,
         min_edge_strength: float = 0.05,
+        gravity_weights: tuple[float, float, float] = (0.5, 0.3, 0.2),
     ) -> None:
         self._gravity_alpha = gravity_alpha
         self._staleness_beta = staleness_beta
+        self._semantic_sigma = semantic_sigma
         self._max_paths = max_paths_per_hop
         self._min_strength = min_edge_strength
+        self._gravity_weights = gravity_weights  # (galactic, neuro_score, pagerank)
         self._lock = threading.Lock()
         self._total_walks = 0
         self._total_nodes_visited = 0
+        self._pagerank_cache: dict[str, float] = {}
+        self._pagerank_cache_time: float = 0.0
 
     # ------------------------------------------------------------------
     # Neighbor loading
     # ------------------------------------------------------------------
 
     def _get_neighbors(self, memory_id: str, pool: Any) -> list[Neighbor]:
-        """Load all outgoing association edges for a memory."""
+        """Load all outgoing association edges for a memory, including target neuro_score."""
         try:
             with pool.connection() as conn:
                 conn.row_factory = sqlite3.Row
                 rows = conn.execute(
-                    """SELECT target_id, strength,
-                              COALESCE(direction, 'undirected') as direction,
-                              COALESCE(relation_type, 'associated_with') as relation_type,
-                              COALESCE(edge_type, 'semantic') as edge_type,
-                              COALESCE(traversal_count, 0) as traversal_count,
-                              created_at, last_traversed_at
-                       FROM associations
-                       WHERE source_id = ? AND strength >= ?
-                       ORDER BY strength DESC
+                    """SELECT a.target_id, a.strength,
+                              COALESCE(a.direction, 'undirected') as direction,
+                              COALESCE(a.relation_type, 'associated_with') as relation_type,
+                              COALESCE(a.edge_type, 'semantic') as edge_type,
+                              COALESCE(a.traversal_count, 0) as traversal_count,
+                              a.created_at, a.last_traversed_at,
+                              COALESCE(m.neuro_score, 1.0) as neuro_score
+                       FROM associations a
+                       LEFT JOIN memories m ON a.target_id = m.id
+                       WHERE a.source_id = ? AND a.strength >= ?
+                       ORDER BY a.strength DESC
                        LIMIT 50""",
                     (memory_id, self._min_strength),
                 ).fetchall()
@@ -157,6 +168,7 @@ class GraphWalker:
                         traversal_count=row["traversal_count"],
                         created_at=row["created_at"],
                         last_traversed_at=row["last_traversed_at"],
+                        neuro_score=row["neuro_score"],
                     )
                     for row in rows
                 ]
@@ -178,6 +190,61 @@ class GraphWalker:
             pass
         return 0.5
 
+    def _get_embedding(self, memory_id: str) -> list[float] | None:
+        """Load a cached embedding for a memory from the embedding DB."""
+        try:
+            from whitemagic.core.memory.embeddings import get_embedding_engine
+            engine = get_embedding_engine()
+            db = engine._get_db()
+            if db is None:
+                return None
+            row = db.execute(
+                "SELECT embedding FROM memory_embeddings WHERE memory_id = ?",
+                (memory_id,),
+            ).fetchone()
+            if row and row[0]:
+                from whitemagic.core.memory.embeddings import _unpack_embedding
+                return _unpack_embedding(row[0])
+        except Exception:
+            pass
+        return None
+
+    def _cosine_similarity(self, a: list[float], b: list[float]) -> float:
+        """Cosine similarity between two vectors."""
+        dot = sum(x * y for x, y in zip(a, b))
+        norm_a = math.sqrt(sum(x * x for x in a))
+        norm_b = math.sqrt(sum(x * x for x in b))
+        if norm_a == 0 or norm_b == 0:
+            return 0.0
+        return dot / (norm_a * norm_b)
+
+    def _get_pagerank(self, memory_id: str) -> float:
+        """Get cached PageRank for a memory (refreshed every 5 min)."""
+        now = time.monotonic()
+        if not self._pagerank_cache or (now - self._pagerank_cache_time) > 300:
+            try:
+                from whitemagic.core.memory.graph_engine import get_graph_engine
+                engine = get_graph_engine()
+                self._pagerank_cache = engine.pagerank()
+                self._pagerank_cache_time = now
+            except Exception:
+                pass
+        return self._pagerank_cache.get(memory_id, 0.01)
+
+    def _fused_gravity(
+        self, galactic_dist: float, neuro_score: float, memory_id: str,
+    ) -> float:
+        """Fused gravity signal: galactic proximity + neuro_score + pagerank.
+
+        Gravity = w_g × (1 - galactic_dist) + w_n × neuro_score + w_p × pagerank
+        """
+        w_g, w_n, w_p = self._gravity_weights
+        galactic_proximity = 1.0 / (1.0 + galactic_dist)
+        pagerank = self._get_pagerank(memory_id)
+        # Normalize pagerank to [0, 1] range (typical values are very small)
+        pr_normalized = min(1.0, pagerank * 100)
+        return w_g * galactic_proximity + w_n * neuro_score + w_p * pr_normalized
+
     # ------------------------------------------------------------------
     # Transition probability
     # ------------------------------------------------------------------
@@ -187,16 +254,39 @@ class GraphWalker:
         neighbor: Neighbor,
         target_galactic_dist: float,
         max_traversals: int,
+        query_embedding: list[float] | None = None,
+        neighbor_embedding: list[float] | None = None,
+        prev_created_at: str | None = None,
+        enforce_causality: bool = False,
     ) -> float:
         """Compute transition probability for an edge.
 
-        P(v|u) ∝ Strength × Gravity^α × Recency × (1 - Staleness)^β
+        P(v|u) ∝ SemanticSim^σ × Strength × FusedGravity^α × Recency × (1 - Staleness)^β
         """
+        # Causality enforcement: skip edges that go backward in time
+        if enforce_causality and prev_created_at and neighbor.created_at:
+            try:
+                prev_t = datetime.fromisoformat(prev_created_at)
+                curr_t = datetime.fromisoformat(neighbor.created_at)
+                if curr_t < prev_t:
+                    return 0.0  # Violates temporal ordering
+            except Exception:
+                pass
+
+        # Semantic similarity: steer walk toward query-relevant neighbors
+        semantic_sim = 1.0
+        if query_embedding and neighbor_embedding:
+            raw_sim = self._cosine_similarity(query_embedding, neighbor_embedding)
+            # Map from [-1, 1] to [0.1, 2.0] — never zero, reward alignment
+            semantic_sim = max(0.1, 0.5 + raw_sim * 1.5)
+
         # Strength: raw edge weight
         strength = max(0.001, neighbor.strength)
 
-        # Gravity: attract toward galactic CORE
-        gravity = 1.0 / (1.0 + target_galactic_dist)
+        # Fused gravity: galactic proximity + neuro_score + pagerank
+        gravity = self._fused_gravity(
+            target_galactic_dist, neighbor.neuro_score, neighbor.memory_id,
+        )
 
         # Recency: favor recently created edges
         recency = 1.0
@@ -214,7 +304,8 @@ class GraphWalker:
             staleness = min(1.0, neighbor.traversal_count / max(1, max_traversals))
 
         score = (
-            strength
+            (semantic_sim ** self._semantic_sigma)
+            * strength
             * (gravity ** self._gravity_alpha)
             * recency
             * ((1.0 - staleness) ** self._staleness_beta)
@@ -232,6 +323,8 @@ class GraphWalker:
         top_k: int = 5,
         allowed_relations: set[str] | None = None,
         allowed_directions: set[str] | None = None,
+        query_embedding: list[float] | None = None,
+        enforce_causality: bool = False,
     ) -> WalkResult:
         """Perform weighted random walk from seed nodes.
 
@@ -241,6 +334,10 @@ class GraphWalker:
             top_k: Return the top-K highest-scoring paths.
             allowed_relations: If set, only traverse these relation types.
             allowed_directions: If set, only traverse these directions.
+            query_embedding: If provided, steers walk toward semantically
+                relevant neighbors (cosine similarity weighting).
+            enforce_causality: If True, only traverse edges where
+                t(current) <= t(neighbor) (temporal ordering).
 
         Returns:
             WalkResult with discovered paths and nodes.
@@ -294,12 +391,31 @@ class GraphWalker:
                 if not neighbors:
                     continue
 
-                # Compute transition scores
+                # Get the created_at of the last edge for causality enforcement
+                prev_created = None
+                if enforce_causality and len(path.nodes) >= 2:
+                    # Use the current node's edge creation time from the path
+                    prev_created = self._get_edge_created_at(
+                        path.nodes[-2], current_id, pool,
+                    )
+
+                # Compute transition scores with semantic steering
                 scored: list[tuple[Neighbor, float]] = []
                 for n in neighbors:
                     gdist = self._get_galactic_distance(n.memory_id, pool)
-                    score = self._transition_score(n, gdist, max_traversals)
-                    scored.append((n, score))
+                    # Load neighbor embedding for semantic projection
+                    n_embed = None
+                    if query_embedding:
+                        n_embed = self._get_embedding(n.memory_id)
+                    score = self._transition_score(
+                        n, gdist, max_traversals,
+                        query_embedding=query_embedding,
+                        neighbor_embedding=n_embed,
+                        prev_created_at=prev_created,
+                        enforce_causality=enforce_causality,
+                    )
+                    if score > 0:
+                        scored.append((n, score))
 
                 # Normalize to probabilities
                 total_score = sum(s for _, s in scored)
@@ -360,13 +476,15 @@ class GraphWalker:
         anchor_limit: int = 5,
         walk_top_k: int = 10,
         final_limit: int = 10,
+        enforce_causality: bool = False,
     ) -> list[dict[str, Any]]:
         """Anchor search + graph walk expansion.
 
         1. Find anchor memories via hybrid search (BM25 + embedding)
-        2. Walk the association graph from anchors
-        3. Hydrate discovered memories
-        4. Return ranked results with reasoning paths
+        2. Encode query for semantic walk steering
+        3. Walk the association graph from anchors
+        4. Hydrate discovered memories
+        5. Return ranked results with reasoning paths
 
         Args:
             query: Search query text.
@@ -374,6 +492,7 @@ class GraphWalker:
             anchor_limit: Number of anchor results from initial search.
             walk_top_k: Top-K paths to keep from graph walk.
             final_limit: Maximum results to return.
+            enforce_causality: If True, enforce temporal ordering in walks.
 
         Returns:
             List of dicts with memory data + walk metadata.
@@ -394,12 +513,24 @@ class GraphWalker:
         if not anchors:
             return []
 
+        # Step 1.5: Encode query for semantic walk steering
+        query_embedding: list[float] | None = None
+        try:
+            from whitemagic.core.memory.embeddings import get_embedding_engine
+            engine = get_embedding_engine()
+            if engine.available():
+                query_embedding = engine.encode(query)
+        except Exception:
+            pass  # Graceful degradation: walk without semantic steering
+
         anchor_ids = [m.id for m in anchors]
-        # Step 2: Graph walk from anchors
+        # Step 2: Graph walk from anchors with semantic steering
         walk_result = self.walk(
             seed_ids=anchor_ids,
             hops=hops,
             top_k=walk_top_k,
+            query_embedding=query_embedding,
+            enforce_causality=enforce_causality,
         )
 
         # Step 3: Collect all discovered node IDs
@@ -478,6 +609,22 @@ class GraphWalker:
     # Helpers
     # ------------------------------------------------------------------
 
+    def _get_edge_created_at(
+        self, source_id: str, target_id: str, pool: Any,
+    ) -> str | None:
+        """Get created_at timestamp for an edge (for causality enforcement)."""
+        try:
+            with pool.connection() as conn:
+                row = conn.execute(
+                    "SELECT created_at FROM associations WHERE source_id = ? AND target_id = ?",
+                    (source_id, target_id),
+                ).fetchone()
+                if row:
+                    return str(row[0])
+        except Exception:
+            pass
+        return None
+
     def _get_max_traversals(self, pool: Any) -> int:
         """Get the maximum traversal_count for staleness normalization."""
         try:
@@ -512,7 +659,14 @@ class GraphWalker:
                 "total_nodes_visited": self._total_nodes_visited,
                 "gravity_alpha": self._gravity_alpha,
                 "staleness_beta": self._staleness_beta,
+                "semantic_sigma": self._semantic_sigma,
                 "min_edge_strength": self._min_strength,
+                "gravity_weights": list(self._gravity_weights),
+                "features": {
+                    "semantic_projection": True,
+                    "fused_gravity": True,
+                    "causality_enforcement": True,
+                },
             }
 
 

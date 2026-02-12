@@ -26,6 +26,63 @@ from whitemagic.utils.time import now_iso, override_now
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
+def _nervous_system_check(tool_name: str) -> tuple[bool, str]:
+    """Pre-dispatch check via Nervous System (StateBoard + DispatchBridge).
+
+    Checks circuit breakers and rate limits via the Zig/Python dispatch bridge.
+    Returns (allowed, reason).
+    """
+    try:
+        from whitemagic.core.acceleration.dispatch_bridge import DispatchResult, get_dispatch
+        bridge = get_dispatch()
+        # Map tool name to a generic tool_id (0-27) via hash
+        tool_id = hash(tool_name) % 28
+        result = bridge.check(tool_id)
+        if result == DispatchResult.CIRCUIT_OPEN:
+            return False, f"Circuit breaker OPEN for {tool_name}"
+        if result == DispatchResult.RATE_LIMITED:
+            return False, f"Rate limited: {tool_name}"
+        if result == DispatchResult.IMMATURE:
+            return False, f"Tool maturity gate blocked: {tool_name}"
+    except Exception:
+        pass  # Nervous system is advisory — never block on failure
+    return True, ""
+
+
+def _nervous_system_post(tool_name: str, duration: float, success: bool) -> None:
+    """Post-dispatch: sync Harmony Vector to StateBoard and publish to EventRing."""
+    # Sync Harmony Vector → StateBoard mmap
+    try:
+        from whitemagic.harmony.vector import get_harmony_vector
+        from whitemagic.core.acceleration.state_board_bridge import get_state_board
+        hv = get_harmony_vector()
+        snap = hv.snapshot()
+        board = get_state_board()
+        board.write_harmony(
+            balance=snap.balance,
+            throughput=snap.throughput,
+            latency=snap.latency,
+            error_rate=snap.error_rate,
+            dharma=snap.dharma,
+            karma_debt=snap.karma_debt,
+            energy=snap.energy,
+        )
+    except Exception:
+        pass
+    # Publish tool completion to EventRing
+    try:
+        from whitemagic.core.acceleration.event_ring_bridge import get_event_ring
+        event_type = "tool_completed" if success else "error_occurred"
+        get_event_ring().publish(
+            event_type=event_type,
+            source=tool_name,
+            confidence=1.0,
+            data=f"{duration:.3f}s".encode()[:80],
+        )
+    except Exception:
+        pass
+
+
 def _emit_gan_ying(event_type_name: str, data: dict[str, Any], source: str = "mcp") -> None:
     """Emit Gan Ying events without breaking tool flows."""
     try:
@@ -373,11 +430,29 @@ def call_tool(tool_name: str, **kwargs: Any) -> dict[str, Any]:
                 replay["side_effects"] = side_effects
                 return _finish(replay)
 
-        # Dispatch to legacy implementation.
+        # Nervous System pre-dispatch check (circuit breakers, rate limits)
+        ns_allowed, ns_reason = _nervous_system_check(canonical)
+        if not ns_allowed:
+            return _finish(err(
+                tool=canonical,
+                request_id=request_id,
+                idempotency_key=idempotency_key,
+                timestamp=ts,
+                error_code=ErrorCode.POLICY_BLOCKED,
+                message=ns_reason,
+                details={"tool": canonical, "source": "nervous_system"},
+                retryable=True,
+            ))
+
+        # Dispatch to handler.
         try:
             dispatch_kwargs = dict(kwargs)
             if dry_run:
                 dispatch_kwargs["dry_run"] = True
+            # Zig/StateBoard already validated circuit breaker, rate limit, maturity
+            # — tell the middleware pipeline to skip redundant Python checks
+            if ns_allowed:
+                dispatch_kwargs["_zig_prevalidated"] = True
             raw = _dispatch_tool(canonical, **dispatch_kwargs)
         except ImportError as exc:
             out = err(
@@ -428,6 +503,13 @@ def call_tool(tool_name: str, **kwargs: Any) -> dict[str, Any]:
             except Exception:
                 # Never fail a tool call due to idempotency persistence.
                 pass
+
+        # Nervous System post-dispatch sync
+        _nervous_system_post(
+            canonical,
+            time.time() - call_started_at,
+            out.get("status") in ("success", "ok"),
+        )
 
         return _finish(out)
 

@@ -226,8 +226,12 @@ def _compact_snapshot() -> dict[str, Any]:
     # Auto-suggest next actions based on system state
     next_actions = _auto_suggest(alerts, stage, harmony, maturity)
 
+    # ready = True when system is healthy enough for productive work
+    ready = status_line == "healthy" or (status_line == "degraded" and len(alerts) <= 2)
+
     return {
         "timestamp": datetime.now().isoformat(),
+        "ready": ready,
         "status": status_line,
         "maturity_stage": stage,
         "alert_count": len(alerts),
@@ -277,9 +281,8 @@ def _auto_suggest(
 # ---------------------------------------------------------------------------
 
 def _harmony_portal() -> dict[str, Any]:
-    from whitemagic.harmony.vector import get_harmony_vector
-    hv = get_harmony_vector()
-    snap = hv.snapshot()
+    from whitemagic.harmony.vector import read_harmony_fast
+    snap = read_harmony_fast()
     return cast("dict[str, Any]", snap.to_dict())
 
 

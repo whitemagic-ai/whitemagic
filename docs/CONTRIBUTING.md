@@ -32,7 +32,7 @@ You are encouraged to fork WhiteMagic to create specialized versions (e.g., "Red
 
 ### 1. Setup
 ```bash
-git clone https://github.com/lbailey94/whitemagic
+git clone https://github.com/whitemagic-ai/whitemagic
 cd whitemagic
 python3 -m venv .venv
 . .venv/bin/activate
@@ -69,8 +69,8 @@ export WM_DEBUG=1  # enables verbose error tracebacks
 
 ## Reporting Issues
 
-- **Bugs**: Use the [bug report template](https://github.com/lbailey94/whitemagic/issues/new?template=bug_report.yml)
-- **Features**: Use the [feature request template](https://github.com/lbailey94/whitemagic/issues/new?template=feature_request.yml)
+- **Bugs**: Use the [bug report template](https://github.com/whitemagic-ai/whitemagic/issues/new?template=bug_report.yml)
+- **Features**: Use the [feature request template](https://github.com/whitemagic-ai/whitemagic/issues/new?template=feature_request.yml)
 - **Security**: See `SECURITY.md` — do **not** use public issues for vulnerabilities.
 
 ## License

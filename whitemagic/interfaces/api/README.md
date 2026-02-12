@@ -487,5 +487,5 @@ The API layer wraps the existing WhiteMagic core library without modifying it.
 ## Support
 
 - **Documentation**: Full API docs at `/docs` endpoint
-- **Issues**: <https://github.com/lbailey94/whitemagic/issues>
+- **Issues**: <https://github.com/whitemagic-ai/whitemagic/issues>
 - **Email**: <support@whitemagic.dev> (coming soon)

@@ -138,4 +138,59 @@ ToolDefinition(
         "required": ["profile"],
     },
 ),
+# --- Karma XRPL Anchoring (Phase 4B2) ---
+ToolDefinition(
+    name="karma.anchor",
+    description=(
+        "Compute the current Karma Ledger Merkle root and optionally submit it "
+        "to the XRP Ledger as a tamper-evident timestamp proof. With submit=false "
+        "(default), returns a local snapshot only. With submit=true, sends a 0-drop "
+        "self-payment with the root in the Memo field to XRPL testnet or mainnet."
+    ),
+    category=ToolCategory.DHARMA,
+    safety=ToolSafety.WRITE,
+    input_schema={
+        "type": "object",
+        "properties": {
+            "submit": {"type": "boolean", "default": False, "description": "If true, submit to XRPL"},
+            "network": {"type": "string", "enum": ["testnet", "mainnet"], "default": "testnet"},
+            "wallet_seed": {"type": "string", "description": "XRPL wallet seed (optional, uses saved seed if omitted)"},
+        },
+    },
+    gana="HairyHead", garden="dharma", quadrant="eastern", element="fire",
+),
+ToolDefinition(
+    name="karma.verify_anchor",
+    description=(
+        "Verify a karma anchor transaction on the XRP Ledger. Retrieves the "
+        "transaction memo and compares the on-chain Merkle root against the "
+        "current local root (or a provided expected root)."
+    ),
+    category=ToolCategory.DHARMA,
+    safety=ToolSafety.READ,
+    input_schema={
+        "type": "object",
+        "properties": {
+            "tx_hash": {"type": "string", "description": "XRPL transaction hash to verify"},
+            "expected_merkle_root": {"type": "string", "description": "Root to compare against (optional)"},
+            "network": {"type": "string", "enum": ["testnet", "mainnet"], "default": "testnet"},
+        },
+        "required": ["tx_hash"],
+    },
+    gana="HairyHead", garden="dharma", quadrant="eastern", element="fire",
+),
+ToolDefinition(
+    name="karma.anchor_status",
+    description=(
+        "Get the current karma anchor system status — XRPL availability, "
+        "wallet configuration, total anchors submitted, and the latest anchor details."
+    ),
+    category=ToolCategory.DHARMA,
+    safety=ToolSafety.READ,
+    input_schema={
+        "type": "object",
+        "properties": {},
+    },
+    gana="HairyHead", garden="dharma", quadrant="eastern", element="fire",
+),
 ]

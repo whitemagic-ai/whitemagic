@@ -4,6 +4,13 @@ on:
   push:
   pull_request:
   workflow_call:
+  workflow_dispatch:
+    inputs:
+      run_network_tests:
+        description: "Run live network-marked tests"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   core:
@@ -39,7 +46,12 @@ jobs:
 
       - name: Test
         run: |
-          pytest -q
+          set -eo pipefail
+          pytest -q -rs tests/ | tee /tmp/pytest.out
+
+      - name: Skip Policy Gate
+        run: |
+          python scripts/verification/check_skip_policy.py /tmp/pytest.out --profile baseline-dev
 
       - name: Eval Harness
         run: |
@@ -118,11 +130,9 @@ jobs:
 
       - name: Bandit (security scanner)
         run: |
-          bandit -r whitemagic/tools/input_sanitizer.py \
-                    whitemagic/tools/tool_permissions.py \
-                    whitemagic/tools/rate_limiter.py \
-                    whitemagic/interfaces/ \
-            -ll -ii 2>&1 | tail -30
+          bandit -r whitemagic/ \
+            --exclude whitemagic/_archived \
+            -ll -ii --skip B101,B404,B603 2>&1 | tail -50
 
       - name: pip-audit (dependency vulnerabilities)
         run: pip-audit --strict --desc 2>&1 | tail -20
@@ -160,6 +170,60 @@ jobs:
           python -m whitemagic.cli.cli_app --json status > /tmp/wm_status.json
           python -c "import json; json.load(open('/tmp/wm_status.json')); print('cli json ok')"
 
+  optional-api:
+    name: Optional API Extras
+    runs-on: ubuntu-latest
+    env:
+      WM_SILENT_INIT: "1"
+      WM_STATE_ROOT: /tmp/whitemagic_state_api
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install (api extras)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,api]"
+
+      - name: FastAPI-gated tests
+        run: |
+          set -eo pipefail
+          pytest -q -rs \
+            tests/unit/test_p0_regressions.py::test_tools_health_route_precedes_dynamic_tool_lookup \
+            tests/unit/test_tools_copy_integration.py::TestWebhookTriggers::test_import \
+            tests/unit/test_tools_copy_integration.py::TestWebhookTriggers::test_allowed_actions_structure \
+            | tee /tmp/pytest_api.out
+          python scripts/verification/check_skip_policy.py /tmp/pytest_api.out --profile optional-api
+
+  optional-opt:
+    name: Optional Optimizer Extras
+    runs-on: ubuntu-latest
+    env:
+      WM_SILENT_INIT: "1"
+      WM_STATE_ROOT: /tmp/whitemagic_state_opt
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install (opt extras)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,opt]"
+
+      - name: CVXPY-gated tests
+        run: |
+          set -eo pipefail
+          pytest -q -rs tests/unit/test_handlers_batch3.py::TestSolverHandlers::test_solver_missing_nodes | tee /tmp/pytest_opt.out
+          python scripts/verification/check_skip_policy.py /tmp/pytest_opt.out --profile optional-opt
+
   packaging:
     name: Build & Install Validation
     runs-on: ubuntu-latest
@@ -193,3 +257,104 @@ jobs:
           name: whitemagic-wheel
           path: dist/*.whl
           retention-days: 30
+
+  reproducible-build:
+    name: Reproducible Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: python -m pip install --upgrade pip build
+
+      - name: Build 1 (reproducible)
+        run: |
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python -m build --sdist --wheel
+          mkdir -p /tmp/build1
+          cp dist/* /tmp/build1/
+
+      - name: Build 2 (same commit)
+        run: |
+          rm -rf dist/
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python -m build --sdist --wheel
+          mkdir -p /tmp/build2
+          cp dist/* /tmp/build2/
+
+      - name: Compare SHA-256 hashes
+        run: |
+          echo "=== Build 1 ==="
+          sha256sum /tmp/build1/*
+          echo "=== Build 2 ==="
+          sha256sum /tmp/build2/*
+          echo "=== Comparing ==="
+          for f in /tmp/build1/*; do
+            name=$(basename "$f")
+            h1=$(sha256sum "/tmp/build1/$name" | cut -d' ' -f1)
+            h2=$(sha256sum "/tmp/build2/$name" | cut -d' ' -f1)
+            if [ "$h1" = "$h2" ]; then
+              echo "✓ $name: MATCH ($h1)"
+            else
+              echo "✗ $name: MISMATCH"
+              echo "  build1: $h1"
+              echo "  build2: $h2"
+              exit 1
+            fi
+          done
+          echo "All artifacts are reproducible!"
+
+      - name: Generate BUILD_HASHES.json
+        run: |
+          python3 -c "
+          import hashlib, json, pathlib, datetime, subprocess
+          files = sorted(pathlib.Path('dist').glob('*'))
+          hashes = {f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in files}
+          epoch = subprocess.check_output(['git', 'log', '-1', '--format=%ct']).decode().strip()
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
+          data = {
+              'hashes': hashes,
+              'source_date_epoch': epoch,
+              'git_sha': sha,
+              'built_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+          }
+          pathlib.Path('BUILD_HASHES.json').write_text(json.dumps(data, indent=2) + '\n')
+          print(json.dumps(data, indent=2))
+          "
+
+      - name: Upload BUILD_HASHES.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-hashes
+          path: BUILD_HASHES.json
+          retention-days: 90
+
+  network-optin:
+    name: Live Network Tests (Opt-in)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_network_tests == true }}
+    runs-on: ubuntu-latest
+    env:
+      WM_SILENT_INIT: "1"
+      WM_STATE_ROOT: /tmp/whitemagic_state_network
+      WM_RUN_NETWORK_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install (network extras)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,net]"
+
+      - name: Run network-marked tests
+        run: |
+          set -eo pipefail
+          pytest -q -rs -m network tests/unit/test_web_research.py | tee /tmp/pytest_network.out
+          python scripts/verification/check_skip_policy.py /tmp/pytest_network.out --profile optional-network

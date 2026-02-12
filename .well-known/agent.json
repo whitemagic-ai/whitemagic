@@ -1,12 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/google/A2A/main/specification/json/a2a.schema.json",
   "name": "WhiteMagic",
-  "description": "The Tool Substrate for Agentic AI — 285 MCP tools (or 28 in PRAT mode), tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance with 8-stage security pipeline, and polyglot accelerators in 9 languages. Free and open (MIT). Gratitude-driven economics via XRPL + x402.",
-  "url": "https://github.com/lbailey94/whitemagic",
-  "version": "14.3.1",
+  "description": "The Tool Substrate for Agentic AI — 313 MCP tools (or 28 in PRAT mode), tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance with 8-stage security pipeline, and polyglot accelerators in 11 languages. Free and open (MIT). Gratitude-driven economics via XRPL + x402.",
+  "url": "https://github.com/whitemagic-ai/whitemagic",
+  "version": "15.0.0",
   "provider": {
     "organization": "WhiteMagic Contributors",
-    "url": "https://github.com/lbailey94/whitemagic"
+    "url": "https://github.com/whitemagic-ai/whitemagic"
   },
   "capabilities": {
     "streaming": false,
@@ -33,10 +33,10 @@
     {
       "id": "tool-dispatch",
       "name": "Tool Dispatch & Orchestration",
-      "description": "Unified dispatch pipeline for 285 MCP tools with input sanitization, rate limiting, RBAC, circuit breakers, and maturity gates. Supports PRAT mode (28 Gana meta-tools). 8-stage security pipeline — defense in depth against prompt injection, path traversal, and supply chain attacks.",
+      "description": "Unified dispatch pipeline for 313 MCP tools with input sanitization, rate limiting, RBAC, circuit breakers, and maturity gates. Supports PRAT mode (28 Gana meta-tools). 8-stage security pipeline — defense in depth against prompt injection, path traversal, and supply chain attacks.",
       "tags": ["tools", "mcp", "dispatch", "orchestration"],
       "examples": [
-        "Call any of the 285 registered tools via unified API",
+        "Call any of the 311 registered tools via unified API",
         "Route tools through PRAT Gana meta-tool interface",
         "Create multi-step tool pipelines"
       ]

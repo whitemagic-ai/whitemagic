@@ -26,7 +26,7 @@ use std::sync::Once;
 const MAGIC: u64 = 0x574D_5348_4152_4544; // "WMSHARED"
 const VERSION: u64 = 1;
 const FILE_SIZE: usize = 16384; // 16KB
-const HEADER_SIZE: usize = 64;
+const _HEADER_SIZE: usize = 64;
 
 /// Global counters offset in the mmap
 const OFF_TOTAL_CHECKS: usize = 16;

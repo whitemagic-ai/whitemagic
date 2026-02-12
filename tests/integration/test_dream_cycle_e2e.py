@@ -220,12 +220,12 @@ class TestDreamCycleE2E:
         dc = DreamCycle(idle_threshold_seconds=0.01, cycle_interval_seconds=0.01)
 
         reports: List[DreamReport] = []
-        for i in range(6):
+        for i in range(7):
             dc._run_phase()
             reports.append(dc._history[-1])
 
-        assert dc._total_cycles == 6
-        assert len(dc._history) == 6
+        assert dc._total_cycles == 7
+        assert len(dc._history) == 7
 
         # Verify each phase was visited exactly once
         phases_seen = [r.phase for r in reports]
@@ -233,6 +233,7 @@ class TestDreamCycleE2E:
             DreamPhase.CONSOLIDATION,
             DreamPhase.SERENDIPITY,
             DreamPhase.GOVERNANCE,
+            DreamPhase.NARRATIVE,
             DreamPhase.KAIZEN,
             DreamPhase.ORACLE,
             DreamPhase.DECAY,
@@ -244,16 +245,16 @@ class TestDreamCycleE2E:
             assert r.duration_ms >= 0
             assert isinstance(r.details, dict)
             d = r.to_dict()
-            assert d["phase"] in ("consolidation", "serendipity", "governance", "kaizen", "oracle", "decay")
+            assert d["phase"] in ("consolidation", "serendipity", "governance", "narrative", "kaizen", "oracle", "decay")
 
     def test_phase_rotation_wraps_around(self):
-        """After 6 phases, phase 7 should be CONSOLIDATION again."""
+        """After 7 phases, phase 8 should be CONSOLIDATION again."""
         dc = DreamCycle()
-        for _ in range(7):
+        for _ in range(8):
             dc._run_phase()
 
-        assert dc._total_cycles == 7
-        # Phase 7 (index 6) should wrap to CONSOLIDATION (index 0)
+        assert dc._total_cycles == 8
+        # Phase 8 (index 7) should wrap to CONSOLIDATION (index 0)
         assert dc._history[-1].phase == DreamPhase.CONSOLIDATION
 
     def test_status_reflects_history(self):

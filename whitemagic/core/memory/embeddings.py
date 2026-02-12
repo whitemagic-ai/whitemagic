@@ -726,6 +726,50 @@ class EmbeddingEngine:
             max_pairs=max_results,
         )
 
+    def closest_constellation(
+        self, query: str, max_results: int = 3,
+    ) -> list[dict[str, Any]]:
+        """Find the constellation(s) closest to a query using embedding centroids.
+
+        Encodes the query, then computes cosine similarity against each
+        constellation's centroid embedding (derived from dominant tags).
+
+        Returns list of {name, similarity, dominant_tags, size, zone} sorted
+        by similarity descending. Empty list if no constellations or no model.
+        """
+        query_vec = self.encode(query)
+        if query_vec is None:
+            return []
+
+        try:
+            from whitemagic.core.memory.constellations import get_constellation_detector
+            detector = get_constellation_detector()
+            centroids = detector.get_constellation_centroids()
+            if not centroids:
+                return []
+
+            # Encode each constellation's identity text (dominant tags)
+            results = []
+            for c in centroids:
+                tag_text = " ".join(c["dominant_tags"]) if c["dominant_tags"] else c["name"]
+                tag_vec = self.encode(tag_text)
+                if tag_vec is None:
+                    continue
+                sim = _cosine_similarity(query_vec, tag_vec)
+                results.append({
+                    "name": c["name"],
+                    "similarity": round(sim, 4),
+                    "dominant_tags": c["dominant_tags"],
+                    "size": c["size"],
+                    "zone": c["zone"],
+                })
+
+            results.sort(key=lambda r: r["similarity"], reverse=True)
+            return results[:max_results]
+
+        except Exception:
+            return []
+
     def embedding_stats(self) -> dict[str, Any]:
         """Get stats about the embedding cache (hot + cold)."""
         db = self._get_db()

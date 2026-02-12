@@ -19,5 +19,9 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // This rule is too aggressive for our async polling/data-fetch effects.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

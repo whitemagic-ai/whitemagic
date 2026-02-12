@@ -327,6 +327,29 @@ def build_resonance_context(gana_name: str) -> dict[str, Any]:
             f"this Gana is amplified"
         )
 
+    # Gana vitality / reputation (12.108.20 — honor competence)
+    try:
+        from whitemagic.tools.gana_vitality import get_vitality_monitor
+        monitor = get_vitality_monitor()
+        rep = monitor.get_reputation(gana_name)
+        ctx["gana_reputation"] = {
+            "success_rate": rep["success_rate"],
+            "avg_latency_ms": rep["avg_latency_ms"],
+            "vitality": rep["vitality"],
+            "total_calls": rep["total_calls"],
+            "consecutive_failures": rep["consecutive_failures"],
+        }
+        # If degraded, add warning (12.108.29 — silence = defeat)
+        if rep["vitality"] in ("degraded", "struggling"):
+            ctx["vitality_warning"] = (
+                f"{gana_name} vitality is {rep['vitality']} "
+                f"(success_rate={rep['success_rate']:.0%}, "
+                f"consecutive_failures={rep['consecutive_failures']}). "
+                f"Consider routing to a peer Gana."
+            )
+    except Exception:
+        pass
+
     return ctx
 
 

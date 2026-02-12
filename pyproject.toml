@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "whitemagic"
-version = "14.3.1"
-description = "The Tool Substrate for Agentic AI — 285 MCP tools (28 PRAT Ganas), tiered memory, ethical governance, polyglot accelerators"
+version = "15.0.0"
+description = "The Tool Substrate for Agentic AI — 311 MCP tools (28 PRAT Ganas), tiered memory, ethical governance, polyglot accelerators"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = {text = "MIT"}
 authors = [
     {name = "WhiteMagic Contributors"}
 ]
@@ -34,11 +34,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/lbailey94/whitemagic"
-Documentation = "https://github.com/lbailey94/whitemagic/blob/main/docs/QUICKSTART.md"
-Repository = "https://github.com/lbailey94/whitemagic"
-Changelog = "https://github.com/lbailey94/whitemagic/blob/main/CHANGELOG.md"
-Issues = "https://github.com/lbailey94/whitemagic/issues"
+Homepage = "https://github.com/whitemagic-ai/whitemagic"
+Documentation = "https://github.com/whitemagic-ai/whitemagic/blob/main/docs/QUICKSTART.md"
+Repository = "https://github.com/whitemagic-ai/whitemagic"
+Changelog = "https://github.com/whitemagic-ai/whitemagic/blob/main/CHANGELOG.md"
+Issues = "https://github.com/whitemagic-ai/whitemagic/issues"
 
 [project.optional-dependencies]
 # === MODULAR INSTALLATION OPTIONS ===
@@ -98,6 +98,11 @@ db = [
     "alembic>=1.13.0",
 ]
 
+# Encryption at rest (optional — SQLCipher for encrypted memory DBs)
+encrypt = [
+    "sqlcipher3>=0.5.0",
+]
+
 # Caching & rate limiting (optional)
 cache = [
     "redis>=5.0.1",
@@ -122,6 +127,12 @@ openai = [
 # Authentication helpers (optional)
 auth = [
     "passlib[bcrypt]>=1.7.4",
+]
+
+# Cryptographic trust (XRPL anchoring, Ed25519 signing)
+trust = [
+    "xrpl-py>=3.0.0",
+    "PyNaCl>=1.5.0",
 ]
 
 # Numerical / optimization extras (optional)
@@ -247,7 +258,7 @@ wm = "whitemagic.cli.cli_app:main"
 whitemagic = "whitemagic.cli.cli_app:main"
 
 [tool.setuptools]
-packages = {find = {where = ["."], include = ["whitemagic*"]}}
+packages = {find = {where = ["."], include = ["whitemagic", "whitemagic.*"], exclude = ["whitemagic-mojo", "whitemagic-mojo.*", "whitemagic-rust", "whitemagic-rust.*", "whitemagic-zig", "whitemagic-zig.*", "whitemagic-go", "whitemagic-go.*", "whitemagic-julia", "whitemagic-julia.*"]}}
 
 [tool.setuptools.package-data]
 whitemagic = ["py.typed"]
@@ -280,6 +291,7 @@ markers = [
     "security: marks tests as security-related",
     "slow: marks tests that take >5s (e.g. full DB sweeps, 107K memory loads)",
     "db: marks tests that require a real populated database",
+    "network: marks tests that require outbound network access",
 ]
 
 [tool.mypy]

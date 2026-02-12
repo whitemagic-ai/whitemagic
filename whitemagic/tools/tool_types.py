@@ -29,6 +29,8 @@ class ToolCategory(str, Enum):
     TASK = "task"
     VOTING = "voting"
     AGENT = "agent"
+    GOVERNANCE = "governance"
+    SECURITY = "security"
 
 
 class ToolSafety(str, Enum):

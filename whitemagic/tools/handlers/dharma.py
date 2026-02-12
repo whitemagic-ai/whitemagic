@@ -72,3 +72,47 @@ def handle_set_dharma_profile(**kwargs: Any) -> dict[str, Any]:
         "message": f"Dharma profile set to: {profile}",
         "active_profile": engine.get_profile(),
     }
+
+
+# ---------------------------------------------------------------------------
+# Karma XRPL Anchoring (Phase 4B2)
+# ---------------------------------------------------------------------------
+
+
+def handle_karma_anchor(**kwargs: Any) -> dict[str, Any]:
+    """Compute and optionally submit a karma Merkle root anchor to XRPL."""
+    from whitemagic.dharma.karma_anchor import compute_anchor, submit_anchor
+
+    submit = kwargs.get("submit", False)
+    network = kwargs.get("network", "testnet")
+    wallet_seed = kwargs.get("wallet_seed", None)
+
+    snapshot = compute_anchor()
+    if not submit:
+        return {"status": "success", "action": "snapshot_only", **snapshot}
+
+    result = submit_anchor(
+        merkle_root=snapshot.get("merkle_root"),
+        wallet_seed=wallet_seed,
+        network=network,
+    )
+    return {"status": "success", "action": "submitted", "snapshot": snapshot, **result}
+
+
+def handle_karma_verify_anchor(**kwargs: Any) -> dict[str, Any]:
+    """Verify a karma anchor transaction on the XRP Ledger."""
+    from whitemagic.dharma.karma_anchor import verify_anchor
+
+    tx_hash = kwargs.get("tx_hash", "")
+    if not tx_hash:
+        return {"status": "error", "reason": "tx_hash is required"}
+
+    expected_root = kwargs.get("expected_merkle_root", None)
+    network = kwargs.get("network", "testnet")
+    return verify_anchor(tx_hash, expected_root, network)
+
+
+def handle_karma_anchor_status(**kwargs: Any) -> dict[str, Any]:
+    """Get the current karma anchor system status."""
+    from whitemagic.dharma.karma_anchor import anchor_status
+    return {"status": "success", **anchor_status()}

@@ -1,11 +1,11 @@
 # WhiteMagic
 
-> The Tool Substrate for Agentic AI — 208 MCP tools, tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance, and polyglot accelerators in 9 languages.
+> The Tool Substrate for Agentic AI — 341 MCP tools, tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance, and polyglot accelerators in 11 languages.
 
 ## Overview
 
 WhiteMagic is a high-performance memory and tool infrastructure for AI agents. It provides:
-- 208 MCP tools (or 28 PRAT Gana meta-tools) via unified dispatch
+- 341 MCP tools (or 28 PRAT Gana meta-tools) via unified dispatch
 - Tiered memory with SQLite backing, 5D holographic coordinates (XYZWV), Galactic Map lifecycle
 - Ethical governance: Dharma Rules Engine, Karma Ledger, Harmony Vector, Homeostatic Loop
 - Polyglot accelerators: Rust (PyO3), Zig (SIMD), Haskell (FFI), Elixir (OTP), Mojo, Go, Julia, TypeScript
@@ -47,7 +47,7 @@ call_tool("gnosis", compact=True)
 # PRAT mode — 28 Gana meta-tools (recommended)
 WM_MCP_PRAT=1 python -m whitemagic.run_mcp
 
-# Classic mode — all 208 tools
+# Classic mode — all 341 tools
 python -m whitemagic.run_mcp
 ```
 
@@ -120,7 +120,7 @@ Free and open (MIT). Gratitude-driven economics:
 - Proof of Gratitude via on-chain verification
 - All funds support Whitemagic Labs (MandalaOS, core development, micro-bounties)
 
-See docs/ECONOMIC_STRATEGY.md for full details.
+Gratitude-driven: free by default, tip if grateful. XRPL + x402 dual channel.
 
 ## Agent Discovery
 
@@ -139,6 +139,6 @@ See docs/ECONOMIC_STRATEGY.md for full details.
 
 ## Links
 
-- Repository: https://github.com/lbailey94/whitemagic
-- Issues: https://github.com/lbailey94/whitemagic/issues
+- Repository: https://github.com/whitemagic-ai/whitemagic
+- Issues: https://github.com/whitemagic-ai/whitemagic/issues
 - License: MIT

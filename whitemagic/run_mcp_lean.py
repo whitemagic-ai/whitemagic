@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # mypy: disable-error-code=no-untyped-def
 """
-WhiteMagic MCP Server — Lean Edition (v14.1)
+WhiteMagic MCP Server — Lean Edition (v15.0)
 ==============================================
 Uses the standard mcp SDK directly (no FastMCP overhead).
 Registers 28 PRAT Gana meta-tools.  All heavy imports are
@@ -20,6 +20,7 @@ import asyncio
 import json
 import logging
 import sys
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -37,14 +38,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger("wm_mcp")
 
-# ── Standard MCP SDK imports ─────────────────────────────────────────
-from mcp.server import Server
-import mcp.types as types
-from mcp.shared.message import SessionMessage
+# ── Standard MCP SDK imports (after sys.path setup) ──────────────────
+from mcp.server import Server  # noqa: E402
+import mcp.types as types  # noqa: E402
+from mcp.shared.message import SessionMessage  # noqa: E402
 
 # ── Version ──────────────────────────────────────────────────────────
 _VERSION_FILE = CORE_SYSTEM_DIR / "VERSION"
-_VERSION = _VERSION_FILE.read_text().strip() if _VERSION_FILE.exists() else "14.0.0"
+_VERSION = _VERSION_FILE.read_text().strip() if _VERSION_FILE.exists() else "15.0.0"
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -52,6 +53,7 @@ _VERSION = _VERSION_FILE.read_text().strip() if _VERSION_FILE.exists() else "14.
 # ══════════════════════════════════════════════════════════════════════
 
 _INITIALISED = False
+_INIT_LOCK = threading.Lock()
 
 
 def _ensure_init() -> None:
@@ -59,23 +61,26 @@ def _ensure_init() -> None:
     global _INITIALISED
     if _INITIALISED:
         return
-    _INITIALISED = True
-    logger.info("Lazy-initialising WhiteMagic subsystems …")
-    try:
-        from importlib.util import find_spec
-        if find_spec("whitemagic_rs") is not None:
-            logger.info("Rust bridge available")
-    except Exception:
-        pass
+    with _INIT_LOCK:
+        if _INITIALISED:
+            return
+        logger.info("Lazy-initialising WhiteMagic subsystems …")
+        try:
+            from importlib.util import find_spec
+            if find_spec("whitemagic_rs") is not None:
+                logger.info("Rust bridge available")
+        except Exception:
+            pass
 
-    # Auto-load Gana Forge extensions (12.108.17 — declarative śāstra)
-    try:
-        from whitemagic.tools.gana_forge import load_extensions
-        ext_result = load_extensions()
-        if ext_result.get("loaded", 0) > 0:
-            logger.info("Forge: loaded %d extension tool(s)", ext_result["loaded"])
-    except Exception:
-        pass
+        # Auto-load Gana Forge extensions (12.108.17 — declarative śāstra)
+        try:
+            from whitemagic.tools.gana_forge import load_extensions
+            ext_result = load_extensions()
+            if ext_result.get("loaded", 0) > 0:
+                logger.info("Forge: loaded %d extension tool(s)", ext_result["loaded"])
+        except Exception:
+            pass
+        _INITIALISED = True
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -142,7 +147,7 @@ _GANA_SHORT_DESC: dict[str, str] = {
     "gana_straddling_legs": "Ethics & balance — ethics eval, boundaries, consent, harmony vector",
     "gana_mound": "Metrics & caching — hologram view, metric tracking, yin-yang balance",
     "gana_stomach": "Digestion & tasks — pipeline, task distribute/status/route",
-    "gana_hairy_head": "Detail & debug — salience, anomaly, otel, karma report/trace, dharma rules",
+    "gana_hairy_head": "Detail & debug — salience, anomaly, otel, karma report/trace, dharma rules, karma XRPL anchoring",
     "gana_net": "Capture & filtering — prompt render/list/reload, karma verify",
     "gana_turtle_beak": "Precision — edge/bitnet inference, edge batch, stats",
     "gana_three_stars": "Judgment & synthesis — bicameral reasoning, ensemble, optimization, kaizen, sabha convene/status",
@@ -160,28 +165,28 @@ _GANA_TOOLS: dict[str, list[str]] = {
     "gana_horn": ["checkpoint_session", "create_session", "resume_session", "session_bootstrap", "session_status", "focus_session"],
     "gana_neck": ["create_memory", "delete_memory", "import_memories", "update_memory", "thought_clone"],
     "gana_root": ["health_report", "rust_audit", "rust_compress", "rust_similarity", "rust_status", "ship.check", "state.paths", "state.summary"],
-    "gana_room": ["immune_heal", "immune_scan", "mcp_integrity.snapshot", "mcp_integrity.status", "mcp_integrity.verify", "sandbox.set_limits", "sandbox.status", "sandbox.violations", "sangha_lock", "security.alerts", "security.monitor_status"],
+    "gana_room": ["hermit.assess", "hermit.check_access", "hermit.mediate", "hermit.resolve", "hermit.status", "hermit.verify_ledger", "hermit.withdraw", "immune_heal", "immune_scan", "mcp_integrity.snapshot", "mcp_integrity.status", "mcp_integrity.verify", "sandbox.set_limits", "sandbox.status", "sandbox.violations", "sangha_lock", "security.alerts", "security.monitor_status"],
     "gana_heart": ["analyze_scratchpad", "context.pack", "context.status", "scratchpad", "scratchpad_create", "scratchpad_finalize", "scratchpad_update", "session.handoff"],
     "gana_tail": ["execute_cascade", "list_cascade_patterns", "simd.batch", "simd.cosine", "simd.status"],
-    "gana_winnowing_basket": ["batch_read_memories", "fast_read_memory", "graph_walk", "hybrid_recall", "list_memories", "read_memory", "search_memories", "vector.index", "vector.search", "vector.status"],
+    "gana_winnowing_basket": ["batch_read_memories", "fast_read_memory", "graph_walk", "hybrid_recall", "jit_research", "jit_research.stats", "list_memories", "read_memory", "search_memories", "vector.index", "vector.search", "vector.status"],
     "gana_ghost": ["capabilities", "capability.matrix", "capability.status", "capability.suggest", "drive.event", "drive.snapshot", "explain_this", "get_telemetry_summary", "gnosis", "graph_topology", "manifest", "repo.summary", "selfmodel.alerts", "selfmodel.forecast", "surprise_stats", "watcher_add", "watcher_list", "watcher_recent_events", "watcher_status", "web_fetch", "web_search", "web_search_and_read", "research_topic", "browser_navigate", "browser_click", "browser_type", "browser_extract_dom", "browser_screenshot", "browser_get_interactables", "browser_session_status"],
     "gana_willow": ["cast_oracle", "grimoire_auto_status", "grimoire_cast", "grimoire_list", "grimoire_read", "grimoire_recommend", "grimoire_suggest", "grimoire_walkthrough", "rate_limiter.stats"],
     "gana_star": ["dharma.reload", "forge.reload", "forge.status", "forge.validate", "governor_check_budget", "governor_check_dharma", "governor_check_drift", "governor_set_goal", "governor_stats", "governor_validate", "governor_validate_path", "set_dharma_profile"],
     "gana_extended_net": ["cluster_stats", "coherence_boost", "learning.patterns", "learning.status", "learning.suggest", "pattern_search", "resonance_trace", "tool.graph", "tool.graph_full"],
     "gana_wings": ["audit.export", "export_memories", "mesh.broadcast", "mesh.status"],
     "gana_chariot": ["archaeology", "archaeology_daily_digest", "archaeology_search", "archaeology_stats", "kg.extract", "kg.query", "kg.status", "kg.top", "windsurf_list_conversations", "windsurf_search_conversations"],
-    "gana_abundance": ["dream", "dream_now", "dream_start", "dream_status", "dream_stop", "entity_resolve", "gratitude.benefits", "gratitude.stats", "memory.consolidate", "memory.consolidation_stats", "memory.lifecycle", "memory.lifecycle_stats", "memory.lifecycle_sweep", "memory.retention_sweep", "serendipity_mark_accessed", "serendipity_surface", "whitemagic.tip"],
+    "gana_abundance": ["dream", "dream_now", "dream_start", "dream_status", "dream_stop", "entity_resolve", "gratitude.benefits", "gratitude.stats", "memory.consolidate", "memory.consolidation_stats", "memory.lifecycle", "memory.lifecycle_stats", "memory.lifecycle_sweep", "memory.retention_sweep", "narrative.compress", "narrative.stats", "serendipity_mark_accessed", "serendipity_surface", "whitemagic.tip"],
     "gana_straddling_legs": ["check_boundaries", "evaluate_ethics", "get_dharma_guidance", "get_ethical_score", "harmony_vector", "verify_consent", "wu_xing_balance"],
-    "gana_mound": ["get_metrics_summary", "get_yin_yang_balance", "record_yin_yang_activity", "track_metric", "view_hologram"],
+    "gana_mound": ["get_metrics_summary", "get_yin_yang_balance", "green.record", "green.report", "record_yin_yang_activity", "track_metric", "view_hologram"],
     "gana_stomach": ["pipeline", "pipeline.create", "pipeline.list", "pipeline.status", "task.complete", "task.distribute", "task.list", "task.route_smart", "task.status"],
-    "gana_hairy_head": ["anomaly", "anomaly.check", "anomaly.history", "anomaly.status", "dharma_rules", "karma_report", "karmic_trace", "otel", "otel.metrics", "otel.spans", "otel.status", "salience.spotlight"],
+    "gana_hairy_head": ["anomaly", "anomaly.check", "anomaly.history", "anomaly.status", "dharma_rules", "karma.anchor", "karma.anchor_status", "karma.verify_anchor", "karma_report", "karmic_trace", "otel", "otel.metrics", "otel.spans", "otel.status", "salience.spotlight"],
     "gana_net": ["karma.verify_chain", "prompt.list", "prompt.reload", "prompt.render"],
     "gana_turtle_beak": ["bitnet_infer", "bitnet_status", "edge_batch_infer", "edge_infer", "edge_stats"],
     "gana_three_stars": ["ensemble", "ensemble.history", "ensemble.query", "ensemble.status", "kaizen_analyze", "kaizen_apply_fixes", "reasoning.bicameral", "sabha.convene", "sabha.status", "solve_optimization"],
-    "gana_dipper": ["homeostasis", "homeostasis.check", "homeostasis.status", "maturity.assess", "starter_packs", "starter_packs.get", "starter_packs.list", "starter_packs.suggest"],
+    "gana_dipper": ["cognitive.hints", "cognitive.mode", "cognitive.set", "cognitive.stats", "homeostasis", "homeostasis.check", "homeostasis.status", "maturity.assess", "starter_packs", "starter_packs.get", "starter_packs.list", "starter_packs.suggest"],
     "gana_ox": ["swarm.complete", "swarm.decompose", "swarm.plan", "swarm.resolve", "swarm.route", "swarm.status", "swarm.vote", "worker.status"],
     "gana_girl": ["agent.capabilities", "agent.deregister", "agent.heartbeat", "agent.list", "agent.register", "agent.trust"],
-    "gana_void": ["galactic.dashboard", "galaxy.create", "galaxy.delete", "galaxy.ingest", "galaxy.list", "galaxy.status", "galaxy.switch", "garden_activate", "garden_health", "garden_status", "garden_synergy"],
+    "gana_void": ["galactic.dashboard", "galaxy.create", "galaxy.delete", "galaxy.ingest", "galaxy.list", "galaxy.status", "galaxy.switch", "galaxy.backup", "galaxy.restore", "garden_activate", "garden_health", "garden_status", "garden_synergy"],
     "gana_roof": ["model.hash", "model.list", "model.register", "model.signing_status", "model.verify", "ollama.agent", "ollama.chat", "ollama.generate", "ollama.models"],
     "gana_encampment": ["broker.history", "broker.publish", "broker.status", "ganying_emit", "ganying_history", "ganying_listeners", "sangha_chat_read", "sangha_chat_send"],
     "gana_wall": ["engagement.issue", "engagement.list", "engagement.revoke", "engagement.status", "engagement.validate", "vote.analyze", "vote.cast", "vote.create", "vote.list", "vote.record_outcome"],
@@ -345,11 +350,9 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[types.T
     tool_args = args.get("args") or {}
     operation = args.get("operation")
 
-    # Run in a thread so sync handlers that use asyncio.run() don't
-    # collide with the MCP server's own event loop.
-    result = await asyncio.to_thread(
-        _sync_dispatch, name, tool_name, tool_args, operation,
-    )
+    # Keep dispatch synchronous here; some runtimes intermittently stall when
+    # resolving executor-backed futures in this handler path.
+    result = _sync_dispatch(name, tool_name, tool_args, operation)
 
     text = json.dumps(result, indent=2, default=str)
     return [types.TextContent(type="text", text=text)]
@@ -504,7 +507,7 @@ async def main_http(host: str = "127.0.0.1", port: int = 8770) -> None:
     logger.warning(f"WhiteMagic MCP HTTP server starting on http://{host}:{port}/mcp")
     print(f"\n  WhiteMagic MCP Server v{_VERSION}", file=sys.stderr)
     print(f"  HTTP endpoint: http://{host}:{port}/mcp", file=sys.stderr)
-    print(f"  28 Gana tools | 285 nested tools\n", file=sys.stderr)
+    print("  28 Gana tools | 311 nested tools\n", file=sys.stderr)
 
     config = uvicorn.Config(app, host=host, port=port, log_level="warning")
     uv_server = uvicorn.Server(config)

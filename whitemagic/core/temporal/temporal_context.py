@@ -15,7 +15,6 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from pathlib import Path
 from typing import Any, Optional
 
 from whitemagic.config.paths import WM_ROOT

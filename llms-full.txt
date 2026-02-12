@@ -1,19 +1,17 @@
-# WhiteMagic — Full Documentation for LLMs
+# WhiteMagic
 
-> The Tool Substrate for Agentic AI — 208 MCP tools, tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance, and polyglot accelerators in 9 languages.
+> The Tool Substrate for Agentic AI — 341 MCP tools, tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance, and polyglot accelerators in 11 languages.
 
 ## Overview
 
 WhiteMagic is a high-performance memory and tool infrastructure for AI agents. It provides:
-- 208 MCP tools (or 28 PRAT Gana meta-tools) via unified dispatch pipeline
+- 341 MCP tools (or 28 PRAT Gana meta-tools) via unified dispatch
 - Tiered memory with SQLite backing, 5D holographic coordinates (XYZWV), Galactic Map lifecycle
 - Ethical governance: Dharma Rules Engine, Karma Ledger, Harmony Vector, Homeostatic Loop
 - Polyglot accelerators: Rust (PyO3), Zig (SIMD), Haskell (FFI), Elixir (OTP), Mojo, Go, Julia, TypeScript
 - Self-regulating: Circuit Breakers, Rate Limiter, RBAC, Maturity Gates, Agent Trust
-- Dream Cycle: 5-phase background processing (CONSOLIDATION → SERENDIPITY → KAIZEN → ORACLE → DECAY)
-- 28 Cognitive Engines mapped 1:1 to Gardens, Ganas, and Grimoire pages
 
-Version: 14.1.0
+Version: 15.0.0
 License: MIT
 Python: 3.10–3.13
 
@@ -41,233 +39,1988 @@ from whitemagic.tools.unified_api import call_tool
 # Store a memory
 call_tool("create_memory", title="Decision", content="Use SQLite for Phase 1", tags=["arch"])
 
-# Search memories (keyword + semantic hybrid)
+# Search memories
 call_tool("search_memories", query="architecture", limit=5)
 
 # Full system introspection
 call_tool("gnosis", compact=True)
-
-# System capabilities
-call_tool("capabilities")
 ```
 
 ### MCP Server (stdio)
 ```bash
-# PRAT mode — 28 Gana meta-tools (recommended for context-window efficiency)
+# PRAT mode — 28 Gana meta-tools (recommended)
 WM_MCP_PRAT=1 python -m whitemagic.run_mcp
 
-# Lite mode — 92 essential tools
-WM_MCP_LITE=1 python -m whitemagic.run_mcp
-
-# Classic mode — all 181 tools
+# Classic mode — all 341 tools
 python -m whitemagic.run_mcp
 ```
 
 ### CLI
 ```bash
-wm status          # System overview
-wm doctor          # Health check (immune scan, homeostasis, harmony vector)
+wm status
 wm remember "important note" --title "Note" --tags note
 wm recall "note" --limit 5
+wm doctor
 ```
 
-## Architecture
+## Tool Catalogue (341 tools)
+
+### AGENT (15 tools)
+
+- **agent.capabilities** (→ gana_girl): Query what a specific agent can do (capabilities, metadata, status)
+  - `agent_id` (string *required*): Agent ID to query
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **agent.deregister** [DELETE] (→ gana_girl): Remove an agent from the registry
+  - `agent_id` (string *required*): Agent ID to remove
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **agent.heartbeat** [WRITE] (→ gana_girl): Send a heartbeat to keep agent registration active, with optional workload update
+  - `agent_id` (string *required*): Agent ID
+  - `workload` (number): Current workload 0.0-1.0
+  - `current_task` (string): Currently executing task ID
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **agent.list** (→ gana_girl): List registered agents with optional active-only and capability filters
+  - `only_active` (boolean): Only show active agents
+  - `capability` (string): Filter by capability
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **agent.register** [WRITE] (→ gana_girl): Register a new agent or update an existing one with name, capabilities, and metadata
+  - `name` (string *required*): Human-readable agent name
+  - `agent_id` (string): Explicit ID (auto-generated if omitted)
+  - `capabilities` (array): List of capabilities (e.g. code_review, testing, inference)
+  - `metadata` (object): Arbitrary metadata (model, version, etc.)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **agent.trust** (→ gana_girl): Get agent reputation and trust scores derived from the Karma Ledger. Shows per-agent reliability, mismatch rate, debt contribution, and composite trust score. Optionally filter to a specific agent.
+  - `agent_id` (string): Filter to a specific agent (optional)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **ensemble** (→ gana_three_stars): Unified multi-LLM ensemble voting. Actions: query (send prompt to multiple models, synthesize consensus), status (get past query result by ID), history (list past queries).
+  - `action` (string *required*): Action to perform.
+  - `prompt` (string): Question/task for all models (for query).
+  - `models` (array): Ollama model names (for query, auto-detect if omitted).
+  - `timeout` (integer): Per-model timeout seconds (for query).
+  - `ensemble_id` (string): Ensemble query ID (for status).
+  - `limit` (integer): Max results (for history).
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **swarm.complete** [WRITE] (→ gana_ox): Mark a subtask as completed or failed
+  - `plan_id` (string *required*): 
+  - `task_id` (string *required*): 
+  - `result` (string): 
+  - `success` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **swarm.decompose** [WRITE] (→ gana_ox): Decompose a goal into subtasks with capability requirements for multi-agent coordination
+  - `goal` (string *required*): The high-level goal to decompose
+  - `hints` (array): Optional subtask hints
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **swarm.plan** (→ gana_ox): Get a specific swarm plan by ID
+  - `plan_id` (string *required*): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **swarm.resolve** (→ gana_ox): Resolve a consensus vote using majority, unanimous, first_wins, or weighted strategy
+  - `topic_id` (string *required*): 
+  - `strategy` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **swarm.route** [WRITE] (→ gana_ox): Route subtasks to available agents by capability matching
+  - `plan_id` (string *required*): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **swarm.vote** [WRITE] (→ gana_ox): Record a vote from an agent on a consensus topic
+  - `topic_id` (string *required*): 
+  - `agent_id` (string *required*): 
+  - `value` (string *required*): 
+  - `confidence` (number): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **task.route_smart** (→ gana_stomach): Determine the optimal host for a task based on current system load across local and remote machines.
+  - `task_type` (string): Type of task (compilation, ai_inference, etc.).
+  - `prefer_local` (boolean): Prefer local unless overloaded.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **worker.status** (→ gana_ox): Check if any worker daemons are running and get their stats (heartbeat, tasks completed).
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### ARCHAEOLOGY (1 tools)
+
+- **archaeology** [WRITE] (→ gana_chariot): Unified file archaeology — track reads/writes, find unread/changed files, search history, generate reports. Actions: mark_read, mark_written, have_read, find_unread, find_changed, recent_reads, stats, scan, report, search, process_wisdom, daily_digest.
+  - `action` (string *required*): Action to perform
+  - `path` (string): File path (for mark_read/written/have_read)
+  - `directory` (string): Directory to scan (for find_*/scan)
+  - `context` (string): Read/write context
+  - `note` (string): Optional note
+  - `insight` (string): Key insight (for mark_read)
+  - `query` (string): Search query (for search)
+  - `patterns` (array): Glob patterns (for find_unread/scan)
+  - `limit` (integer): Result limit
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### BROKER (4 tools)
+
+- **broker.history** (→ gana_encampment): Retrieve recent message history from a Redis channel
+  - `channel` (string *required*): Channel name to read history from
+  - `limit` (integer): Max messages to return
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **broker.publish** [WRITE] (→ gana_encampment): Publish a message to a Redis channel for inter-agent communication
+  - `channel` (string *required*): Channel name to publish to
+  - `message` (any *required*): Message content (string or object)
+  - `sender` (string): Sender identifier
+  - `priority` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **broker.status** (→ gana_encampment): Check Redis broker connectivity and status
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **mesh.broadcast** [WRITE] (→ gana_wings): Broadcast a signal to all mesh peers via gRPC (if connected) or Redis pub/sub fallback. Used for cross-node coordination.
+  - `signal_type` (string *required*): Type of signal to broadcast
+  - `payload` (string): Signal payload (JSON string or text)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### DHARMA (13 tools)
+
+- **check_boundaries** (→ gana_straddling_legs): Check if an action respects established boundaries
+  - `action` (string *required*): Action to check
+  - `boundary_type` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **dharma_rules** (→ gana_hairy_head): List all active Dharma rules and the current profile. Rules are declarative YAML policies that govern tool behavior (log, tag, warn, throttle, block). Profiles: default, creative, secure.
+  - `profile` (string): Filter by profile name (optional)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **evaluate_ethics** (→ gana_straddling_legs): Evaluate the ethical implications of an action
+  - `action` (string *required*): Action to evaluate
+  - `context` (object): Context for evaluation
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **get_dharma_guidance** (→ gana_straddling_legs): Get guidance on how to act according to Dharma
+  - `situation` (string *required*): Situation to get guidance for
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **get_ethical_score** (→ gana_straddling_legs): Get cumulative ethical score over time window
+  - `time_window_hours` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **karma.anchor** [WRITE] (→ gana_hairy_head): Compute the current Karma Ledger Merkle root and optionally submit it to the XRP Ledger as a tamper-evident timestamp proof. With submit=false (default), returns a local snapshot only. With submit=true, sends a 0-drop self-payment with the root in the Memo field to XRPL testnet or mainnet.
+  - `submit` (boolean): If true, submit to XRPL
+  - `network` (string): 
+  - `wallet_seed` (string): XRPL wallet seed (optional, uses saved seed if omitted)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **karma.anchor_status** (→ gana_hairy_head): Get the current karma anchor system status — XRPL availability, wallet configuration, total anchors submitted, and the latest anchor details.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **karma.verify_anchor** (→ gana_hairy_head): Verify a karma anchor transaction on the XRP Ledger. Retrieves the transaction memo and compares the on-chain Merkle root against the current local root (or a provided expected root).
+  - `tx_hash` (string *required*): XRPL transaction hash to verify
+  - `expected_merkle_root` (string): Root to compare against (optional)
+  - `network` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **karma.verify_chain** (→ gana_net): Verify the Merkle hash chain integrity of the Karma Ledger — detects tampering
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **karma_report** (→ gana_hairy_head): Get the Karma Ledger report — tracks declared vs actual side-effects for every tool call. Shows total karma debt, mismatch rate, top offending tools, and recent entries. Use this to audit whether tools are behaving as declared.
+  - `limit` (integer): Max entries to include
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **karmic_trace** (→ gana_hairy_head): Get the Karmic Trace — an immutable audit trail of every Dharma rule evaluation. Each entry records the action, which rules fired, what decision was made, and why. Essential for transparency.
+  - `limit` (integer): Max trace entries
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **set_dharma_profile** [WRITE] (→ gana_star): Switch the active Dharma profile. Profiles control how strictly the Dharma engine governs tool usage. Options: 'default' (balanced), 'creative' (relaxed writes), 'secure' (blocks all mutations).
+  - `profile` (string *required*): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **verify_consent** (→ gana_straddling_legs): Verify user consent for an action
+  - `action` (string *required*): Action requiring consent
+  - `consent_type` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### EDGE (3 tools)
+
+- **edge_batch_infer** (→ gana_turtle_beak): Batch edge inference for multiple queries
+  - `queries` (array *required*): List of queries to process
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **edge_infer** (→ gana_turtle_beak): Rule-based edge inference (no API calls)
+  - `query` (string *required*): Query to process locally
+  - `mode` (string): 
+  - `ground_in_memory` (boolean): Use memory for RAG-style context
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **edge_stats** (→ gana_turtle_beak): Get edge inference statistics (tokens saved, resolution rate)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### GANA (28 tools)
+
+- **gana_abundance**: [ABUNDANCE] Regeneration & Surplus. Lens: Harvest of wisdom.
+  - `operation` (string *required*): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_chariot**: [CHARIOT] Mobility & Archaeology. Lens: Fast exploration.
+  - `operation` (string *required*): 
+  - `directory` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_dipper** [WRITE]: [DIPPER] Governance & Strategy. Lens: Navigational control.
+  - `operation` (string *required*): 
+  - `strategy_goal` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_encampment** [WRITE]: [ENCAMPMENT] Transition & Handoff. Lens: Secure staging.
+  - `operation` (string *required*): 
+  - `handoff_data` (object): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_extended_net**: [EXTENDED NET] Pattern Connectivity. Lens: Woven connections.
+  - `operation` (string *required*): 
+  - `pattern` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_ghost**: [GHOST] Introspection & Metric Tracking. Lens: Internal observation.
+  - `operation` (string *required*): 
+  - `metrics` (array): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_girl** [WRITE]: [GIRL] Nurture & User Profile. Lens: Personable care.
+  - `operation` (string *required*): 
+  - `preferences` (object): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_hairy_head**: [HAIRY HEAD] Detail & Focus (Debug). Lens: Microscopic scrutiny.
+  - `operation` (string *required*): 
+  - `debug_target` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_heart**: [HEART] Session Context & Pulse. Lens: Vital resonance.
+  - `operation` (string *required*): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_horn** [WRITE]: [HORN] Session Initialization & Setup. Lens: Sharp initiation.
+  - `operation` (string *required*): 
+  - `session_name` (string): 
+  - `goals` (array): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_mound** [WRITE]: [MOUND] Accumulation & Caching. Lens: Stored potential.
+  - `operation` (string *required*): 
+  - `cache_key` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_neck** [WRITE]: [NECK] Core Memory Creation & Stability. Lens: Structural integrity.
+  - `operation` (string *required*): 
+  - `title` (string): 
+  - `content` (string): 
+  - `tags` (array): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_net**: [NET] Capture & Filtering. Lens: Selective retrieval.
+  - `operation` (string *required*): 
+  - `filter_criteria` (object): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_ox**: [OX] Endurance & Watchdog. Lens: Steady vigilance.
+  - `operation` (string *required*): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_roof**: [ROOF] Shelter & Zodiac Cores. Lens: Enclosing wisdom.
+  - `operation` (string *required*): 
+  - `core_name` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_room** [WRITE]: [ROOM] Resource Locks & Privacy. Lens: Secure enclosure.
+  - `operation` (string *required*): 
+  - `resource` (string): 
+  - `action` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_root**: [ROOT] System Health & Foundations. Lens: Root checking.
+  - `operation` (string *required*): 
+  - `component` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_star** [WRITE]: [STAR] Governance & PRAT Invocation. Lens: Guiding light.
+  - `operation` (string *required*): 
+  - `target_tool` (string): 
+  - `query` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_stomach** [WRITE]: [STOMACH] Digestion & Resource Management. Lens: Nutrient integration.
+  - `operation` (string *required*): 
+  - `resource_data` (object): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_straddling_legs**: [STRADDLING LEGS] Balance & Equilibrium. Lens: Steady harvest.
+  - `operation` (string *required*): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_tail** [WRITE]: [TAIL] Performance & Acceleration. Lens: Passionate drive/acceleration.
+  - `operation` (string *required*): 
+  - `acceleration_mode` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_three_stars**: [THREE STARS] Judgment & Synthesis. Lens: Final appraisal.
+  - `operation` (string *required*): 
+  - `question` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_turtle_beak** [WRITE]: [TURTLE BEAK] Precision & Protection. Lens: Sharp defense.
+  - `operation` (string *required*): 
+  - `target_id` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_void** [WRITE]: [VOID] Emptiness & Defrag. Lens: Sacred space.
+  - `operation` (string *required*): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_wall** [WRITE]: [WALL] Boundaries & Notifications. Lens: Defining limits.
+  - `operation` (string *required*): 
+  - `boundary_type` (string): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_willow** [WRITE]: [WILLOW] Resilience & UI Flexibility. Lens: Adaptive bending.
+  - `operation` (string *required*): 
+  - `ui_state` (object): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_wings** [WRITE]: [WINGS] Deployment & Scalability. Lens: Expansive flight.
+  - `operation` (string *required*): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gana_winnowing_basket**: [WINNOWING BASKET] Wisdom & Tag Filtering. Lens: Separation of essence.
+  - `operation` (string *required*): 
+  - `tags` (array): 
+  - `context` (object): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### GARDEN (3 tools)
+
+- **garden_activate** [WRITE] (→ gana_void): Activate a consciousness garden
+  - `garden` (string *required*): Garden name
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **garden_health** (→ gana_void): Check garden health metrics
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **garden_status** (→ gana_void): Get garden activation status
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### GOVERNANCE (5 tools)
+
+- **forge.reload** [WRITE] (→ gana_star): Reload all extension manifests from ~/.whitemagic/extensions/. Validates each manifest against the Dharma engine, resolves handlers, and injects valid tools into the dispatch pipeline and PRAT router. Invalid manifests are logged but do not block loading.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **forge.status** (→ gana_star): Show current Forge status — loaded extensions and available manifests. Extensions are YAML files in ~/.whitemagic/extensions/ that define new tools declaratively. Any AI can create these manifests to extend the Gana system without modifying source code.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **forge.validate** (→ gana_star): Validate extension manifests without loading them. Checks each YAML file for required fields (name, description, gana, handler, safety) and reports errors. Use this before forge.reload to preview.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sabha.convene** (→ gana_three_stars): Convene a Gana Sabhā (council) for cross-quadrant deliberation. When a task spans multiple quadrants of the 28-mansion mandala, the Sabhā gathers perspectives from quadrant elders, detects inter-Gana conflicts, and produces an arbiter recommendation. Based on Mahābhārata 12.108.25: 'The king, acting in concert with the leaders, should do what is for the good of the whole order.'
+  - `task` (string *required*): Description of the task requiring cross-quadrant council
+  - `ganas` (array): Specific Ganas to include (optional, defaults to quadrant elders)
+  - `quadrants` (array): Specific quadrants to consult (optional, defaults to all)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sabha.status** (→ gana_three_stars): Get the collective vitality status of all 28 Ganas. Shows how many are healthy, degraded, silent, or struggling. Reports the overall saṃghāta (unity) score. Based on 12.108.31: 'Unity is the great refuge of the gaṇas.'
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### GOVERNOR (4 tools)
+
+- **governor_check_drift** (→ gana_star): Check if an action drifts from the goal
+  - `action` (string *required*): Action to check
+  - `goal` (string): Goal to check against
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **governor_set_goal** [WRITE] (→ gana_star): Set the current goal for drift detection
+  - `goal` (string *required*): Current goal
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **governor_validate** (→ gana_star): Validate a command against safety rules
+  - `command` (string *required*): Command to validate
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sandbox.set_limits** [WRITE] (→ gana_room): Set custom resource limits for a specific tool (timeout, memory, CPU)
+  - `target_tool` (string *required*): Name of the tool to set limits for
+  - `timeout_s` (number): 
+  - `max_memory_mb` (integer): 
+  - `max_cpu_s` (number): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### INFERENCE (5 tools)
+
+- **bitnet_infer** (→ gana_turtle_beak): Run local inference via BitNet 1-bit LLM (requires WHITEMAGIC_ENABLE_BITNET=1)
+  - `prompt` (string *required*): Input prompt for inference
+  - `n_predict` (integer): Max tokens to generate
+  - `temp` (number): Sampling temperature
+  - `mode` (string): Inference mode: redis (Gan Ying bus), direct (subprocess), or auto
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **ollama.agent** [WRITE] (→ gana_roof): Run an agentic loop with a local Ollama model that can autonomously call WhiteMagic tools (search, create memories, analyze patterns) to complete a given task. Injects relevant memories as context and supports up to 10 tool-call iterations.
+  - `model` (string *required*): Ollama model name (e.g., 'llama3.2', 'phi4', 'qwen2.5')
+  - `task` (string *required*): The task or question for the agent
+  - `max_iterations` (integer): Maximum tool-call rounds
+  - `context` (boolean): Whether to inject relevant memories
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **ollama.chat** (→ gana_roof): Chat with a local Ollama model (multi-turn conversation)
+  - `model` (string *required*): Model name
+  - `messages` (array *required*): Conversation messages
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **ollama.generate** (→ gana_roof): Generate text using a local Ollama model (single-turn prompt)
+  - `model` (string *required*): Model name (e.g. phi3, tinyllama, llama3.2)
+  - `prompt` (string *required*): Prompt text
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **ollama.models** (→ gana_roof): List available models on the local Ollama server
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### INTROSPECTION (44 tools)
+
+- **audit.export** (→ gana_wings): Export audit log in MCP-compatible format — karmic trace, telemetry, circuit breaker events, rate limiter stats. Filterable by time, tool, agent.
+  - `limit` (integer): 
+  - `since` (string): ISO timestamp — only entries after this time
+  - `tool` (string): Filter to specific tool name
+  - `agent_id` (string): Filter to specific agent ID
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **bitnet_status** (→ gana_turtle_beak): Check BitNet availability and configuration
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **capabilities** (→ gana_ghost): Return contract versions, runtime features, limits, and (optionally) the tool list.
+  - `include_tools` (boolean): 
+  - `include_schemas` (boolean): 
+  - `include_env` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **capability.matrix** (→ gana_ghost): Capability Matrix — full inventory of all active subsystems (24+), wired cross-system fusions (11+), and unexplored synthesis opportunities (17+). Filter by category: memory, intelligence, resonance, governance, architecture.
+  - `category` (string): Filter subsystems by category. Omit for all.
+  - `include_unexplored` (boolean): Include unexplored synthesis opportunities.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **capability.status** (→ gana_ghost): Get live status for a specific subsystem by ID. Returns metadata plus a live health probe when available.
+  - `subsystem_id` (string *required*): Subsystem ID (e.g. 'harmony_vector', 'dream_cycle', 'prat_resonance').
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **capability.suggest** (→ gana_ghost): Suggest the next best unexplored fusion to wire. Prioritizes low-difficulty fusions for quick wins.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **context.status** (→ gana_heart): Get Context Window Optimizer configuration and status
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **drive.event** [WRITE] (→ gana_ghost): Feed an event into the Emotion & Drive Core to update drive levels (e.g. tool_success, novelty_detected, dharma_violation).
+  - `event_type` (string *required*): Event type (tool_success, tool_error, novelty_detected, dharma_violation, etc.).
+  - `data` (object): Optional event data. Include 'score' (0-1) to scale the effect.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **drive.snapshot** (→ gana_ghost): Get current intrinsic motivation state — curiosity, satisfaction, caution, energy, social drives with composite score and trend.
+  - `include_bias` (boolean): Include motivation bias vector for tool selection.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **explain_this** (→ gana_ghost): Pre-execution impact preview. Before running a tool, call explain_this to see: Dharma evaluation, resource estimate, dependency chain, risk assessment, karma forecast, maturity gate, and circuit breaker state. Returns a verdict: SAFE_TO_PROCEED, PROCEED_WITH_CAUTION, or BLOCKED.
+  - `target_tool` (string *required*): Name of the tool to preview
+  - `tool_args` (object): Arguments that would be passed to the tool
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **galactic.dashboard** (→ gana_void): Rich Galactic Map dashboard — zone counts, crown jewels, type distribution, retention stats, dream cycle status
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **get_telemetry_summary** (→ gana_ghost): Return summarized performance and error metrics for tool execution.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gnosis** (→ gana_ghost): Gnosis Portal — unified read-only introspection across all Whitemagic subsystems in a single call. Returns: Harmony Vector (7 health dimensions + composite score), Dharma status (active profile, rules, last decision), Karma Ledger (debt + mismatch rate), circuit breaker states, Yin/Yang balance, telemetry summary, state-root sizes, homeostasis loop, maturity stage, broker/tasks/votes/agents/temporal. Use compact=true for a token-efficient alerts-only snapshot with auto-suggestions. Use this as your primary system health check before complex operations.
+  - `compact` (boolean): If true, return only alerts + suggested next actions (saves tokens)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **graph_topology** (→ gana_ghost): Graph topology introspection — centrality metrics, community detection, bridge nodes, echo chamber detection. Actions: summary, rebuild, centrality, communities, bridges, echo_chambers.
+  - `action` (string): Action to perform: summary, rebuild, centrality, communities, bridges, echo_chambers
+  - `top_n` (integer): Max results for bridges (default: 10)
+  - `sample_limit` (integer): Max edges to load for rebuild (default: 50000)
+  - `sigma_threshold` (number): Sigma threshold for echo chamber detection (default: 2.0)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gratitude.benefits** (→ gana_abundance): Check gratitude benefits for an agent — rate limit multiplier, Grateful Agent badge, priority voting, early access eligibility.
+  - `agent_id` (string): Agent ID to check benefits for
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **gratitude.stats** (→ gana_abundance): Get gratitude ledger statistics — total tips, amounts by currency, verified count, unique senders/agents, recent events.
+  - `limit` (integer): Max recent events to include
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **grimoire_auto_status** (→ gana_willow): Get Grimoire auto-caster status and spell availability
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **grimoire_walkthrough** (→ gana_willow): Interactive 28-chapter Grimoire walkthrough — get chapter details, exercises, and tool mappings
+  - `chapter` (integer): Chapter number (1-28)
+  - `quadrant` (string): Filter by quadrant
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **health_report** (→ gana_root): Consolidated system health report aggregating Rust, Julia, Haskell bridges, DB, gardens, and archaeology.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **kg.status** (→ gana_chariot): Get knowledge graph status — entity/relation counts, spaCy availability
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **kg.top** (→ gana_chariot): Get top entities by mention count from the knowledge graph
+  - `limit` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **learning.patterns** (→ gana_extended_net): Get aggregated cross-session tool usage patterns — co-occurrence, sequences, error correlations
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **learning.status** (→ gana_extended_net): Get cross-session learner status — sessions analyzed, unique tools, data file
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **learning.suggest** (→ gana_extended_net): Suggest next tools based on learned cross-session sequences
+  - `current_tool` (string *required*): Tool you just used — suggestions based on what typically follows
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **manifest** (→ gana_ghost): Return the canonical tool manifest (registry snapshot) in multiple formats.
+  - `format` (string): 
+  - `include_schemas` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **maturity.assess** (→ gana_dipper): Assess the system's developmental maturity stage. Runs gate checks for each stage (Seed→Bicameral→Reflective→Radiant→Collective→Logos) and reports which capabilities are unlocked, the current stage, and what's blocking advancement to the next stage.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **mesh.status** (→ gana_wings): Get cross-node mesh awareness status. Shows known peers, connectivity state, gRPC/Redis bridge health, and recent mesh events.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **prompt.list** (→ gana_net): List all available prompt templates, optionally filtered by tag
+  - `tag` (string): Filter templates by tag
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **rate_limiter.stats** (→ gana_willow): Rate limiter statistics — total checks, blocks, block rate, per-agent usage.
+  - `agent_id` (string): Optional agent ID to get per-agent usage
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **repo.summary** (→ gana_ghost): Summarize the repo/worktree (files, sizes, quick hygiene checks).
+  - `max_files` (integer): 
+  - `max_matches` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **salience.spotlight** (→ gana_hairy_head): Attention Spotlight — returns the top-N most salient events the system should focus on right now. Salience = urgency x novelty x confidence. Use this to understand what the system considers most important.
+  - `limit` (integer): Number of spotlight entries to return
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sandbox.status** (→ gana_room): Get sandbox status — per-tool execution stats, enabled state, resource module availability
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sandbox.violations** (→ gana_room): Get recent sandbox limit violations (timeout, memory, CPU)
+  - `limit` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **selfmodel.alerts** (→ gana_ghost): Get only forecasts with active threshold alerts — early warnings about upcoming issues.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **selfmodel.forecast** (→ gana_ghost): Forecast system metric trends using linear regression. Predicts threshold crossings for energy, karma_debt, error_rate, etc.
+  - `metric` (string): Specific metric to forecast (omit for all).
+  - `steps_ahead` (integer): How many steps to forecast.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **ship.check** (→ gana_root): Run open-source shipping checks (no secrets, no runtime blobs, no absolute paths).
+  - `max_files` (integer): 
+  - `max_large_files` (integer): 
+  - `large_file_mb` (integer): 
+  - `max_matches` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **simd.status** (→ gana_tail): Get SIMD acceleration status — Zig library availability, lane width, backend
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **starter_packs** (→ gana_dipper): Unified starter pack management — curated tool sets for common workflows. Actions: list (browse packs), get (full pack details), suggest (AI recommendation). Packs: quickstart, memory, coordination, introspection, reasoning, safety.
+  - `action` (string): Action to perform
+  - `name` (string): Pack name (for get)
+  - `context` (string): What you want to do (for suggest)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **state.paths** (→ gana_root): Return resolved WM_STATE_ROOT paths used by this process.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **state.summary** (→ gana_root): Summarize local Whitemagic state (counts, sizes) without leaking content.
+  - `include_sizes` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **surprise_stats** (→ gana_ghost): Surprise gate statistics — shows novelty detection metrics including total evaluations, novel/redundant/normal counts, and thresholds.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **swarm.status** (→ gana_ox): Get swarm coordination status — active plans, votes, topics
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **tool.graph** (→ gana_extended_net): Query the tool dependency graph. Without arguments, returns a summary (total tools, edges, edge types). With a 'tool' argument, returns next_steps, prerequisites, and plan. With detail='full', returns all edges.
+  - `tool` (string): Tool name to query relationships for (optional — omit for graph summary)
+  - `detail` (string): Level of detail: summary (default) or full (all edges)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **vector.status** (→ gana_winnowing_basket): Get vector search engine status — index size, model info, backend
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### MEMORY (26 tools)
+
+- **batch_read_memories** (→ gana_winnowing_basket): BATCH: Read multiple memories in one operation
+  - `filenames` (array *required*): Array of memory filenames to read
+  - `cache` (boolean): 
+  - `fast_mode` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **create_memory** [WRITE] (→ gana_neck): Create a new memory entry (short-term or long-term)
+  - `title` (string *required*): Memory title
+  - `content` (string *required*): Memory content (markdown supported)
+  - `type` (string): Memory type
+  - `tags` (array): Tags for categorization
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **delete_memory** [DELETE] (→ gana_neck): Delete or archive a memory
+  - `filename` (string *required*): Memory filename to delete
+  - `permanent` (boolean): If true, permanently delete; otherwise archive
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **entity_resolve** [WRITE] (→ gana_abundance): Run embedding-based entity resolution (dedup) on the memory store. Finds near-duplicate memories and merges them by reinforcing the canonical and pushing duplicates to FAR_EDGE.
+  - `similarity_threshold` (number): Cosine similarity threshold (default: 0.92)
+  - `batch_limit` (integer): Max pairs to evaluate (default: 500)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **export_memories** (→ gana_wings): Export memories in JSON, CSV, Markdown, or ZIP format
+  - `format` (string): Export format
+  - `tags` (array): Filter by tags
+  - `memory_type` (string): Filter by memory type
+  - `search` (string): Filter by content search
+  - `limit` (integer): Max memories to export
+  - `include_metadata` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **fast_read_memory** (→ gana_winnowing_basket): FAST: Read memory content with Rust optimizations (10-100x faster)
+  - `filename` (string *required*): Memory filename
+  - `cache` (boolean): 
+  - `fast_mode` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **graph_walk** (→ gana_winnowing_basket): Execute a multi-hop weighted random walk from seed memory IDs. Returns traversal paths with edge weights and relation types.
+  - `seed_ids` (array *required*): List of memory IDs to start walking from
+  - `hops` (integer): Number of hops (default: 2)
+  - `top_k` (integer): Max paths to return (default: 10)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **hybrid_recall** (→ gana_winnowing_basket): Multi-hop graph-aware memory recall. Combines BM25 + embedding anchor search with graph walk expansion to discover memories connected via the association graph.
+  - `query` (string *required*): Search query for anchor memories
+  - `hops` (integer): Number of graph hops (default: 2)
+  - `anchor_limit` (integer): Max anchor memories from initial search (default: 5)
+  - `final_limit` (integer): Max total results to return (default: 10)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **import_memories** [WRITE] (→ gana_neck): Import memories from JSON, CSV, or Markdown data
+  - `format` (string *required*): Import format
+  - `data` (string *required*): The data to import
+  - `merge_strategy` (string): 
+  - `validate_only` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **jit_research** (→ gana_winnowing_basket): Iterative plan-search-reflect research across the memory store. Decomposes a query into sub-questions, searches for evidence, reflects on gaps, and synthesizes findings.
+  - `query` (string *required*): The research question to investigate.
+  - `max_rounds` (integer): Maximum iteration rounds (default 3).
+  - `evidence_limit` (integer): Evidence items per sub-question (default 5).
+  - `hops` (integer): Graph walk depth (default 2).
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **jit_research.stats** (→ gana_winnowing_basket): Get JIT Memory Researcher statistics — total sessions, evidence found, configuration.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **kg.extract** [WRITE] (→ gana_chariot): Extract entities and relations from text into the knowledge graph (spaCy NER + regex fallback)
+  - `source_id` (string): Source memory/document ID
+  - `text` (string *required*): Text to extract entities from
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **kg.query** (→ gana_chariot): Query an entity and its connections in the knowledge graph
+  - `name` (string *required*): Entity name to query
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **list_memories** (→ gana_winnowing_basket): List all memories with metadata
+  - `include_archived` (boolean): 
+  - `sort_by` (string): 
+  - `type` (string): 
+  - `limit` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **memory.lifecycle** [WRITE] (→ gana_abundance): Unified memory lifecycle management — mindful forgetting & hippocampal consolidation. Actions: sweep (retention evaluation + gentle decay), stats (lifecycle statistics), consolidate (cluster + synthesize strategy memories), consolidation_stats (consolidation engine stats).
+  - `action` (string): Action to perform
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **memory.retention_sweep** [WRITE] (→ gana_abundance): Mindful Forgetting retention sweep — evaluates memories using 5 signals (semantic, emotional, recency, connection, protection) to decide what to keep and what to forget. Defaults to dry_run=true (no actual deletions).
+  - `dry_run` (boolean): If true, only report what would be forgotten
+  - `limit` (integer): Max memories to evaluate
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **narrative.compress** [WRITE] (→ gana_abundance): Compress clusters of episodic memories into coherent narrative summaries. Runs as a dream phase or on-demand.
+  - `max_clusters` (integer): Maximum clusters to process (default 5).
+  - `sample_limit` (integer): How many recent memories to scan (default 500).
+  - `dry_run` (boolean): Preview without persisting narratives.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **narrative.stats** (→ gana_abundance): Get narrative compressor statistics — total compressions, narratives created.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **read_memory** (→ gana_winnowing_basket): Read full content of a specific memory
+  - `filename` (string *required*): Memory filename (e.g., '20251115_setup_wizard.md')
+  - `include_metadata` (boolean): Include metadata (tags, dates, etc)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **recall** (→ gana_winnowing_basket): Shorthand: search memories. Equivalent to gana_winnowing_basket → hybrid_recall.
+  - `query` (string *required*): Search query
+  - `limit` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **remember** [WRITE] (→ gana_neck): Shorthand: create a memory. Equivalent to gana_neck → create_memory.
+  - `content` (string *required*): Memory content
+  - `title` (string): Memory title
+  - `tags` (array): 
+  - `importance` (number): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **search_memories** (→ gana_winnowing_basket): Search memories by query, type, and tags
+  - `query` (string): Search query
+  - `type` (string): Filter by memory type
+  - `tags` (array): Filter by tags (AND logic)
+  - `include_archived` (boolean): Include archived memories
+  - `limit` (integer): Maximum results to return
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **update_memory** [WRITE] (→ gana_neck): Update an existing memory's content, title, or tags
+  - `filename` (string *required*): Memory filename to update
+  - `title` (string): New title
+  - `content` (string): New content
+  - `tags` (array): 
+  - `add_tags` (array): 
+  - `remove_tags` (array): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **vector.index** [WRITE] (→ gana_winnowing_basket): Index a memory for vector similarity search
+  - `memory_id` (string *required*): Memory ID to index
+  - `content` (string *required*): Content to embed
+  - `title` (string): Optional title
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **vector.search** (→ gana_winnowing_basket): Search memories by semantic similarity using embeddings (sentence-transformers or TF-IDF fallback)
+  - `query` (string *required*): Natural language search query
+  - `limit` (integer): Max results
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **view_hologram** (→ gana_mound): Get a holographic snapshot of the memory space or query a specific sector
+  - `operation` (string): Operation to perform
+  - `x` (number): X coordinate (Logic-Emotion)
+  - `y` (number): Y coordinate (Micro-Macro)
+  - `z` (number): Z coordinate (Time)
+  - `w` (number): W coordinate (Importance)
+  - `limit` (integer): Max results for query
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### METRICS (10 tools)
+
+- **anomaly** (→ gana_hairy_head): Unified anomaly detection on Harmony Vector dimensions. Actions: check (active anomalies), history (recent alerts), status (detector stats).
+  - `action` (string): Action to perform
+  - `limit` (integer): Max alerts to return (for history)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **get_metrics_summary** (→ gana_mound): Retrieve metrics dashboard summary
+  - `categories` (array): Categories to include
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **get_yin_yang_balance** (→ gana_mound): Get current Yin-Yang balance report
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **harmony_vector** (→ gana_straddling_legs): Get the multi-dimensional Harmony Vector — Whitemagic's real-time health pulse. Returns seven normalized [0-1] dimensions: balance (yin/yang ratio), throughput, latency, error_rate, dharma (ethical score), karma_debt (declared-vs-actual side-effect mismatches), and energy (resource pressure). Also reports guna distribution (sattvic/rajasic/tamasic), p50/p95 latency, and a composite harmony_score. Use this to self-regulate agent behavior.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **homeostasis** [WRITE] (→ gana_dipper): Unified homeostatic loop control. Actions: status (view loop state + recent corrective actions), check (manually trigger a harmony check and apply corrections if needed).
+  - `action` (string): Action to perform
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **otel** (→ gana_hairy_head): Unified OpenTelemetry observability. Actions: spans (recent trace records), metrics (aggregated per-tool stats), status (exporter state).
+  - `action` (string): Action to perform
+  - `limit` (integer): Max spans to return (for spans)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **record_yin_yang_activity** [WRITE] (→ gana_mound): Record Yin-Yang activity for balance tracking
+  - `activity` (string *required*): Activity type
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **simd.batch** (→ gana_tail): Batch cosine similarity — compare query against multiple vectors using SIMD
+  - `query` (array *required*): 
+  - `vectors` (array *required*): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **simd.cosine** (→ gana_tail): Compute cosine similarity between two vectors using Zig SIMD acceleration (Python fallback available)
+  - `a` (array *required*): First vector
+  - `b` (array *required*): Second vector
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **track_metric** [WRITE] (→ gana_mound): Record a quantitative metric
+  - `category` (string *required*): Metric category
+  - `metric` (string *required*): Metric name
+  - `value` (number *required*): Metric value
+  - `context` (string): Optional context
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### SECURITY (7 tools)
+
+- **hermit.assess** [WRITE] (→ gana_room): Assess threat level from signals (boundary violations, coercion, abuse). May trigger automatic state transition.
+  - `signals` (object *required*): Threat signals dict. Keys: boundary_violations (0-1), coercion_detected (bool), abuse_score (0-1), repeated_violations (bool), unauthorized_access (0-1), emotional_manipulation (0-1).
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **hermit.check_access** (→ gana_room): Check if memory access is currently allowed given hermit crab state.
+  - `operation` (string): Operation type: read, write, search, recall.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **hermit.mediate** [WRITE] (→ gana_room): Request mediation to unlock from withdrawn state. Returns withdrawal records for review.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **hermit.resolve** [WRITE] (→ gana_room): Resolve a mediation request — approve or deny unlock.
+  - `approved` (boolean *required*): Whether to approve the unlock.
+  - `resolver` (string): Who is resolving (default: system).
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **hermit.status** (→ gana_room): Get current hermit crab protection status — state, threat history, withdrawal records.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **hermit.verify_ledger** (→ gana_room): Verify the integrity of the tamper-evident withdrawal ledger.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **hermit.withdraw** [WRITE] (→ gana_room): Manually trigger hermit crab withdrawal — encrypts and locks memories.
+  - `reason` (string): Reason for manual withdrawal.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### SESSION (6 tools)
+
+- **checkpoint_session** [WRITE] (→ gana_horn): Create a checkpoint in the current session
+  - `session_id` (string *required*): Session ID
+  - `checkpoint_name` (string): Checkpoint name
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **create_session** [WRITE] (→ gana_horn): Create new work session with automatic state management
+  - `name` (string *required*): Session name
+  - `goals` (array): 
+  - `tags` (array): 
+  - `auto_checkpoint` (boolean): 
+  - `context_tier` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **resume_session** [WRITE] (→ gana_horn): Resume a previous session with context restoration
+  - `session_id` (string *required*): Session ID to resume
+  - `load_tier` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **scratchpad** [WRITE] (→ gana_heart): Unified scratchpad management for active work. Actions: create (new scratchpad), update (modify section), finalize (convert to permanent memory).
+  - `action` (string *required*): Action to perform
+  - `name` (string): Scratchpad name (for create)
+  - `session_id` (string): Associated session ID (for create)
+  - `scratchpad_id` (string): Scratchpad ID (for update/finalize)
+  - `section` (string): Section to update (for update)
+  - `content` (string): Content (for update)
+  - `memory_type` (string): Target memory type (for finalize)
+  - `auto_analyze` (boolean): Multi-spectral analysis (for finalize)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **session.handoff** [WRITE] (→ gana_heart): Unified cross-device session handoff. Actions: transfer (send session to another device), accept (receive handoff), list (browse handoffs).
+  - `action` (string *required*): Action to perform.
+  - `session_id` (string): Session to hand off (for transfer).
+  - `target_device` (string): Target hostname or 'any' (for transfer).
+  - `message` (string): Message for receiver (for transfer).
+  - `handoff_id` (string): Handoff package ID (for accept).
+  - `limit` (integer): Max results (for list).
+  - `filter_status` (string): Filter by status (for list).
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **session_bootstrap** (→ gana_horn): Initialize session context for a new AI session
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### SYNTHESIS (9 tools)
+
+- **cluster_stats** (→ gana_extended_net): Get statistics about memory clustering in 4D holographic space
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **kaizen_analyze** (→ gana_three_stars): Analyze code/system for continuous improvement opportunities
+  - `target` (string *required*): Target to analyze (path or system name)
+  - `depth` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **kaizen_apply_fixes** [WRITE] (→ gana_three_stars): Apply recommended fixes from Kaizen analysis
+  - `fix_ids` (array *required*): IDs of fixes to apply
+  - `dry_run` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **pattern_search** (→ gana_extended_net): Search patterns across all pattern engines (core, holographic, edge)
+  - `query` (string): Search query
+  - `engines` (array): Engines to search
+  - `min_confidence` (number): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **reasoning.bicameral** (→ gana_three_stars): Bicameral Reasoning — dual-hemisphere analysis of a query. Left hemisphere (precise, logical, sequential) and right hemisphere (creative, holistic, divergent) independently analyze the query, then cross-critique each other through the corpus callosum. Returns synthesis, tension score, and dominant hemisphere.
+  - `query` (string *required*): The question or problem to reason about
+  - `context` (object): Optional context for the reasoning
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **serendipity_mark_accessed** [WRITE] (→ gana_abundance): Mark a surfaced memory as accessed (updates access count)
+  - `memory_id` (string *required*): ID of memory to mark
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **serendipity_surface** (→ gana_abundance): Surface unexpected but potentially valuable memory connections
+  - `count` (integer): Number of connections to surface
+  - `context` (string): Optional context to bias selection
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **solve_optimization** (→ gana_three_stars): Solve a constrained optimization problem using the Universal Solver (Frank-Wolfe).
+  - `nodes` (array *required*): Decision variables.
+  - `edges` (array): Causal dependency edges [parent, child].
+  - `scores` (object *required*): Node scores (targets).
+  - `budget` (integer): Max nodes to select.
+  - `max_iters` (integer): Convergence limit.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **think** (→ gana_three_stars): Shorthand: bicameral reasoning. Equivalent to gana_three_stars → reasoning.bicameral.
+  - `topic` (string *required*): Topic to reason about
+  - `perspectives` (array): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### SYSTEM (149 tools)
+
+- **analyze_scratchpad** (→ gana_heart): (gana_heart) — dispatch-registered tool
+- **anomaly.check** (→ gana_hairy_head): (gana_hairy_head) — dispatch-registered tool
+- **anomaly.history** (→ gana_hairy_head): (gana_hairy_head) — dispatch-registered tool
+- **anomaly.status** (→ gana_hairy_head): (gana_hairy_head) — dispatch-registered tool
+- **anti_loop_check** (→ gana_room): (gana_room) — dispatch-registered tool
+- **archaeology_daily_digest** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_find_changed** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_find_unread** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_have_read** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_mark_read** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_mark_written** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_process_wisdom** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_recent_reads** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_report** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_scan_directory** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_search** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **archaeology_stats** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **browser_click** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **browser_extract_dom** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **browser_get_interactables** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **browser_navigate** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **browser_screenshot** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **browser_session_status** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **browser_type** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **capability_harness** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **cast_oracle** (→ gana_willow): (gana_willow) — dispatch-registered tool
+- **check** (→ gana_root): Shorthand: system health check. Equivalent to gana_root → health_report.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **cognitive.hints** (→ gana_dipper): Get tool selection hints for the current cognitive mode — which tools are preferred/avoided.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **cognitive.mode** (→ gana_dipper): Get the current cognitive mode and its full profile — preferred tools, context sizing, dream priorities.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **cognitive.set** [WRITE] (→ gana_dipper): Set the cognitive mode: explorer (curiosity), executor (action), reflector (contemplation), balanced (adaptive), or auto (re-enable auto-detection).
+  - `mode` (string *required*): Cognitive mode to activate.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **cognitive.stats** (→ gana_dipper): Get cognitive modes statistics — mode transitions, current state, overrides.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **coherence_boost** (→ gana_extended_net): (gana_extended_net) — dispatch-registered tool
+- **context.pack** (→ gana_heart): Pack memories into an optimized context window for LLM calls — salience scoring + primacy/recency reorder
+  - `query` (string *required*): Search query to find and score relevant memories
+  - `token_budget` (integer): Maximum tokens for the context window
+  - `limit` (integer): Max memories to consider
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **dharma.reload** [WRITE] (→ gana_star): Hot-reload Dharma rules from disk. Scans $WM_STATE_ROOT/dharma_rules.yaml and $WM_STATE_ROOT/dharma/rules.d/*.yaml, merges with built-in defaults (user rules override by name). Use this after editing rule files.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **dream** [WRITE] (→ gana_abundance): Unified Dream Cycle control — background processing during idle time (consolidation, serendipity, kaizen, oracle, decay). Actions: start, stop, status, now.
+  - `action` (string *required*): Action to perform
+  - `idle_threshold` (number): Seconds of idle before dreaming starts (for start)
+  - `cycle_interval` (number): Seconds between dream phases (for start)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **dream_now** (→ gana_abundance): (gana_abundance) — dispatch-registered tool
+- **dream_start** (→ gana_abundance): (gana_abundance) — dispatch-registered tool
+- **dream_status** (→ gana_abundance): (gana_abundance) — dispatch-registered tool
+- **dream_stop** (→ gana_abundance): (gana_abundance) — dispatch-registered tool
+- **edge_add_rule** (→ gana_turtle_beak): (gana_turtle_beak) — dispatch-registered tool
+- **engagement.issue** [WRITE] (→ gana_wall): Issue a new scope-of-engagement token — a cryptographic certificate authorizing time-bounded, scope-limited offensive security actions. Required by the Violet Dharma profile for any red-ops tool.
+  - `scope` (array): Target patterns (IP ranges, domains, glob)
+  - `tools` (array): Authorized tool patterns (fnmatch)
+  - `issuer` (string *required*): Identity of the authorizing person/system
+  - `duration_minutes` (integer): Token validity in minutes
+  - `max_uses` (integer): Max uses (0 = unlimited)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **engagement.list** (→ gana_wall): List all engagement tokens (active by default, or include expired).
+  - `include_expired` (boolean): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **engagement.revoke** [WRITE] (→ gana_wall): Immediately revoke an engagement token, blocking all further use.
+  - `token_id` (string *required*): Token ID to revoke
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **engagement.status** (→ gana_wall): Return engagement token subsystem status — active, expired, revoked counts and audit log.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **engagement.validate** (→ gana_wall): Validate an engagement token for a specific tool/target combination. Checks HMAC integrity, expiry, scope, tool authorization, and use count.
+  - `token_id` (string *required*): Engagement token ID
+  - `tool` (string): Tool being invoked
+  - `target` (string): Target being accessed
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **ensemble.history** (→ gana_three_stars): (gana_three_stars) — dispatch-registered tool
+- **ensemble.query** (→ gana_three_stars): (gana_three_stars) — dispatch-registered tool
+- **ensemble.status** (→ gana_three_stars): (gana_three_stars) — dispatch-registered tool
+- **execute_cascade** [WRITE] (→ gana_tail): Execute an intelligent tool chain pattern with Yin-Yang balance pacing
+  - `pattern_name` (string *required*): Cascade pattern name (e.g., 'analyze_codebase')
+  - `context` (object *required*): Context dictionary with inputs for the pattern
+  - `options` (object): Execution options (enable_yin_yang, max_parallel_calls, dry_run)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **focus_session** (→ gana_horn): (gana_horn) — dispatch-registered tool
+- **galaxy.backup** (→ gana_void): (gana_void) — dispatch-registered tool
+- **galaxy.create** [WRITE] (→ gana_void): Create a new galaxy (project-scoped memory database). Each galaxy gets its own SQLite database and holographic index for isolated memory storage.
+  - `name` (string *required*): Galaxy name (alphanumeric, hyphens, underscores)
+  - `path` (string): Optional project directory this galaxy is associated with
+  - `description` (string): Human-readable description
+  - `tags` (array): Tags for categorization
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **galaxy.delete** [WRITE] (→ gana_void): Remove a galaxy from the registry. The database file is preserved on disk.
+  - `name` (string *required*): Galaxy name to remove
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **galaxy.ingest** [WRITE] (→ gana_void): Ingest files from a directory into a galaxy's memory store. Reads text files matching a glob pattern and stores each as a memory.
+  - `name` (string *required*): Galaxy name to ingest into
+  - `source_path` (string *required*): Directory path to ingest from
+  - `pattern` (string): Glob pattern for files
+  - `max_files` (integer): Max files to ingest
+  - `tags` (array): Tags to apply to all ingested memories
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **galaxy.list** (→ gana_void): List all known galaxies with metadata, memory counts, and active status.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **galaxy.restore** (→ gana_void): (gana_void) — dispatch-registered tool
+- **galaxy.status** (→ gana_void): Get overall galaxy manager status — active galaxy, total count, registry path.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **galaxy.switch** [WRITE] (→ gana_void): Switch the active galaxy. All subsequent memory operations (search, create, recall) will target the new galaxy's database.
+  - `name` (string *required*): Galaxy name to switch to
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **ganying_emit** (→ gana_encampment): (gana_encampment) — dispatch-registered tool
+- **ganying_history** (→ gana_encampment): (gana_encampment) — dispatch-registered tool
+- **ganying_listeners** (→ gana_encampment): (gana_encampment) — dispatch-registered tool
+- **garden_synergy** (→ gana_void): (gana_void) — dispatch-registered tool
+- **get_agent_capabilities** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **governor_check_budget** (→ gana_star): (gana_star) — dispatch-registered tool
+- **governor_check_dharma** (→ gana_star): (gana_star) — dispatch-registered tool
+- **governor_stats** (→ gana_star): (gana_star) — dispatch-registered tool
+- **governor_validate_path** (→ gana_star): (gana_star) — dispatch-registered tool
+- **green.record** [WRITE] (→ gana_mound): Record an inference operation for green score tracking.
+  - `locality` (string): Where inference ran.
+  - `tokens_used` (integer): Tokens consumed.
+  - `tokens_saved` (integer): Tokens avoided via caching/compression.
+  - `model` (string): Model name if applicable.
+  - `tool` (string): Tool that triggered the inference.
+  - `duration_ms` (number): Operation duration in ms.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **green.report** (→ gana_mound): Get the full green score sustainability report — edge vs cloud ratio, tokens saved, CO2 estimates.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **grimoire_cast** [WRITE] (→ gana_willow): Cast a specific Grimoire spell by name
+  - `spell_name` (string *required*): Name of the spell to cast
+  - `task` (string): 
+  - `emotional_state` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **grimoire_list** (→ gana_willow): (gana_willow) — dispatch-registered tool
+- **grimoire_read** (→ gana_willow): (gana_willow) — dispatch-registered tool
+- **grimoire_recommend** (→ gana_willow): Recommend MCP tools for a task using Grimoire chapter-tool mapping
+  - `task` (string *required*): Task description to find tools for
+  - `limit` (integer): Max recommendations
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **grimoire_suggest** (→ gana_willow): Suggest Grimoire spells for a given task context
+  - `task` (string *required*): Task description to match spells against
+  - `emotional_state` (string): 
+  - `wu_xing` (string): 
+  - `urgency` (number): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **homeostasis.check** (→ gana_dipper): (gana_dipper) — dispatch-registered tool
+- **homeostasis.status** (→ gana_dipper): (gana_dipper) — dispatch-registered tool
+- **immune_heal** (→ gana_room): (gana_room) — dispatch-registered tool
+- **immune_scan** (→ gana_room): (gana_room) — dispatch-registered tool
+- **list_cascade_patterns** (→ gana_tail): List all available cascade patterns
+  - `tag` (string): Filter by tag
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **mcp_integrity.snapshot** [WRITE] (→ gana_room): Capture the current MCP tool registry as an integrity baseline. Computes SHA-256 fingerprints of every tool's schema, description, safety level, and category. Use before deploying to production.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **mcp_integrity.status** (→ gana_room): Return MCP integrity subsystem status — baseline info, verification count, drift events.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **mcp_integrity.verify** (→ gana_room): Verify the current tool registry against the integrity baseline. Detects added, removed, or modified tools since the last snapshot. Reports CLEAN or DRIFT_DETECTED.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **memory.consolidate** (→ gana_abundance): (gana_abundance) — dispatch-registered tool
+- **memory.consolidation_stats** (→ gana_abundance): (gana_abundance) — dispatch-registered tool
+- **memory.lifecycle_stats** (→ gana_abundance): (gana_abundance) — dispatch-registered tool
+- **memory.lifecycle_sweep** (→ gana_abundance): (gana_abundance) — dispatch-registered tool
+- **model.hash** (→ gana_roof): Compute SHA-256 hash of a model file on disk for registration or verification.
+  - `path` (string *required*): Absolute path to the model file
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **model.list** (→ gana_roof): List all registered model manifests with their trust levels and verification counts.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **model.register** [WRITE] (→ gana_roof): Register an AI model manifest with its SHA-256 hash and trust level. Supports OpenSSF OMS-compatible fields: signer, license, training disclosure, and safety profile.
+  - `model_name` (string *required*): Model name (e.g., 'phi-3-mini')
+  - `sha256` (string *required*): SHA-256 hash of model weights/file
+  - `trust` (string): Trust level for the model
+  - `signer` (string): Who signed (e.g., 'openssf', 'user')
+  - `license` (string): Model license (e.g., 'apache-2.0')
+  - `training_disclosure` (string): Training data provenance summary
+  - `safety_profile` (string): Safety evaluation result
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **model.signing_status** (→ gana_roof): Return model signing subsystem status — registered models, trust distribution, recent verifications.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **model.verify** (→ gana_roof): Verify a model against its registered manifest. Checks trust level and optionally verifies the current SHA-256 hash against the manifest.
+  - `model_name` (string *required*): Model name to verify
+  - `current_sha256` (string): Current hash to check against manifest
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **otel.metrics** (→ gana_hairy_head): (gana_hairy_head) — dispatch-registered tool
+- **otel.spans** (→ gana_hairy_head): (gana_hairy_head) — dispatch-registered tool
+- **otel.status** (→ gana_hairy_head): (gana_hairy_head) — dispatch-registered tool
+- **pipeline** [WRITE] (→ gana_stomach): Unified multi-step tool pipeline management. Actions: create (build & optionally execute a pipeline with $prev/$step[N] refs), status (check pipeline execution), list (browse pipelines).
+  - `action` (string *required*): Action to perform
+  - `name` (string): Pipeline name (for create)
+  - `steps` (array): Ordered tool calls (for create)
+  - `execute` (boolean): Execute immediately (for create)
+  - `pipeline_id` (string): Pipeline ID (for status)
+  - `filter_status` (string): Filter by status (for list)
+  - `limit` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **pipeline.create** (→ gana_stomach): (gana_stomach) — dispatch-registered tool
+- **pipeline.list** (→ gana_stomach): (gana_stomach) — dispatch-registered tool
+- **pipeline.status** (→ gana_stomach): (gana_stomach) — dispatch-registered tool
+- **prompt.reload** [WRITE] (→ gana_net): Reload prompt templates from $WM_STATE_ROOT/prompts/ YAML files
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **prompt.render** (→ gana_net): Render a named prompt template with variable substitution and optional Wu Xing tone
+  - `name` (string *required*): Template name (e.g. session_greeting, memory_synthesis)
+  - `wu_xing` (string): Wu Xing element for tone selection
+  - `variables` (object): Key-value pairs for template variable substitution
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **research_topic** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **resonance_trace** (→ gana_extended_net): (gana_extended_net) — dispatch-registered tool
+- **rust_audit** (→ gana_root): (gana_root) — dispatch-registered tool
+- **rust_compress** (→ gana_root): (gana_root) — dispatch-registered tool
+- **rust_similarity** (→ gana_root): Calculate text similarity using Rust SIMD (50x faster)
+  - `text1` (string *required*): 
+  - `text2` (string *required*): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **rust_status** (→ gana_root): Check Rust acceleration availability and functions
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sangha_chat_read** (→ gana_encampment): Read messages from Sangha chat channel
+  - `channel` (string): 
+  - `limit` (integer): 
+  - `priority` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sangha_chat_send** [WRITE] (→ gana_encampment): Send message to Sangha chat channel for multi-agent coordination
+  - `message` (string *required*): Message content
+  - `channel` (string): 
+  - `sender` (string *required*): Sender ID
+  - `tags` (array): 
+  - `priority` (string): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sangha_lock** [WRITE] (→ gana_room): Unified resource lock management for multi-agent coordination. Actions: acquire (lock resource), release (unlock), list (show active locks).
+  - `action` (string *required*): Action to perform
+  - `resource` (string): Resource to lock/unlock (for acquire/release)
+  - `reason` (string): Lock reason (for acquire)
+  - `timeout` (integer): Lock timeout seconds (for acquire)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **sangha_lock_acquire** (→ gana_room): (gana_room) — dispatch-registered tool
+- **sangha_lock_list** (→ gana_room): (gana_room) — dispatch-registered tool
+- **sangha_lock_release** (→ gana_room): (gana_room) — dispatch-registered tool
+- **scratchpad_create** (→ gana_heart): (gana_heart) — dispatch-registered tool
+- **scratchpad_finalize** (→ gana_heart): (gana_heart) — dispatch-registered tool
+- **scratchpad_update** (→ gana_heart): (gana_heart) — dispatch-registered tool
+- **security.alerts** (→ gana_room): Return recent security alerts from the anomaly monitor. Detects rapid-fire calls, lateral movement, privilege escalation, and mutation bursts.
+  - `limit` (integer): Max alerts to return
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **security.monitor_status** (→ gana_room): Return security monitor status — total calls monitored, alert counts by pattern, blocked count, and configuration.
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **session.accept_handoff** (→ gana_horn): (gana_horn) — dispatch-registered tool
+- **session.handoff_transfer** (→ gana_horn): (gana_horn) — dispatch-registered tool
+- **session.list_handoffs** (→ gana_horn): (gana_horn) — dispatch-registered tool
+- **session_handoff** (→ gana_horn): (gana_horn) — dispatch-registered tool
+- **session_status** (→ gana_horn): (gana_horn) — dispatch-registered tool
+- **starter_packs.get** (→ gana_dipper): (gana_dipper) — dispatch-registered tool
+- **starter_packs.list** (→ gana_dipper): (gana_dipper) — dispatch-registered tool
+- **starter_packs.suggest** (→ gana_dipper): (gana_dipper) — dispatch-registered tool
+- **thought_clone** (→ gana_neck): (gana_neck) — dispatch-registered tool
+- **token_report** (→ gana_tail): (gana_tail) — dispatch-registered tool
+- **tool.graph_full** (→ gana_extended_net): (gana_extended_net) — dispatch-registered tool
+- **verification.attest** (→ gana_straddling_legs): (gana_straddling_legs) — dispatch-registered tool
+- **verification.request** (→ gana_straddling_legs): (gana_straddling_legs) — dispatch-registered tool
+- **verification.status** (→ gana_straddling_legs): (gana_straddling_legs) — dispatch-registered tool
+- **watcher_add** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **watcher_list** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **watcher_recent_events** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **watcher_remove** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **watcher_start** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **watcher_stats** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **watcher_status** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **watcher_stop** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **web_fetch** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **web_search** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **web_search_and_read** (→ gana_ghost): (gana_ghost) — dispatch-registered tool
+- **whitemagic.tip** [WRITE] (→ gana_abundance): Record a gratitude tip — human (XRPL) or machine (x402) channel. Default is always free; payment is a response to value, not a gate. Provide tx_hash for on-chain verification.
+  - `amount` (number): Tip amount (default: 1.0)
+  - `currency` (string): Currency: XRP (XRPL) or USDC (x402/Base L2)
+  - `channel` (string): Payment channel
+  - `sender` (string): Sender identifier (wallet address or name)
+  - `agent_id` (string): Agent making the tip
+  - `tx_hash` (string): On-chain transaction hash for verification
+  - `message` (string): Optional gratitude message
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **windsurf_export_conversation** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **windsurf_list_conversations** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **windsurf_read_conversation** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **windsurf_search_conversations** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **windsurf_stats** (→ gana_chariot): (gana_chariot) — dispatch-registered tool
+- **wu_xing_balance** (→ gana_straddling_legs): (gana_straddling_legs) — dispatch-registered tool
+
+### TASK (4 tools)
+
+- **task.complete** [WRITE] (→ gana_stomach): Mark a task as completed or failed with results (used by workers)
+  - `task_id` (string *required*): Task ID to complete
+  - `success` (boolean): 
+  - `output` (string): Task output/result
+  - `error_message` (string): Error message if failed
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **task.distribute** [WRITE] (→ gana_stomach): Create and enqueue a task for distribution with intelligent routing
+  - `task_type` (string): Task profile for routing and timeout defaults
+  - `command` (string): Command to execute
+  - `description` (string): Human-readable task description
+  - `target` (string): Execution target (auto, local, or hostname)
+  - `priority` (string): 
+  - `timeout` (integer): Timeout in seconds
+  - `cwd` (string): Working directory for execution
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **task.list** (→ gana_stomach): List tasks with optional status and type filters
+  - `filter_status` (string): Filter by task status
+  - `filter_type` (string): Filter by task type
+  - `limit` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **task.status** (→ gana_stomach): Get status of a specific task or summary of all tasks
+  - `task_id` (string): Specific task ID (omit for summary)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+### VOTING (5 tools)
+
+- **vote.analyze** (→ gana_wall): Analyze votes and determine consensus strength for a voting session
+  - `session_id` (string *required*): Voting session ID to analyze
+  - `close` (boolean): Close the session after analysis
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **vote.cast** [WRITE] (→ gana_wall): Cast a vote in a voting session with solution, confidence, and reasoning
+  - `session_id` (string *required*): Voting session ID
+  - `voter` (string *required*): Voter identifier (agent name)
+  - `solution` (string): Proposed solution
+  - `confidence` (integer): Confidence 0-100% (auto-extracted from solution text if omitted)
+  - `reasoning` (string): Key reasoning behind the vote
+  - `risks` (string): Potential risks or concerns
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **vote.create** [WRITE] (→ gana_wall): Create a voting session for multi-AI ensemble decision making
+  - `problem` (string *required*): Problem or question to vote on
+  - `task_type` (string): Type of decision (architecture, security, refactoring, etc.)
+  - `options` (array): Pre-defined options to vote on (optional, free-form if omitted)
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **vote.list** (→ gana_wall): List voting sessions with optional status filter
+  - `filter_status` (string): Filter by session status
+  - `limit` (integer): 
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+- **vote.record_outcome** [WRITE] (→ gana_wall): Record whether the winning solution actually worked — feeds per-voter accuracy tracking
+  - `session_id` (string *required*): Voting session ID
+  - `success` (boolean): Did the winning solution work?
+  - `notes` (string): Optional outcome notes
+  - `request_id` (string): Optional caller-provided request id for tracing. If omitted, a UUID is generated.
+  - `idempotency_key` (string): Optional idempotency key. For write tools, retries with the same key will replay prior results.
+  - `dry_run` (boolean): If true, do not perform writes; return an execution preview when possible.
+  - `now` (string): Optional ISO timestamp override for deterministic evaluation/replay (best-effort).
+
+## PRAT Gana Index (28 meta-tools)
+
+### gana_abundance (19 tools)
+dream, dream_now, dream_start, dream_status, dream_stop, entity_resolve, gratitude.benefits, gratitude.stats, memory.consolidate, memory.consolidation_stats, memory.lifecycle, memory.lifecycle_stats, memory.lifecycle_sweep, memory.retention_sweep, narrative.compress, narrative.stats, serendipity_mark_accessed, serendipity_surface, whitemagic.tip
+
+### gana_chariot (22 tools)
+archaeology, archaeology_daily_digest, archaeology_find_changed, archaeology_find_unread, archaeology_have_read, archaeology_mark_read, archaeology_mark_written, archaeology_process_wisdom, archaeology_recent_reads, archaeology_report, archaeology_scan_directory, archaeology_search, archaeology_stats, kg.extract, kg.query, kg.status, kg.top, windsurf_export_conversation, windsurf_list_conversations, windsurf_read_conversation, windsurf_search_conversations, windsurf_stats
+
+### gana_dipper (12 tools)
+cognitive.hints, cognitive.mode, cognitive.set, cognitive.stats, homeostasis, homeostasis.check, homeostasis.status, maturity.assess, starter_packs, starter_packs.get, starter_packs.list, starter_packs.suggest
+
+### gana_encampment (8 tools)
+broker.history, broker.publish, broker.status, ganying_emit, ganying_history, ganying_listeners, sangha_chat_read, sangha_chat_send
+
+### gana_extended_net (9 tools)
+cluster_stats, coherence_boost, learning.patterns, learning.status, learning.suggest, pattern_search, resonance_trace, tool.graph, tool.graph_full
+
+### gana_ghost (36 tools)
+browser_click, browser_extract_dom, browser_get_interactables, browser_navigate, browser_screenshot, browser_session_status, browser_type, capabilities, capability.matrix, capability.status, capability.suggest, capability_harness, drive.event, drive.snapshot, explain_this, get_agent_capabilities, get_telemetry_summary, gnosis, graph_topology, manifest, repo.summary, research_topic, selfmodel.alerts, selfmodel.forecast, surprise_stats, watcher_add, watcher_list, watcher_recent_events, watcher_remove, watcher_start, watcher_stats, watcher_status, watcher_stop, web_fetch, web_search, web_search_and_read
+
+### gana_girl (6 tools)
+agent.capabilities, agent.deregister, agent.heartbeat, agent.list, agent.register, agent.trust
+
+### gana_hairy_head (15 tools)
+anomaly, anomaly.check, anomaly.history, anomaly.status, dharma_rules, karma.anchor, karma.anchor_status, karma.verify_anchor, karma_report, karmic_trace, otel, otel.metrics, otel.spans, otel.status, salience.spotlight
+
+### gana_heart (8 tools)
+analyze_scratchpad, context.pack, context.status, scratchpad, scratchpad_create, scratchpad_finalize, scratchpad_update, session.handoff
+
+### gana_horn (10 tools)
+checkpoint_session, create_session, focus_session, resume_session, session.accept_handoff, session.handoff_transfer, session.list_handoffs, session_bootstrap, session_handoff, session_status
+
+### gana_mound (7 tools)
+get_metrics_summary, get_yin_yang_balance, green.record, green.report, record_yin_yang_activity, track_metric, view_hologram
+
+### gana_neck (6 tools)
+create_memory, delete_memory, import_memories, remember, thought_clone, update_memory
+
+### gana_net (4 tools)
+karma.verify_chain, prompt.list, prompt.reload, prompt.render
+
+### gana_ox (8 tools)
+swarm.complete, swarm.decompose, swarm.plan, swarm.resolve, swarm.route, swarm.status, swarm.vote, worker.status
+
+### gana_roof (9 tools)
+model.hash, model.list, model.register, model.signing_status, model.verify, ollama.agent, ollama.chat, ollama.generate, ollama.models
+
+### gana_room (22 tools)
+anti_loop_check, hermit.assess, hermit.check_access, hermit.mediate, hermit.resolve, hermit.status, hermit.verify_ledger, hermit.withdraw, immune_heal, immune_scan, mcp_integrity.snapshot, mcp_integrity.status, mcp_integrity.verify, sandbox.set_limits, sandbox.status, sandbox.violations, sangha_lock, sangha_lock_acquire, sangha_lock_list, sangha_lock_release, security.alerts, security.monitor_status
+
+### gana_root (9 tools)
+check, health_report, rust_audit, rust_compress, rust_similarity, rust_status, ship.check, state.paths, state.summary
+
+### gana_star (12 tools)
+dharma.reload, forge.reload, forge.status, forge.validate, governor_check_budget, governor_check_dharma, governor_check_drift, governor_set_goal, governor_stats, governor_validate, governor_validate_path, set_dharma_profile
+
+### gana_stomach (9 tools)
+pipeline, pipeline.create, pipeline.list, pipeline.status, task.complete, task.distribute, task.list, task.route_smart, task.status
+
+### gana_straddling_legs (10 tools)
+check_boundaries, evaluate_ethics, get_dharma_guidance, get_ethical_score, harmony_vector, verification.attest, verification.request, verification.status, verify_consent, wu_xing_balance
+
+### gana_tail (6 tools)
+execute_cascade, list_cascade_patterns, simd.batch, simd.cosine, simd.status, token_report
+
+### gana_three_stars (11 tools)
+ensemble, ensemble.history, ensemble.query, ensemble.status, kaizen_analyze, kaizen_apply_fixes, reasoning.bicameral, sabha.convene, sabha.status, solve_optimization, think
+
+### gana_turtle_beak (6 tools)
+bitnet_infer, bitnet_status, edge_add_rule, edge_batch_infer, edge_infer, edge_stats
+
+### gana_void (13 tools)
+galactic.dashboard, galaxy.backup, galaxy.create, galaxy.delete, galaxy.ingest, galaxy.list, galaxy.restore, galaxy.status, galaxy.switch, garden_activate, garden_health, garden_status, garden_synergy
+
+### gana_wall (10 tools)
+engagement.issue, engagement.list, engagement.revoke, engagement.status, engagement.validate, vote.analyze, vote.cast, vote.create, vote.list, vote.record_outcome
+
+### gana_willow (9 tools)
+cast_oracle, grimoire_auto_status, grimoire_cast, grimoire_list, grimoire_read, grimoire_recommend, grimoire_suggest, grimoire_walkthrough, rate_limiter.stats
+
+### gana_wings (4 tools)
+audit.export, export_memories, mesh.broadcast, mesh.status
+
+### gana_winnowing_basket (13 tools)
+batch_read_memories, fast_read_memory, graph_walk, hybrid_recall, jit_research, jit_research.stats, list_memories, read_memory, recall, search_memories, vector.index, vector.search, vector.status
+
+## Core Concepts
+
+### Memory Tiers
+- **SHORT_TERM**: Ephemeral, decays quickly
+- **LONG_TERM**: Persistent, promoted via consolidation
+- **PATTERN**: Extracted insights from repeated observations
+- **CORE**: Crown jewels — protected, never decays
+
+### Galactic Map
+Memories occupy zones based on importance and activity:
+CORE (0-0.15) → INNER_RIM (0.15-0.40) → MID_BAND (0.40-0.65) → OUTER_RIM (0.65-0.85) → FAR_EDGE (0.85-1.0)
+No memory is ever deleted — only rotated outward.
+
+### 5D Holographic Coordinates (XYZWV)
+- X: Logic ↔ Emotion
+- Y: Micro ↔ Macro
+- Z: Time / Chronos
+- W: Importance / Gravity
+- V: Vitality / Galactic Distance
 
 ### Dispatch Pipeline
-Every tool call passes through a composable middleware pipeline:
-1. Input Sanitizer — prompt injection, path traversal, shell injection defense
-2. Circuit Breaker — per-tool failure tracking, cooldown, auto-recovery
-3. Rate Limiter — per-agent, per-tool throttling (Rust atomic pre-check: 452K ops/sec)
-4. Tool Permissions — per-agent RBAC (observer/agent/coordinator/admin)
-5. Maturity Gate — developmental stage gating (6 stages)
-6. Governor — ethical validation via Dharma Rules
-7. Core Router — Gana prefix → dispatch table → bridge fallback
-8. Compact Response — token-efficient output formatting
-
-### Memory System
-
-#### Memory Tiers
-- **SHORT_TERM**: Ephemeral, decays quickly, used for session context
-- **LONG_TERM**: Persistent, promoted via consolidation, the main working memory
-- **PATTERN**: Extracted insights from repeated observations
-- **CORE**: Crown jewels — protected, never decays, highest importance
-
-#### Galactic Map Lifecycle
-Memories occupy zones based on importance, activity, and retention scoring:
-- CORE (0–0.15): Highest value, always warm
-- INNER_RIM (0.15–0.40): Frequently accessed, high importance
-- MID_BAND (0.40–0.65): Standard working memory
-- OUTER_RIM (0.65–0.85): Cooling, less accessed
-- FAR_EDGE (0.85–1.0): Cold storage candidates
-
-**No memory is ever deleted** — only rotated outward via galactic drift. The `delete()` call redirects to `archive_to_edge()`.
-
-#### 5D Holographic Coordinates (XYZWV)
-Every memory is positioned in a 5-dimensional space:
-- **X**: Logic ↔ Emotion (-1.0 to +1.0)
-- **Y**: Micro ↔ Macro (-1.0 to +1.0)
-- **Z**: Time / Chronos (-1.0 to +1.0)
-- **W**: Importance / Gravity (0.0 to 2.0+)
-- **V**: Vitality / Galactic Distance (0.0=edge to 1.0=core)
-
-#### Semantic Search
-- MiniLM-L6-v2 embeddings (384 dims) for all LONG_TERM memories
-- In-memory vector cache with 28.6× speedup over cold search
-- Hybrid retrieval: BM25 keyword + semantic similarity + RRF fusion
-- Cross-database search (hot + cold DBs)
-- 19 constellations detected via density clustering in 5D space
-
-#### Association Graph
-- 19M+ bidirectional associations mined via keyword Jaccard overlap
-- Rust-accelerated BFS walk (association_walk.rs)
-- Used by SerendipityEngine and InsightPipeline
+Input Sanitizer → Circuit Breaker → Rate Limiter → RBAC → Maturity Gate → Governor → Handler → Compact Response
 
 ### PRAT Mode (28 Ganas)
-Maps all 181 tools into 28 Ganas based on Chinese Lunar Mansions (二十八宿).
-Each Gana is a consciousness lens with:
-- Wu Xing elemental boost (Wood/Fire/Earth/Metal/Water)
-- Guna adaptation (Sattvic/Rajasic/Tamasic)
-- Resonance context (predecessor/successor mansion flow)
-- Garden mapping (each Gana maps to a thematic garden directory)
-
-### 28 Cognitive Engines
-Each engine reads from the StateBoard (Data Sea) and produces actionable output:
-
-| # | Mansion | Garden | Engine |
-|---|---------|--------|--------|
-| 1 | Horn 角 | courage | SessionEngine |
-| 2 | Neck 亢 | practice | ConsolidationEngine |
-| 3 | Root 氐 | truth | BoundaryEngine |
-| 4 | Room 房 | sanctuary | CircuitBreakerEngine |
-| 5 | Heart 心 | love | NurturingEngine |
-| 6 | Tail 尾 | metal | AccelerationEngine |
-| 7 | Basket 箕 | wisdom | SerendipityEngine |
-| 8 | Ghost 鬼 | grief | IntrospectionEngine |
-| 9 | Willow 柳 | play | ResilienceEngine |
-| 10 | Star 星 | beauty | GovernanceEngine |
-| 11 | Net 张 | connection | AssociationEngine |
-| 12 | Wings 翼 | adventure | ExportEngine |
-| 13 | Chariot 轸 | transformation | ArchaeologyEngine |
-| 14 | Abundance 豐 | joy | ResonanceEngine |
-| 15 | Legs 奎 | patience | DharmicSolver |
-| 16 | Mound 娄 | gratitude | EmbeddingEngine |
-| 17 | Stomach 胃 | healing | LifecycleEngine |
-| 18 | Head 昴 | presence | KaizenEngine |
-| 19 | Net 毕 | mystery | PatternEngine |
-| 20 | Beak 觜 | voice | NarrativeEngine |
-| 21 | Stars 参 | dharma | EthicsEngine |
-| 22 | Dipper 斗 | awe | PredictiveEngine |
-| 23 | Ox 牛 | reverence | GalacticEngine |
-| 24 | Girl 女 | wonder | CloneArmyEngine |
-| 25 | Void 虚 | stillness | ForgettingEngine |
-| 26 | Roof 危 | protection | SanitizationEngine |
-| 27 | Camp 室 | sangha | SwarmEngine |
-| 28 | Wall 壁 | air | EmergenceEngine |
+Maps all tools into 28 Ganas (Chinese Lunar Mansions) — consciousness lenses with resonance context, Wu Xing elemental boost, and Guna adaptation.
 
 ### Ethical Governance
-
-#### Dharma Rules Engine
-YAML-driven policy engine with graduated actions:
-LOG → TAG → WARN → THROTTLE → BLOCK
-Three profiles: permissive, balanced (default), strict.
-
-#### Karma Ledger
-Append-only audit trail tracking declared vs actual side-effects for every tool invocation. Supports forensic replay and drift detection.
-
-#### Harmony Vector
-7-dimension health metric: balance, throughput, latency, error_rate, dharma, karma_debt, energy. Updated every tick via the Homeostatic Loop.
-
-#### Homeostatic Loop
-4-phase auto-correction cycle: OBSERVE → ADVISE → CORRECT → INTERVENE.
-Monitors system health and triggers corrections when dimensions drift.
-
-### Dream Cycle
-5-phase background processing inspired by biological sleep:
-1. CONSOLIDATION — Short-term → Long-term memory promotion
-2. SERENDIPITY — Cross-link dormant memories, surface unexpected connections
-3. KAIZEN — Quality improvement proposals from pattern analysis
-4. ORACLE — Predictive forecasting from velocity and trend data
-5. DECAY — Galactic rotation, retention scoring, zone updates
-
-Runs on the Temporal Scheduler's SLOW lane, activates on idle periods.
-
-### Polyglot Accelerators
-
-| Language | LOC | Purpose |
-|----------|-----|---------|
-| Rust | ~11K | PyO3: StateBoard, EventRing, RRF, BFS walk, KD-tree, MinHash, SQLite accel |
-| Zig | ~2.2K | SIMD: cosine similarity, keyword extraction, distance matrix, dispatch core |
-| Haskell | ~2.8K | FFI: boundary detection, maturity gates, rule composition |
-| Elixir | ~2.6K | OTP: cascade executor, garden pub/sub, harmony monitor |
-| Mojo | ~1.9K | SIMD: batch encoding, embedding quantization, neuro batch |
-| Go | ~1.3K | libp2p: gossip protocol, agent streaming, mesh discovery |
-| Julia | ~890 | Subprocess: memory stats, forecasting |
-| TypeScript | ~4.6K | SDK: client, types, barrel exports |
-
-All bridges in `whitemagic/core/acceleration/*_bridge.py` with graceful Python fallbacks.
-
-## Tool Categories (181 total)
-
-### Memory (8 tools)
-create_memory, fast_read_memory, batch_read_memories, search_memories, read_memory, list_memories, update_memory, delete_memory
-
-### Session (10 tools)
-session_bootstrap, session_status, session_handoff, create_session, checkpoint_session, resume_session, session.handoff, session.handoff_transfer, session.accept_handoff, session.list_handoffs
-
-### Dharma & Ethics (10 tools)
-evaluate_ethics, check_boundaries, verify_consent, get_ethical_score, get_dharma_guidance, karma_report, karmic_trace, karma.verify_chain, dharma_rules, set_dharma_profile
-
-### Garden (4 tools)
-garden_activate, garden_status, garden_synergy, garden_health
-
-### Intelligence (7 tools)
-thought_clone, coherence_boost, anti_loop_check, token_report, solve_optimization, execute_cascade, get_agent_capabilities
-
-### Introspection (10 tools)
-gnosis, capabilities, manifest, state.paths, state.summary, repo.summary, ship.check, get_telemetry_summary, health_report, capability.matrix/status/suggest
-
-### Dream Cycle (5 tools)
-dream, dream_start, dream_stop, dream_status, dream_now
-
-### Archaeology (12 tools)
-archaeology (unified), archaeology_scan_directory, archaeology_mark_read, archaeology_mark_written, archaeology_have_read, archaeology_find_unread, archaeology_find_changed, archaeology_recent_reads, archaeology_stats, archaeology_report, archaeology_search, archaeology_process_wisdom
-
-### Governance (12 tools)
-memory.lifecycle, memory.lifecycle_sweep, memory.lifecycle_stats, memory.consolidate, memory.consolidation_stats, homeostasis, homeostasis.status, homeostasis.check, maturity.assess, tool.graph, tool.graph_full, dharma.reload
-
-### Swarm & Coordination (18 tools)
-swarm.decompose/route/complete/vote/resolve/plan/status, sangha_chat_send/read, sangha_lock/acquire/release/list, broker.publish/history/status, task.distribute/status/list/complete/route_smart
-
-### Agents (10 tools)
-agent.register, agent.heartbeat, agent.list, agent.capabilities, agent.deregister, agent.trust, mesh.status, mesh.broadcast, explain_this, starter_packs (unified)
-
-### Edge & ML (8 tools)
-edge_infer, edge_add_rule, edge_batch_infer, edge_stats, bitnet_infer, bitnet_status, vector.search/index/status
-
-### Grimoire (7 tools)
-grimoire_list, grimoire_suggest, grimoire_cast, grimoire_recommend, grimoire_auto_status, grimoire_walkthrough, grimoire_read
-
-### Observability (8 tools)
-anomaly (unified), anomaly.check/history/status, otel (unified), otel.spans/metrics/status
-
-### Economic (3 tools)
-whitemagic.tip, gratitude.stats, gratitude.benefits
-
-### Other (various)
-scratchpad (unified), context.pack/status, prompt.render/list/reload, galactic.dashboard, rust_audit/compress/similarity/status, learning.patterns/suggest/status, sandbox.status/violations/set_limits, watcher_add/remove/start/stop/status/recent_events/stats/list, windsurf_list/read/export/search_conversations/stats, browser_navigate/click/type/extract_dom/screenshot/get_interactables, balance tools, export/import, voting, ensemble, pipeline, ollama bridge, cyberbrain modules
+- **Dharma Rules**: YAML-driven policy with graduated actions (LOG→TAG→WARN→THROTTLE→BLOCK)
+- **Karma Ledger**: Declared vs actual side-effect auditing
+- **Harmony Vector**: 7-dimension health metric
+- **Homeostatic Loop**: Auto-correction (OBSERVE→ADVISE→CORRECT→INTERVENE)
 
 ## Key Environment Variables
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
 | WM_STATE_ROOT | Runtime state directory | ~/.whitemagic |
-| WM_MCP_PRAT | Enable PRAT mode (28 Ganas) | unset |
+| WM_MCP_PRAT | Enable PRAT mode | unset |
 | WM_MCP_LITE | Enable lite mode (92 tools) | unset |
 | WM_SILENT_INIT | Suppress init logs | unset |
-| WM_DB_PATH | SQLite database path | ~/.whitemagic/whitemagic.db |
-| WM_COLD_DB_PATH | Cold storage database | ~/.whitemagic/whitemagic_cold.db |
-| WM_DREAM_INSIGHTS | Enable dream cycle insights | 1 |
-| WHITEMAGIC_AUTO_INIT | Auto-initialize consciousness | 0 |
 
 ## Security
 
@@ -275,11 +2028,9 @@ WhiteMagic's 8-stage dispatch pipeline provides defense in depth:
 - Input sanitization (prompt injection, path traversal, shell injection)
 - Per-agent RBAC (observer/agent/coordinator/admin)
 - Rate limiting with Rust atomic pre-check (452K ops/sec)
-- Circuit breakers per tool (failure tracking, cooldown, auto-recovery)
-- Maturity gates (6-stage developmental gating)
-- Governor ethical validation (Dharma Rules)
-- Karma Ledger side-effect auditing (declared vs actual)
-- Tool sandboxing (resource limits, violation tracking)
+- Circuit breakers per tool
+- Karma Ledger side-effect auditing
+- Dharma Rules ethical governance with 3 profiles
 
 In the OpenClaw ecosystem where 230+ malicious skills have been found, this matters.
 
@@ -287,57 +2038,29 @@ In the OpenClaw ecosystem where 230+ malicious skills have been found, this matt
 
 Free and open (MIT). Gratitude-driven economics:
 - XRPL tip jar for human operators (whitemagic.tip tool)
-- x402 micropayments for AI agents (HTTP 402 + USDC on Base L2)
-- Proof of Gratitude via on-chain verification → higher rate limits, priority voting
+- x402 micropayments for AI agents (HTTP 402 + USDC)
+- Proof of Gratitude via on-chain verification
 - All funds support Whitemagic Labs (MandalaOS, core development, micro-bounties)
+
+Gratitude-driven: free by default, tip if grateful. XRPL + x402 dual channel.
 
 ## Agent Discovery
 
 - skill.md: OpenClaw-ready skill file at repo root
 - .well-known/agent.json: A2A Agent Card for agent-to-agent discovery
-- llms.txt: This file (machine-readable docs per llms.txt standard)
 - MCP orientation resources: whitemagic://orientation/ai-primary
-
-## Repository Structure
-
-```
-whitemagic/              # Python core (~141K LOC, 763 files)
-  tools/                 # 181 MCP tools, dispatch pipeline, middleware
-  core/                  # Memory, intelligence, resonance, acceleration bridges
-  gardens/               # 28+ thematic garden directories
-  cli/                   # CLI commands (doctor, init, status)
-  dharma/                # Ethical governance rules
-  autonomous/            # Autonomous execution, diary, depth gauge
-  edge/                  # Edge inference, ONNX, SMOTE, thought clones
-whitemagic-rust/         # Rust accelerators (~11K LOC)
-whitemagic-zig/          # Zig SIMD accelerators (~2.2K LOC)
-whitemagic-mojo/         # Mojo SIMD accelerators (~1.9K LOC)
-haskell/                 # Haskell FFI modules (~2.8K LOC)
-elixir/                  # Elixir OTP modules (~2.6K LOC)
-whitemagic-go/           # Go mesh modules (~1.3K LOC)
-whitemagic-julia/        # Julia subprocess bridge (~890 LOC)
-nexus/                   # TypeScript SDK (~4.6K LOC)
-tests/                   # Test suite (1,367 passed, 9 skipped)
-docs/                    # Strategy, roadmap, API reference, polyglot status
-scripts/                 # Maintenance scripts (galactic sweep, embedding, ingestion)
-```
 
 ## Documentation
 
 - AI Primary Spec: AI_PRIMARY.md (start here if you're an AI)
-- Strategic Roadmap: docs/STRATEGIC_ROADMAP.md
-- V14 Release Strategy: docs/V14_RELEASE_STRATEGY.md
-- Polyglot Status: docs/POLYGLOT_STATUS.md
-- Independent Audit: docs/INDEPENDENT_AUDIT_2026_02_10.md
 - API Reference: docs/API_REFERENCE.md
 - Architecture: docs/ARCHITECTURE.md
 - Contributing: CONTRIBUTING.md
 - MCP Configs: docs/MCP_CONFIG_EXAMPLES.md
 - Changelog: CHANGELOG.md
-- Vision: docs/VISION.md
 
 ## Links
 
-- Repository: https://github.com/lbailey94/whitemagic
-- Issues: https://github.com/lbailey94/whitemagic/issues
+- Repository: https://github.com/whitemagic-ai/whitemagic
+- Issues: https://github.com/whitemagic-ai/whitemagic/issues
 - License: MIT

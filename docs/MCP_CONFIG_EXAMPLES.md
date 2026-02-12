@@ -1,6 +1,6 @@
 # MCP Integration Cookbook
 
-WhiteMagic exposes its 208 tools (or 28 PRAT Gana meta-tools) via the Model Context Protocol (MCP) over stdio. This guide covers configuration for all major MCP clients.
+WhiteMagic exposes its 313 tools (or 28 PRAT Gana meta-tools) via the Model Context Protocol (MCP) over stdio. This guide covers configuration for all major MCP clients.
 
 ---
 
@@ -107,14 +107,14 @@ If using an MCP extension for VS Code:
 ### Docker
 
 ```bash
-docker run --rm -i ghcr.io/lbailey94/whitemagic:latest
+docker run --rm -i ghcr.io/whitemagic-ai/whitemagic:latest
 ```
 
 Or with custom state:
 ```bash
 docker run --rm -i \
   -v /path/to/state:/data/whitemagic \
-  ghcr.io/lbailey94/whitemagic:latest
+  ghcr.io/whitemagic-ai/whitemagic:latest
 ```
 
 ### pip-installed (global)
@@ -187,7 +187,7 @@ pip install fastmcp
 
 ### Too many tools / client timeout
 
-Use PRAT mode (`WM_MCP_PRAT=1`) to reduce from 208 → 28 tools, or Lite mode (`WM_MCP_LITE=1`) for 92 tools.
+Use PRAT mode (`WM_MCP_PRAT=1`) to reduce from 311 → 28 tools, or Lite mode (`WM_MCP_LITE=1`) for 92 tools.
 
 ### Tools not responding
 

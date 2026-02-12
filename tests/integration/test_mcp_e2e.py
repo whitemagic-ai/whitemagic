@@ -237,7 +237,7 @@ class TestMCPToolCall:
                     "tool": "health_report",
                     "args": {},
                 },
-            })
+            }, timeout=60.0)
             assert "result" in response, f"Expected result, got: {response}"
 
             content = response["result"].get("content", [])

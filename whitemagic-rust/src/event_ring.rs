@@ -312,6 +312,17 @@ pub fn ring_reset() -> PyResult<()> {
     for cursor in &RING.consumer_cursors {
         cursor.store(0, Ordering::Relaxed);
     }
+    for slot in RING.slots.iter() {
+        slot.sequence.store(0, Ordering::Relaxed);
+        slot.event_type.store(0, Ordering::Relaxed);
+        slot.source_id.store(0, Ordering::Relaxed);
+        slot.timestamp_ns.store(0, Ordering::Relaxed);
+        slot.confidence_bits.store(0, Ordering::Relaxed);
+        slot.data_len.store(0, Ordering::Relaxed);
+        for word in &slot.data {
+            word.store(0, Ordering::Relaxed);
+        }
+    }
     Ok(())
 }
 

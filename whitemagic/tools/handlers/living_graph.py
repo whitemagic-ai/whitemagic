@@ -24,6 +24,14 @@ def handle_hybrid_recall(**kwargs: Any) -> dict[str, Any]:
             anchor_limit=anchor_limit,
             final_limit=final_limit,
         )
+
+        # Track context reuse in telemetry
+        try:
+            from whitemagic.core.monitoring.telemetry import get_telemetry
+            get_telemetry().record_context_reuse(hit=len(results) > 0)
+        except Exception:
+            pass
+
         return {
             "status": "success",
             "query": query,

@@ -90,6 +90,8 @@ class Memory:
     is_core_identity: bool = False  # Lucas, Aria, etc.
     is_sacred: bool = False         # Philosophical foundations
     is_pinned: bool = False         # User-pinned
+    is_private: bool = False        # v15: Exclude from MCP tool responses
+    model_exclude: bool = False     # v15: Exclude from AI model context windows
     emotional_weight: float = 0.5   # Resonance score
     links: dict[str, MemoryLink] = field(default_factory=dict)
 
@@ -235,6 +237,8 @@ class Memory:
             "recall_count": self.recall_count,
             "half_life_days": self.half_life_days,
             "is_protected": self.is_protected,
+            "is_private": self.is_private,
+            "model_exclude": self.model_exclude,
             "source": self.source,
             "last_recalled": self.last_recalled.isoformat() if self.last_recalled else None,
             "last_modified": self.last_modified.isoformat() if self.last_modified else None,
@@ -277,6 +281,8 @@ class Memory:
             recall_count=data.get("recall_count", 0),
             half_life_days=data.get("half_life_days", 30.0),
             is_protected=bool(data.get("is_protected", False)),
+            is_private=bool(data.get("is_private", False)),
+            model_exclude=bool(data.get("model_exclude", False)),
             source=data.get("source", ""),
             last_recalled=parse_datetime(data["last_recalled"]) if data.get("last_recalled") else None,
             last_modified=parse_datetime(data["last_modified"]) if data.get("last_modified") else None,

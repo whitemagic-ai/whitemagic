@@ -24,8 +24,9 @@ class TestNoDuplicates(unittest.TestCase):
     def test_tool_count_in_range(self):
         from whitemagic.tools.registry import TOOL_REGISTRY
         # v12.5: consolidated 207→175 tools; Violet security added 15 more
+        # v14.6: 234 tools after Phase 4B2 karma anchoring + v14.2 features
         self.assertGreaterEqual(len(TOOL_REGISTRY), 170)
-        self.assertLessEqual(len(TOOL_REGISTRY), 215)
+        self.assertLessEqual(len(TOOL_REGISTRY), 260)
 
 
 class TestUnifiedArchaeology(unittest.TestCase):

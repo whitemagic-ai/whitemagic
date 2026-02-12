@@ -1,0 +1,39 @@
+{
+  "name": "@whitemagic/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript client SDK for WhiteMagic — memory, governance, and orchestration for AI agents",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node --test dist/**/*.test.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "whitemagic",
+    "mcp",
+    "ai-agent",
+    "memory",
+    "governance",
+    "model-context-protocol"
+  ],
+  "author": "WhiteMagic Labs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/whitemagic-ai/whitemagic",
+    "directory": "sdk/typescript"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  }
+}

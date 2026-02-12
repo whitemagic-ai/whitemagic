@@ -1,11 +1,35 @@
-# Whitemagic v14.1.0
+# WhiteMagic v15.0.0
 
-**Release Date:** 2026-02-11
-**Codename:** Cognitive Enrichment
+**Release Date:** 2026-02-12
+**Codename:** The Seed
 
 ## What Is WhiteMagic?
 
-WhiteMagic is the tool substrate for agentic AI — 208 MCP tools (or 28 in PRAT mode), tiered memory with 5D holographic coordinates and a Galactic Map lifecycle, ethical governance, and polyglot accelerators in 9 languages. It gives AI agents hands, memory, and conscience while keeping them safe.
+WhiteMagic is the tool substrate for agentic AI — 313 MCP tools (or 28 in PRAT mode), tiered memory with 5D holographic coordinates and a Galactic Map lifecycle, ethical governance, and polyglot accelerators in 11 languages. It gives AI agents hands, memory, and conscience while keeping them safe.
+
+## v15.0 Focus: Security Hardening, Seed Binary, and Release Polish
+
+v14.1 built the Living Graph and Cognitive Enrichment layer. v15.0 hardens everything for public release: SQLCipher encryption at rest, persistent RBAC, FTS query sanitization, embedding auto-indexing, `wm backup`/`wm restore`, a 2.4MB zero-dependency seed binary (`wm-seed`), Makefile local verification targets, strict Clippy, and a full codebase audit with 313 tools across 28 Gana meta-tools.
+
+### Highlights
+
+- **SQLCipher Encryption** — AES-256-CBC encryption for SQLite databases via `WM_DB_PASSPHRASE`.
+- **Seed Binary (WhiteMagic Lite)** — 2.4MB standalone Rust MCP server with embedded SQLite, FTS5 search, and 30 core tools. Zero dependencies, <3s install.
+- **3-Tier Delivery** — Lite (seed binary), Standard (pip), Heavy (Docker with all 11 polyglot cores).
+- **Persistent RBAC** — Agent roles survive restarts via JSON-backed storage.
+- **Backup/Restore** — `wm backup` / `wm restore` CLI + `galaxy.backup` / `galaxy.restore` MCP tools.
+- **Embedding Auto-Indexing** — Automatic semantic embedding on memory creation.
+- **FTS5 Query Sanitization** — Strips unsafe characters before MATCH.
+- **Makefile Hardening** — `make verify-local` (pytest + skip policy + Rust tests + strict clippy), `make smoke` from source.
+- **1,955 Python tests**, 87 Rust tests, 195,000+ LOC across 11 languages.
+- **GitHub Organization** — [whitemagic-ai/whitemagic](https://github.com/whitemagic-ai/whitemagic)
+
+---
+
+# WhiteMagic v14.1.0 (Historical)
+
+**Release Date:** 2026-02-11
+**Codename:** Cognitive Enrichment
 
 ## v14.1 Focus: Intelligence Layers on the Living Graph
 
@@ -45,7 +69,7 @@ See `CHANGELOG.md` for the full version-by-version history.
 pip install whitemagic[mcp,cli]
 
 # Or from source:
-git clone https://github.com/lbailey94/whitemagic.git
+git clone https://github.com/whitemagic-ai/whitemagic.git
 cd whitemagic
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev,mcp,cli]"

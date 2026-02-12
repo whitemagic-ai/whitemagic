@@ -1,5 +1,6 @@
 """Async Thought Clone Army - 16,000 concurrent agents.
 Replaces ProcessPoolExecutor with asyncio for massive scalability.
+v14.5: Rust Tokio fast-path (208× faster) with Python asyncio fallback.
 """
 
 import asyncio
@@ -12,6 +13,21 @@ from typing import Any
 from ..core.async_layer import batch_process, gather_with_concurrency
 
 logger = logging.getLogger(__name__)
+
+# v14.5: Rust Tokio Clone Army fast-path
+_RUST_TOKIO = False
+_tokio_deploy: Any = None
+try:
+    from whitemagic.optimization.rust_accelerators import (
+        tokio_clones_available,
+        tokio_deploy_clones as _imported_tokio_deploy,
+    )
+    _RUST_TOKIO = tokio_clones_available()
+    _tokio_deploy = _imported_tokio_deploy
+    if _RUST_TOKIO:
+        logger.debug("Rust Tokio Clone Army available — 208× fast-path enabled")
+except ImportError:
+    pass
 
 @dataclass
 class AsyncThoughtPath:
@@ -57,12 +73,15 @@ class AsyncThoughtCloneArmy:
             "deployment_time_ms": 0,
         }
 
-    async def parallel_explore(self, prompt: str, num_clones: int | None = None) -> AsyncThoughtPath:
+    async def parallel_explore(
+        self, prompt: str, num_clones: int | None = None, *, use_tokio: bool = True,
+    ) -> AsyncThoughtPath:
         """Explore prompt with async clones.
 
         Args:
             prompt: The prompt to explore
             num_clones: Number of clones to deploy (defaults to config.max_clones)
+            use_tokio: If True and Rust Tokio is available, use 208× fast-path
 
         Returns:
             Best thought path from all clones
@@ -70,6 +89,36 @@ class AsyncThoughtCloneArmy:
         """
         start_time = datetime.now()
         clones_to_deploy = min(num_clones or self.config.max_clones, self.config.max_clones)
+
+        # v14.5: Rust Tokio fast-path — 208× faster than Python asyncio
+        if use_tokio and _RUST_TOKIO and callable(_tokio_deploy):
+            try:
+                result = _tokio_deploy(prompt, clones_to_deploy)
+                if result is not None:
+                    winner = result.get("winner", {})
+                    elapsed_ms = result.get("elapsed_ms", 0.0)
+                    # Update cumulative stats
+                    async with self._stats_lock:
+                        self._stats["total_clones_deployed"] += result.get("total_clones", 0)
+                        self._stats["successful_paths"] += result.get("total_clones", 0)
+                        self._stats["total_tokens"] += result.get("total_tokens", 0)
+                        self._stats["deployment_time_ms"] += elapsed_ms
+                        self._stats["avg_confidence"] = result.get("avg_confidence", 0.0)
+                    logger.info(
+                        f"Tokio fast-path: {clones_to_deploy} clones in {elapsed_ms:.1f}ms "
+                        f"(winner: {winner.get('strategy', '?')}, conf: {winner.get('confidence', 0):.2f})"
+                    )
+                    return AsyncThoughtPath(
+                        strategy=winner.get("strategy", "tokio_direct"),
+                        content=winner.get("response", ""),
+                        confidence=winner.get("confidence", 0.0),
+                        tokens=winner.get("tokens_used", 0),
+                        clone_id=winner.get("clone_id", 0),
+                        duration_ms=elapsed_ms,
+                        metadata={"backend": "rust_tokio", "strategy_votes": result.get("strategy_votes", {})},
+                    )
+            except Exception as e:
+                logger.debug(f"Tokio fast-path failed, falling back to asyncio: {e}")
 
         logger.info(f"Deploying {clones_to_deploy} clones for prompt: {prompt[:50]}...")
 

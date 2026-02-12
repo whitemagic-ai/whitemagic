@@ -98,7 +98,7 @@ export default function RightPanel() {
 
   // Live event feed — real WebSocket with mock fallback
   const wsRef = useRef<WebSocket | null>(null);
-  const [wsConnected, setWsConnected] = useState(false);
+  const [_wsConnected, setWsConnected] = useState(false);
 
   useEffect(() => {
     if (paused) return;

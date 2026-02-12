@@ -12,7 +12,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-def handle_tip(kwargs: dict[str, Any]) -> dict[str, Any]:
+def handle_tip(**kwargs: Any) -> dict[str, Any]:
     """Record a gratitude tip.
 
     Args:
@@ -79,7 +79,7 @@ def handle_tip(kwargs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def handle_gratitude_stats(kwargs: dict[str, Any]) -> dict[str, Any]:
+def handle_gratitude_stats(**kwargs: Any) -> dict[str, Any]:
     """Get gratitude ledger statistics."""
     from whitemagic.gratitude.ledger import get_gratitude_ledger
 
@@ -93,7 +93,7 @@ def handle_gratitude_stats(kwargs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def handle_gratitude_benefits(kwargs: dict[str, Any]) -> dict[str, Any]:
+def handle_gratitude_benefits(**kwargs: Any) -> dict[str, Any]:
     """Check gratitude benefits for an agent."""
     from whitemagic.gratitude.proof import get_gratitude_benefits
 

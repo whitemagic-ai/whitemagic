@@ -105,9 +105,32 @@ fn ensure_file(path: &PathBuf) -> std::io::Result<File> {
 
 fn init_board() {
     INIT.call_once(|| {
-        let path = board_path();
-        match ensure_file(&path) {
-            Ok(file) => unsafe {
+        let primary = board_path();
+        let file = match ensure_file(&primary) {
+            Ok(f) => Some(f),
+            Err(primary_err) => {
+                // Fallback to a temp-rooted state path if HOME/WM_STATE_ROOT is not writable.
+                let fallback_root = std::env::temp_dir().join("whitemagic_state");
+                std::env::set_var("WM_STATE_ROOT", fallback_root.to_string_lossy().to_string());
+                let fallback = board_path();
+                match ensure_file(&fallback) {
+                    Ok(f) => Some(f),
+                    Err(fallback_err) => {
+                        eprintln!(
+                            "state_board: failed to create file at {} ({}) and fallback {} ({})",
+                            primary.display(),
+                            primary_err,
+                            fallback.display(),
+                            fallback_err
+                        );
+                        None
+                    }
+                }
+            }
+        };
+
+        if let Some(file) = file {
+            unsafe {
                 let fd = {
                     use std::os::unix::io::AsRawFd;
                     file.as_raw_fd()
@@ -130,8 +153,7 @@ fn init_board() {
                     *magic_ptr = MAGIC;
                     *(magic_ptr.add(1)) = VERSION;
                 }
-            },
-            Err(e) => eprintln!("state_board: failed to create file: {}", e),
+            }
         }
     });
 }
