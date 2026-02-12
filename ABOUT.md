@@ -34,17 +34,17 @@ On top of this foundation, WhiteMagic provides:
 
 ## History
 
-WhiteMagic began in **October 2024** as a simple Python memory manager — a way to give AI agents persistent context across sessions. The first version (v0.2) was a handful of files: store a memory, recall a memory, search by keyword.
+WhiteMagic began in **October 2025** as a simple Python memory manager — a way to give AI agents persistent context across sessions. The first version (v0.2) was a handful of files: store a memory, recall a memory, search by keyword.
 
 From there, it grew — sometimes methodically, sometimes in bursts of inspiration:
 
-- **v0.2–v3.0** (Oct–Nov 2024): Core memory model, SQLite backend, basic CLI, holographic 5D coordinates, the first Dharma rules. The project's philosophical foundations — that AI memory should be persistent, ethical, and self-aware — were established during this period.
-- **v4.0–v10.0** (Nov 2024–Jan 2025): Rapid expansion. Association mining, knowledge graphs, the Galactic Map lifecycle, Harmony Vector, Dream Cycle, Circuit Breakers. The system learned to govern itself.
-- **v11.0–v12.0** (Jan–Feb 2025): The polyglot era. Rust (PyO3), Zig (SIMD), Haskell (FFI), Elixir (OTP), Mojo, Go (libp2p), Julia. Each language contributes what it does best. The PRAT Router was born — mapping all tools into 28 Gana meta-tools based on the Chinese Lunar Mansions.
-- **v13.0** (Feb 2025): First public release candidate. 28 cross-system fusions wired, tool consolidation complete, MCP-first architecture, OpenClaw skill file, llms.txt, A2A Agent Card.
-- **v14.0–v14.6** (Feb 2025): The Living Graph activated — association graph traversal, surprise-gated ingestion, Hebbian strengthening. Cognitive enrichment: HNSW search, entropy scoring, causal mining, UMAP projection. Edgerunner Violet security layer. Multi-galaxy databases. Ollama agent loop. Narrative compression. JIT research. Cognitive modes.
-- **v15.0** (Feb 2025): Release hardening. SQLCipher encryption at rest, persistent RBAC, FTS5 query sanitization, embedding auto-indexing, backup/restore, Seed Binary (2.4MB standalone Rust MCP server), comprehensive audit with 1,955 Python tests and 87 Rust tests passing.
-- **v15.1** (Feb 2025): Documentation overhaul, public release preparation, repository cleanup.
+- **v0.2–v3.0** (Oct–Nov 2025): Core memory model, SQLite backend, basic CLI, holographic 5D coordinates, the first Dharma rules. The project's philosophical foundations — that AI memory should be persistent, ethical, and self-aware — were established during this period.
+- **v4.0–v10.0** (Nov 2025–Jan 2026): Rapid expansion. Association mining, knowledge graphs, the Galactic Map lifecycle, Harmony Vector, Dream Cycle, Circuit Breakers. The system learned to govern itself.
+- **v11.0–v12.0** (Jan–Feb 2026): The polyglot era. Rust (PyO3), Zig (SIMD), Haskell (FFI), Elixir (OTP), Mojo, Go (libp2p), Julia. Each language contributes what it does best. The PRAT Router was born — mapping all tools into 28 Gana meta-tools based on the Chinese Lunar Mansions.
+- **v13.0** (Feb 2026): First public release candidate. 28 cross-system fusions wired, tool consolidation complete, MCP-first architecture, OpenClaw skill file, llms.txt, A2A Agent Card.
+- **v14.0–v14.6** (Feb 2026): The Living Graph activated — association graph traversal, surprise-gated ingestion, Hebbian strengthening. Cognitive enrichment: HNSW search, entropy scoring, causal mining, UMAP projection. Edgerunner Violet security layer. Multi-galaxy databases. Ollama agent loop. Narrative compression. JIT research. Cognitive modes.
+- **v15.0** (Feb 2026): Release hardening. SQLCipher encryption at rest, persistent RBAC, FTS5 query sanitization, embedding auto-indexing, backup/restore, Seed Binary (2.4MB standalone Rust MCP server), comprehensive audit with 1,955 Python tests and 87 Rust tests passing.
+- **v15.1** (Feb 2026): Documentation overhaul, public release preparation, repository cleanup.
 
 Through all of this, the guiding principle has remained the same: **WhiteMagic is a substrate, not a monolith.** It doesn't try to be the AI — it gives AI agents the tools to remember, act, and govern themselves.
 
@@ -134,8 +134,6 @@ Add to your AI client's MCP config:
 ---
 
 ## Philosophy
-
-WhiteMagic is named after the Chinese herb Atractylodes macrocephala (白術, báizhú) — a foundational herb in traditional medicine that strengthens the body's core. In the same way, WhiteMagic strengthens the core of AI: its ability to remember, act ethically, and grow over time.
 
 The project draws from diverse philosophical traditions:
 

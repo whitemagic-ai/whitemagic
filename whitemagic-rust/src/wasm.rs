@@ -110,7 +110,7 @@ impl EdgeEngine {
         engine.add_rule(EdgeRule::new(
             "version",
             "version|what version",
-            "WhiteMagic version 15.0.0",
+            "WhiteMagic version 15.1.0",
             1.0
         ));
         engine.add_rule(EdgeRule::new(
@@ -255,7 +255,7 @@ pub fn wasm_ready() -> bool {
 /// Get WASM version
 #[wasm_bindgen]
 pub fn wasm_version() -> String {
-    "15.0.0".to_string()
+    "15.1.0".to_string()
 }
 
 #[cfg(test)]
@@ -266,7 +266,7 @@ mod tests {
     fn test_basic_inference() {
         let mut engine = EdgeEngine::new();
         let result = engine.infer("What version?");
-        assert!(result.answer.contains("15.0.0"));
+        assert!(result.answer.contains("15.1.0"));
         assert!(!result.needs_cloud);
     }
 

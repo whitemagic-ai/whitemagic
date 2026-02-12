@@ -274,6 +274,30 @@ def register_tools() -> None:
     logger.info(msg)
 
 if __name__ == "__main__":
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("WhiteMagic MCP Server (Hydrated)")
+        print()
+        print("Usage:")
+        print("  python -m whitemagic.run_mcp                    # Classic mode (313 tools)")
+        print("  WM_MCP_PRAT=1 python -m whitemagic.run_mcp      # PRAT mode (28 Gana meta-tools)")
+        print("  WM_MCP_LITE=1 python -m whitemagic.run_mcp      # Lite mode (92 core tools)")
+        print()
+        print("Environment Variables:")
+        print("  WM_MCP_PRAT=1       Enable 28-tool PRAT mode")
+        print("  WM_MCP_LITE=1       Enable 92-tool lite mode")
+        print("  WM_STATE_ROOT       Runtime state directory (default: ~/.whitemagic)")
+        print("  WM_SILENT_INIT      Suppress startup messages")
+        print("  WM_DB_PASSPHRASE    Enable SQLCipher encryption")
+        print()
+        print("For the recommended lean server, use: python -m whitemagic.run_mcp_lean")
+        sys.exit(0)
+
+    if "--version" in sys.argv:
+        version_file = CORE_SYSTEM_DIR / "VERSION"
+        version = version_file.read_text().strip() if version_file.exists() else "15.1.0"
+        print(f"whitemagic {version}")
+        sys.exit(0)
+
     lifecycle.startup()
     register_resources()
     register_tools()

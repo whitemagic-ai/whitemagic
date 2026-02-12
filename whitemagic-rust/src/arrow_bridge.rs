@@ -163,18 +163,37 @@ pub fn arrow_to_memories(batch: &RecordBatch) -> Vec<MemoryRecord> {
     let ws = batch.column(8).as_any().downcast_ref::<Float64Array>().unwrap();
     let vs = batch.column(9).as_any().downcast_ref::<Float64Array>().unwrap();
 
-    (0..n).map(|i| MemoryRecord {
-        id: ids.value(i).to_string(),
-        title: titles.value(i).to_string(),
-        content: contents.value(i).to_string(),
-        importance: importances.value(i),
-        memory_type: mem_types.value(i).to_string(),
-        x: xs.value(i),
-        y: ys.value(i),
-        z: zs.value(i),
-        w: ws.value(i),
-        v: vs.value(i),
-        tags: vec![], // TODO: extract from list column
+    // Extract tags from the List<Utf8> column
+    let tags_col = batch.column(10);
+    let tags_list = tags_col.as_any().downcast_ref::<arrow::array::ListArray>();
+
+    (0..n).map(|i| {
+        let tags = if let Some(list) = tags_list {
+            if list.is_valid(i) {
+                let values = list.value(i);
+                let str_arr = values.as_any().downcast_ref::<StringArray>();
+                str_arr.map(|a| (0..a.len()).map(|j| a.value(j).to_string()).collect())
+                    .unwrap_or_default()
+            } else {
+                vec![]
+            }
+        } else {
+            vec![]
+        };
+
+        MemoryRecord {
+            id: ids.value(i).to_string(),
+            title: titles.value(i).to_string(),
+            content: contents.value(i).to_string(),
+            importance: importances.value(i),
+            memory_type: mem_types.value(i).to_string(),
+            x: xs.value(i),
+            y: ys.value(i),
+            z: zs.value(i),
+            w: ws.value(i),
+            v: vs.value(i),
+            tags,
+        }
     }).collect()
 }
 

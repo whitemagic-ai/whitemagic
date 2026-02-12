@@ -6,6 +6,11 @@ Get from zero to productive in 5 minutes.
 
 ## 1. Install
 
+> **Important**: On modern Linux (PEP 668), use a virtual environment to avoid `externally-managed-environment` errors:
+> ```bash
+> python -m venv .venv && source .venv/bin/activate
+> ```
+
 ```bash
 # Minimal (core + CLI)
 pip install whitemagic[cli]

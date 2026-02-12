@@ -322,6 +322,9 @@ class SQLiteBackend:
                     INSERT INTO memories_fts (id, title, content, tags_text) VALUES (?, ?, ?, ?)
                 """, (memory.id, memory.title or "", str(memory.content), tags_text))
 
+            # Ensure WAL data is visible to other connections immediately
+            conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
+
         return memory.id
 
     def recall(self, memory_id: str) -> Memory | None:

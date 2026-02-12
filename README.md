@@ -23,6 +23,9 @@ If you're integrating Whitemagic into an agent runtime, start with `AI_PRIMARY.m
 ## Installation
 
 ### From Source (Recommended For This Repo)
+
+> **Note**: On modern Linux systems (PEP 668), use a virtual environment to avoid `externally-managed-environment` errors.
+
 ```bash
 # A pre-configured venv exists at .venv/ with all deps + Mojo 0.26.1
 source .venv/bin/activate

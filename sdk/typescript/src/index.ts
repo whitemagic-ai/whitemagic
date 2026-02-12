@@ -1,7 +1,7 @@
 /**
  * @whitemagic/sdk — TypeScript client for WhiteMagic.
  *
- * Provides typed access to WhiteMagic's 302+ MCP tools via stdio or HTTP transport.
+ * Provides typed access to WhiteMagic's 313 MCP tools via stdio or HTTP transport.
  *
  * @example
  * ```typescript
