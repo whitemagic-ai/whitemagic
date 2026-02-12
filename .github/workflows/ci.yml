@@ -252,7 +252,7 @@ jobs:
           WM_SILENT_INIT=1 WM_STATE_ROOT=/tmp/wm_pack_test python -c "from whitemagic.tools.unified_api import call_tool; print(call_tool('capabilities')['status'])"
 
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: whitemagic-wheel
           path: dist/*.whl
@@ -326,7 +326,7 @@ jobs:
           "
 
       - name: Upload BUILD_HASHES.json
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: build-hashes
           path: BUILD_HASHES.json
