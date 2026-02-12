@@ -11,11 +11,11 @@ WhiteMagic stores sensitive data in several locations:
 | Data Store | Location | Encryption | Status |
 |-----------|----------|-----------|--------|
 | **Secrets Vault** | `~/.whitemagic/vault/secrets.db` | AES-256-GCM | ✅ Done |
-| **Memory DB (hot)** | `~/.whitemagic/whitemagic.db` | None | ❌ Plaintext |
-| **Memory DB (cold)** | `~/.whitemagic/memory/whitemagic.db` | None | ❌ Plaintext |
-| **Galaxy DBs** | `~/.whitemagic/memory/galaxies/{name}/` | None | ❌ Plaintext |
-| **Karma Ledger** | `~/.whitemagic/karma/` | None | ❌ Plaintext |
-| **Audit Logs** | `~/.whitemagic/audit/` | None | ❌ Plaintext |
+| **Memory DB (hot)** | `~/.whitemagic/whitemagic.db` | SQLCipher (opt-in) | ✅ Done |
+| **Memory DB (cold)** | `~/.whitemagic/memory/whitemagic.db` | SQLCipher (opt-in) | ✅ Done |
+| **Galaxy DBs** | `~/.whitemagic/memory/galaxies/{name}/` | SQLCipher (opt-in) | ✅ Done |
+| **Karma Ledger** | `~/.whitemagic/dharma/` | SHA-256 hash chain | ✅ Done |
+| **Audit Logs** | `~/.whitemagic/audit/` | Merkle root anchoring | ✅ Done |
 | **State root dir** | `~/.whitemagic/` | `chmod 0o700` | ✅ FS permissions |
 
 The Vault (`whitemagic/security/vault.py`) already provides AES-256-GCM encryption for API keys and secrets. The memory databases are currently plaintext SQLite files protected only by filesystem permissions.
@@ -47,35 +47,16 @@ Replace the standard `sqlite3` module with [SQLCipher](https://www.zetetic.net/s
 
 ### Implementation
 
-```python
-# whitemagic/core/memory/encrypted_db.py
+Implemented in two layers:
 
-import os
-from pathlib import Path
+1. **`core/memory/db_manager.py`** — `ConnectionPool._create_connection()` checks `WM_DB_PASSPHRASE` and uses `sqlcipher3` when available. All memory databases (hot, cold, galaxy) inherit this automatically.
 
-def get_connection(db_path: Path, passphrase: str | None = None):
-    """Get an encrypted or plaintext SQLite connection."""
-    passphrase = passphrase or os.environ.get("WM_DB_PASSPHRASE", "")
-    
-    if passphrase:
-        try:
-            from pysqlcipher3 import dbapi2 as sqlcipher
-            conn = sqlcipher.connect(str(db_path))
-            conn.execute(f"PRAGMA key = '{passphrase}'")
-            conn.execute("PRAGMA cipher_page_size = 4096")
-            conn.execute("PRAGMA kdf_iter = 256000")
-            return conn
-        except ImportError:
-            import warnings
-            warnings.warn(
-                "pysqlcipher3 not installed — database will NOT be encrypted. "
-                "Install with: pip install pysqlcipher3",
-                stacklevel=2,
-            )
-    
-    import sqlite3
-    return sqlite3.connect(str(db_path))
-```
+2. **`core/memory/encrypted_db.py`** — Unified encryption manager with:
+   - OS keychain integration (macOS Keychain, GNOME Keyring, KDE Wallet)
+   - Passphrase strength validation (min 12 chars, Shannon entropy ≥ 2.5 bits/char)
+   - Migration tools: `encrypt_database()`, `decrypt_database()`, `rekey_database()`
+   - Status reporting: `encryption_status()` scans all data stores
+   - Secure memory clearing via `ctypes.memset` for passphrase buffers
 
 ### Key Management
 
@@ -115,15 +96,19 @@ Migration is a one-time operation:
 
 Extend the existing `whitemagic/security/vault.py` with CLI commands:
 
+All commands implemented in `cli/cli_app.py`:
+
 ```bash
-wm vault init                  # Initialize vault with passphrase
-wm vault set KEY VALUE         # Store a secret
-wm vault get KEY               # Retrieve a secret
-wm vault list                  # List stored keys (not values)
-wm vault delete KEY            # Remove a secret
-wm vault lock                  # Clear cached passphrase
-wm vault rekey                 # Change master passphrase
-wm vault export --encrypted    # Export vault (encrypted backup)
+wm vault init                  # Initialize vault with passphrase       ✅
+wm vault set KEY VALUE         # Store a secret                         ✅
+wm vault get KEY               # Retrieve a secret                      ✅
+wm vault list                  # List stored keys (not values)          ✅
+wm vault delete KEY            # Remove a secret                        ✅
+wm vault lock                  # Clear cached passphrase from keychain  ✅
+wm vault rekey                 # Change master passphrase               ✅
+wm vault status                # Show encryption status of all stores   ✅
+wm vault encrypt-db [NAME]     # Encrypt a database with SQLCipher      ✅
+wm vault decrypt-db [NAME]     # Decrypt back to plaintext              ✅
 ```
 
 ### Auto-Lock
@@ -168,7 +153,7 @@ For Healthcare tier (Tier 6), audit logs must be append-only and tamper-evident:
 
 | Package | Purpose | Optional? |
 |---------|---------|----------|
-| `pysqlcipher3` | SQLCipher Python bindings | Yes — falls back to plaintext |
+| `sqlcipher3` | SQLCipher Python bindings | Yes — falls back to plaintext |
 | `keyring` | OS keychain access | Yes — falls back to env var |
 | `cryptography` | AES-GCM for vault (already used) | Yes — falls back to HMAC |
 
@@ -176,7 +161,7 @@ For Healthcare tier (Tier 6), audit logs must be append-only and tamper-evident:
 
 ```toml
 [project.optional-dependencies]
-encryption = ["pysqlcipher3>=1.2.0", "keyring>=25.0"]
+encrypt = ["sqlcipher3>=0.5.0"]  # Already in pyproject.toml
 ```
 
 ---
@@ -195,9 +180,9 @@ encryption = ["pysqlcipher3>=1.2.0", "keyring>=25.0"]
 
 1. ✅ Vault secret storage (Done — `security/vault.py`)
 2. ✅ FS permissions (Done — `config/paths.py`, `0o700`)
-3. ⬜ SQLCipher for hot DB (`core/memory/encrypted_db.py`)
-4. ⬜ Vault CLI commands (`cli/vault_command.py`)
-5. ⬜ OS keychain integration
-6. ⬜ Galaxy DB encryption
-7. ⬜ Cold DB encryption
-8. ⬜ Audit log immutability
+3. ✅ SQLCipher for all DBs (Done — `core/memory/db_manager.py` + `encrypted_db.py`)
+4. ✅ Vault CLI commands (Done — `cli/cli_app.py`: init/set/get/list/delete/rekey/lock/status/encrypt-db/decrypt-db)
+5. ✅ OS keychain integration (Done — `encrypted_db.py` + `vault.py` both use `keyring`)
+6. ✅ Galaxy DB encryption (Done — all pools use `ConnectionPool` which auto-enables SQLCipher)
+7. ✅ Cold DB encryption (Done — same mechanism as hot DB)
+8. ✅ Audit log immutability (Done — `dharma/karma_ledger.py`: SHA-256 hash chain + Merkle tree roots)

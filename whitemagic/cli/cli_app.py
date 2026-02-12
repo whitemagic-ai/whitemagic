@@ -2820,5 +2820,108 @@ def vault_rekey(new_passphrase: str, passphrase: str | None):
     click.echo(f"Re-keyed {count} secret(s) with new passphrase.")
 
 
+@vault_group.command(name="status")
+def vault_status():
+    """Show encryption status of all WhiteMagic data stores."""
+    from whitemagic.core.memory.encrypted_db import encryption_status
+    status = encryption_status()
+
+    config = status.pop("_config", {})
+    click.echo("WhiteMagic Encryption Status")
+    click.echo("=" * 40)
+    click.echo(f"  SQLCipher available: {'yes' if config.get('sqlcipher_available') else 'no'}")
+    click.echo(f"  Keyring available:   {'yes' if config.get('keyring_available') else 'no'}")
+    click.echo(f"  Passphrase source:   {config.get('passphrase_source', 'none')}")
+    click.echo()
+
+    for name, info in sorted(status.items()):
+        if not info.get("exists"):
+            click.echo(f"  {name:20s}  —  not found")
+            continue
+        enc = "🔒 encrypted" if info.get("encrypted") else "🔓 plaintext"
+        size = f"{info.get('size_mb', 0):.1f} MB"
+        count = info.get("memory_count")
+        count_str = f", {count} memories" if count is not None else ""
+        click.echo(f"  {name:20s}  {enc}  ({size}{count_str})")
+
+
+@vault_group.command(name="encrypt-db")
+@click.argument("db_name", default="hot_db")
+@click.option("--passphrase", "-p", prompt=True, hide_input=True, confirmation_prompt=True, help="Encryption passphrase (min 12 chars)")
+def vault_encrypt_db(db_name: str, passphrase: str):
+    """Encrypt a WhiteMagic database with SQLCipher.
+
+    DB_NAME: hot_db, cold_db, or a galaxy name (default: hot_db)
+    """
+    from whitemagic.core.memory.encrypted_db import encrypt_database, encryption_status
+    status = encryption_status()
+
+    if db_name not in status:
+        click.echo(f"Unknown database: {db_name}", err=True)
+        click.echo(f"Available: {', '.join(k for k in status if not k.startswith('_'))}", err=True)
+        raise SystemExit(1)
+
+    info = status[db_name]
+    if not info.get("exists"):
+        click.echo(f"Database not found: {info.get('path')}", err=True)
+        raise SystemExit(1)
+
+    if info.get("encrypted"):
+        click.echo(f"Database {db_name} is already encrypted.", err=True)
+        raise SystemExit(1)
+
+    db_path = Path(info["path"])
+    try:
+        encrypt_database(db_path, passphrase)
+        click.echo(f"✅ Encrypted {db_name} ({db_path})")
+        click.echo(f"   Plaintext backup: {db_path.with_suffix('.db.plaintext.bak')}")
+    except (ValueError, RuntimeError) as e:
+        click.echo(f"❌ Encryption failed: {e}", err=True)
+        raise SystemExit(1)
+
+
+@vault_group.command(name="decrypt-db")
+@click.argument("db_name", default="hot_db")
+@click.option("--passphrase", "-p", prompt=True, hide_input=True, help="Decryption passphrase")
+def vault_decrypt_db(db_name: str, passphrase: str):
+    """Decrypt a SQLCipher database back to plaintext (for debugging/migration)."""
+    from whitemagic.core.memory.encrypted_db import decrypt_database, encryption_status
+    status = encryption_status()
+
+    if db_name not in status:
+        click.echo(f"Unknown database: {db_name}", err=True)
+        raise SystemExit(1)
+
+    info = status[db_name]
+    if not info.get("exists"):
+        click.echo(f"Database not found: {info.get('path')}", err=True)
+        raise SystemExit(1)
+
+    if not info.get("encrypted"):
+        click.echo(f"Database {db_name} is not encrypted.", err=True)
+        raise SystemExit(1)
+
+    db_path = Path(info["path"])
+    try:
+        decrypt_database(db_path, passphrase)
+        click.echo(f"✅ Decrypted {db_name} ({db_path})")
+    except (ValueError, RuntimeError) as e:
+        click.echo(f"❌ Decryption failed: {e}", err=True)
+        raise SystemExit(1)
+
+
+@vault_group.command(name="lock")
+def vault_lock():
+    """Clear cached passphrase from OS keychain and environment."""
+    from whitemagic.core.memory.encrypted_db import clear_passphrase_from_keychain
+    cleared = clear_passphrase_from_keychain()
+    if "WM_DB_PASSPHRASE" in os.environ:
+        click.echo("Note: WM_DB_PASSPHRASE is set in environment; unset it manually.")
+    if cleared:
+        click.echo("Passphrase cleared from OS keychain.")
+    else:
+        click.echo("No keychain passphrase to clear (or keyring not available).")
+
+
 if __name__ == "__main__":
     main()
