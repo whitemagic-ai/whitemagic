@@ -53,11 +53,17 @@ State root resolution order:
 5. Last resort: `./.whitemagic` (extremely restricted environments)
 
 Key state directories:
-- `memory/` — SQLite databases (main + per-galaxy)
-- `karma/` — Append-only Karma Ledger (JSONL)
-- `vault/` — Encrypted secrets vault
-- `sessions/` — Session checkpoints and scratchpads
-- `audit/` — Audit logs
+- `memory/` — SQLite databases (main + per-galaxy). Optional SQLCipher AES-256 encryption via `WM_DB_PASSPHRASE`.
+- `karma/` — Append-only Karma Ledger (JSONL) with SHA-256 hash chain + Merkle roots.
+- `vault/` — AES-256-GCM encrypted secrets vault (API keys, tokens).
+- `sessions/` — Session checkpoints and scratchpads.
+- `audit/` — Audit logs with Merkle root anchoring.
+
+Vault CLI:
+- `wm vault status` — Show encryption status of all data stores.
+- `wm vault encrypt-db [NAME]` — Encrypt a database with SQLCipher.
+- `wm vault decrypt-db [NAME]` — Decrypt back to plaintext.
+- `wm vault lock` — Clear cached passphrase from OS keychain.
 
 **Nothing under runtime state should ever be committed.**
 
@@ -75,7 +81,7 @@ whitemagic/                    # Main Python package (~170K LOC, 313 MCP tools)
 │   └── resonance/             # Gan Ying event bus
 ├── dharma/                    # Ethical policy engine (YAML rules, 3 profiles)
 ├── harmony/                   # Harmony Vector (7D health), Yin-Yang tracking
-├── security/                  # Vault, Edgerunner Violet, MCP integrity
+├── security/                  # Vault (AES-256-GCM), Edgerunner Violet, MCP integrity
 ├── tools/                     # Canonical tool system
 │   ├── registry.py            # Tool registry
 │   ├── unified_api.py         # call_tool() entry point
@@ -99,7 +105,7 @@ docs/                          # Documentation
 whitemagic-rust/               # Rust PyO3 (~12K LOC) — galactic scoring, 5D KD-tree, SIMD search, Arrow IPC
 haskell/                       # Haskell FFI (~2.8K LOC) — algebraic Dharma rules, dependency planner
 elixir/                        # Elixir OTP (~2.6K LOC) — Gan Ying event bus, dream scheduler
-whitemagic-go/ + mesh/         # Go (~1.3K LOC) — bridge + libp2p P2P mesh, mDNS
+whitemagic-go/ + mesh/         # Go (~1.3K LOC) — bridge + libp2p mesh (TCP+QUIC+WS, PSK auth, NAT traversal)
 whitemagic-zig/                # Zig (~2.2K LOC) — SIMD cosine similarity, holographic projection
 whitemagic-mojo/               # Mojo (~1.9K LOC) — batch encoding, neuro scoring
 whitemagic-julia/              # Julia (~890 LOC) — memory stats, time-series forecasting
@@ -131,7 +137,9 @@ scripts/                       # Build, deploy, and utility scripts
 | **Dream Cycle** | `core/dream_cycle.py` | 7-phase background processing: Consolidation → Narrative → Serendipity → Governance → Kaizen → Oracle → Decay. |
 | **Circuit Breaker** | `tools/circuit_breaker.py` | Stoic resilience per tool: CLOSED → OPEN → HALF_OPEN. Configurable thresholds. |
 | **28 Fusions** | `core/fusions.py` | Cross-system synthesis wiring matching the 28 Ganas. 0 unexplored. |
+| **Encryption at Rest** | `core/memory/encrypted_db.py` | SQLCipher (AES-256-CBC) for all DBs. OS keychain integration. Passphrase strength validation. Migration tools. |
 | **Edgerunner Violet** | `security/` | MCP integrity fingerprinting, model signing, engagement tokens, security monitor. |
+| **P2P Mesh** | `mesh/` | libp2p gossip protocol (TCP+QUIC+WebSocket). PSK peer auth. NAT traversal (UPnP, relay, hole-punch). Agent coordination + distributed locks. |
 
 ---
 
@@ -190,7 +198,9 @@ Extract _agent_id / _compact
 |----------|---------|---------|
 | `WM_STATE_ROOT` | Runtime state directory | `~/.whitemagic` |
 | `WM_DB_PATH` | Override SQLite database path | `$WM_STATE_ROOT/memory/whitemagic.db` |
-| `WM_DB_PASSPHRASE` | Enable SQLCipher encryption | unset |
+| `WM_DB_PASSPHRASE` | Enable SQLCipher encryption for all memory DBs | unset |
+| `WM_MESH_PSK` | Pre-shared key for private mesh network (min 32 chars) | unset |
+| `WM_TERMINOLOGY` | Terminology mode: `esoteric` (default) or `standard` (Rosetta mode) | `esoteric` |
 | `WM_MCP_PRAT` | Enable 28-tool PRAT mode | unset |
 | `WM_MCP_LITE` | Enable 92-tool lite mode | unset |
 | `WM_MCP_CLIENT` | Schema adaptation (gemini/deepseek/qwen) | unset |
@@ -205,3 +215,22 @@ Extract _agent_id / _compact
 Embedded local-model inference is **archived/disabled by default**.
 Legacy code paths require `WHITEMAGIC_ENABLE_LOCAL_MODELS=1`.
 For local LLM integration, use Ollama via the `gana_roof` tools.
+
+---
+
+## Rosetta Mode (Standard Terminology)
+
+Set `WM_TERMINOLOGY=standard` to alias esoteric names in CLI output and logs:
+
+| Esoteric | Standard |
+|----------|----------|
+| Gana | Tool Group |
+| PRAT Router | Meta-Tool Router |
+| Dharma Rules | Ethics Policy |
+| Karma Ledger | Side-Effect Audit |
+| Harmony Vector | Health Metrics |
+| Dream Cycle | Memory Consolidation |
+| Galactic Map | Memory Lifecycle |
+| Gan Ying | Event Bus |
+| Sangha | Agent Swarm |
+| Grimoire | AI Orientation Guide |

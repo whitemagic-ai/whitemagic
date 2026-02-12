@@ -149,7 +149,7 @@ out = call_tool("gnosis", compact=True)
 *   `whitemagic-rust/`: Rust accelerator (~8.5K LOC) — galactic batch scoring, association mining, 5D KD-tree, SIMD search.
 *   `haskell/`: Haskell accelerator (~1.7K LOC) — algebraic Dharma rules, dependency graph planner, FFI bridge.
 *   `elixir/`: Elixir OTP (~1.4K LOC) — actor-model Gan Ying event bus, dream scheduler, supervision trees.
-*   `whitemagic-go/` + `mesh/`: Go (~913 LOC) — libp2p P2P mesh, mDNS discovery, protobuf messaging.
+*   `whitemagic-go/` + `mesh/`: Go (~1.3K LOC) — libp2p mesh (TCP+QUIC+WebSocket), PSK peer auth, NAT traversal, gossip protocol, federated galaxies.
 *   `whitemagic-zig/`: Zig (~795 LOC) — SIMD cosine similarity, holographic projection, memory management.
 *   `whitemagic-mojo/`: Mojo (~1.2K LOC) — batch coordinate encoding, neuro scoring, satkona yang.
 
@@ -162,6 +162,9 @@ out = call_tool("gnosis", compact=True)
 | Variable | Purpose | Default |
 |----------|---------|---------|
 | `WM_STATE_ROOT` | Runtime state directory | `~/.whitemagic` |
+| `WM_DB_PASSPHRASE` | Enable SQLCipher AES-256 encryption for all memory DBs | unset |
+| `WM_MESH_PSK` | Pre-shared key for private mesh network (min 32 chars) | unset |
+| `WM_TERMINOLOGY` | `esoteric` (default) or `standard` (Rosetta mode for enterprise) | `esoteric` |
 | `WM_MCP_PRAT` | Enable 28-tool PRAT mode | unset |
 | `WM_MCP_LITE` | Enable 92-tool lite mode | unset |
 | `WM_MCP_CLIENT` | Schema adaptation (gemini/deepseek/qwen) | unset |

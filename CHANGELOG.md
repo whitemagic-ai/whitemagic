@@ -9,7 +9,26 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [15.1.0] — 2026-02-12
 
-### Documentation Overhaul & Public Release Preparation
+### Documentation Overhaul, Security Hardening & Public Release
+
+#### Added — Security & Encryption
+- **`encrypted_db.py`** — Unified encryption manager: OS keychain integration (macOS Keychain, GNOME Keyring, KDE Wallet), passphrase strength validation (Shannon entropy ≥ 2.5), database migration tools (encrypt/decrypt/rekey), status reporting, secure memory clearing via `ctypes.memset`.
+- **Vault CLI** — 4 new commands: `wm vault status` (encryption audit), `wm vault encrypt-db` (SQLCipher migration), `wm vault decrypt-db` (plaintext restore), `wm vault lock` (clear keychain passphrase).
+- **Rosetta Mode** — `WM_TERMINOLOGY=standard` env var aliases esoteric names (Gana → Tool Group, Dharma → Ethics Policy, etc.) in CLI/logs for enterprise adoption.
+- **Federated Galaxy Protocol** — `mesh/federation.go`: remote galaxy mounting (read-only) via libp2p mesh for multi-device memory sharing without DB merging.
+
+#### Added — Go Mesh Improvements
+- **Multi-transport** — TCP + QUIC + WebSocket (was TCP-only).
+- **PSK peer authentication** — `--psk` flag or `WM_MESH_PSK` env var for private mesh networks.
+- **NAT traversal** — UPnP/NAT-PMP port mapping + AutoRelay + hole punching for cross-network connectivity.
+
+#### Added — System Audit Fixes
+- **`mcp` SDK** added to base `pip install whitemagic` dependencies (was optional-only).
+- **`--help`/`--version`** flags for both `run_mcp_lean.py` and `run_mcp.py` (no longer hangs).
+- **WAL checkpoint** after memory store for immediate search visibility across pooled connections.
+- **Arrow IPC tags extraction** — implemented `List<Utf8>` column decoding (was TODO).
+- **TypeScript SDK** tool count updated 302→313.
+- **WASM/Rust** versions synchronized to 15.1.0.
 
 #### Changed
 - **AI_PRIMARY.md rewritten** — Trimmed from 653 to ~400 lines. Now a pure tool contract spec for AI agents.

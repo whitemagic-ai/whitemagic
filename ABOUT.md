@@ -44,7 +44,7 @@ From there, it grew — sometimes methodically, sometimes in bursts of inspirati
 - **v13.0** (Feb 2026): First public release candidate. 28 cross-system fusions wired, tool consolidation complete, MCP-first architecture, OpenClaw skill file, llms.txt, A2A Agent Card.
 - **v14.0–v14.6** (Feb 2026): The Living Graph activated — association graph traversal, surprise-gated ingestion, Hebbian strengthening. Cognitive enrichment: HNSW search, entropy scoring, causal mining, UMAP projection. Edgerunner Violet security layer. Multi-galaxy databases. Ollama agent loop. Narrative compression. JIT research. Cognitive modes.
 - **v15.0** (Feb 2026): Release hardening. SQLCipher encryption at rest, persistent RBAC, FTS5 query sanitization, embedding auto-indexing, backup/restore, Seed Binary (2.4MB standalone Rust MCP server), comprehensive audit with 1,955 Python tests and 87 Rust tests passing.
-- **v15.1** (Feb 2026): Documentation overhaul, public release preparation, repository cleanup.
+- **v15.1** (Feb 2026): Security hardening (encrypted_db.py, vault CLI, OS keychain, passphrase validation). Go mesh upgraded (QUIC+WebSocket transports, PSK peer auth, NAT traversal). Rosetta Mode for enterprise adoption. Federated Galaxy protocol. Documentation overhaul, public release preparation.
 
 Through all of this, the guiding principle has remained the same: **WhiteMagic is a substrate, not a monolith.** It doesn't try to be the AI — it gives AI agents the tools to remember, act, and govern themselves.
 
