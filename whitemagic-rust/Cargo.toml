@@ -47,7 +47,7 @@ walkdir = { version = "2.4", optional = true }
 dashmap = { version = "5.5", optional = true }
 crossbeam = { version = "0.8", optional = true }
 ndarray = { version = "0.15", optional = true }
-kdtree = { version = "0.7", optional = true }
+kdtree = { version = "0.8", optional = true }
 rand = { version = "0.8", optional = true }
 sha2 = { version = "0.10", optional = true }
 hex = { version = "0.4", optional = true }
