@@ -17,7 +17,7 @@
     "@xterm/addon-web-links": "^0.11.0",
     "d3": "^7.9.0",
     "d3-force": "^3.0.0",
-    "lucide-react": "^0.460.0",
+    "lucide-react": "^0.563.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "zustand": "^5.0.0"
