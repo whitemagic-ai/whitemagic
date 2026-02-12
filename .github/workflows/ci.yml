@@ -24,7 +24,7 @@ jobs:
       WM_SILENT_INIT: "1"
       WM_STATE_ROOT: /tmp/whitemagic_state
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -61,7 +61,7 @@ jobs:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -99,7 +99,7 @@ jobs:
     name: Rust Quality
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -116,7 +116,7 @@ jobs:
     name: Security Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -144,7 +144,7 @@ jobs:
       WM_SILENT_INIT: "1"
       WM_STATE_ROOT: /tmp/whitemagic_state_extras
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -177,7 +177,7 @@ jobs:
       WM_SILENT_INIT: "1"
       WM_STATE_ROOT: /tmp/whitemagic_state_api
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -206,7 +206,7 @@ jobs:
       WM_SILENT_INIT: "1"
       WM_STATE_ROOT: /tmp/whitemagic_state_opt
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -228,7 +228,7 @@ jobs:
     name: Build & Install Validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -262,7 +262,7 @@ jobs:
     name: Reproducible Build Verification
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -341,7 +341,7 @@ jobs:
       WM_STATE_ROOT: /tmp/whitemagic_state_network
       WM_RUN_NETWORK_TESTS: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Up Python
         uses: actions/setup-python@v5
