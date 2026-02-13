@@ -46,6 +46,19 @@
 /whitemagic-rust/logs/
 whitemagic/playground.py
 
+# Internal-only scripts (dev/CI verification, benchmarks, DB maintenance)
+# These live in whitemagicdev but should not ship to the public repo.
+/scripts/verification/verify_*.py
+/scripts/benchmark_*.py
+/scripts/batch_classify_associations.py
+/scripts/memory_renaissance.py
+/scripts/rehydrate_cold.py
+/scripts/rehydrate_galaxy.py
+
+# Test files should NOT live inside the whitemagic package
+whitemagic/**/test_*.py
+whitemagic/**/*_test.py
+
 # Type checking / linting caches
 .mypy_cache/
 .ruff_cache/
