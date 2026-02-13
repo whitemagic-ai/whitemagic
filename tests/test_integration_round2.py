@@ -467,7 +467,7 @@ class TestCallToolRound2:
         monkeypatch.setattr(paths_mod, "WM_ROOT", tmp_path)
 
         from whitemagic.tools.unified_api import call_tool
-        result = call_tool("pipeline.create", steps=[{"tool": "task.list"}])
+        result = call_tool("pipeline.create", name="test-pipeline", steps=[{"tool": "task.list"}])
         assert result["status"] == "success"
         assert result["tool"] == "pipeline.create"
 

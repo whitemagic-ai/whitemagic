@@ -1,9 +1,9 @@
 """
 End-to-end Dream Cycle Integration Test
 =========================================
-Exercises all 5 dream phases with synthetic memories,
-verifying consolidation, serendipity (association mining),
-kaizen (harmony hints), oracle (grimoire), and decay (lifecycle sweep).
+Exercises all 8 dream phases with synthetic memories,
+verifying triage, consolidation, serendipity (association mining),
+governance, narrative, kaizen (harmony hints), oracle (grimoire), and decay (lifecycle sweep).
 
 Also verifies galactic promotion of strategy memories after consolidation.
 """
@@ -130,8 +130,8 @@ class TestDreamPhaseSerendipity:
     def test_serendipity_phase_graceful(self):
         """Serendipity phase should complete gracefully (empty DB is fine)."""
         dc = DreamCycle()
-        # Advance to SERENDIPITY (phase index 1)
-        dc._current_phase_index = 1
+        # Advance to SERENDIPITY (phase index 2, after TRIAGE and CONSOLIDATION)
+        dc._current_phase_index = 2
         dc._run_phase()
 
         report = dc._history[-1]
@@ -219,16 +219,17 @@ class TestDreamCycleE2E:
         dc = DreamCycle(idle_threshold_seconds=0.01, cycle_interval_seconds=0.01)
 
         reports: List[DreamReport] = []
-        for i in range(7):
+        for i in range(8):
             dc._run_phase()
             reports.append(dc._history[-1])
 
-        assert dc._total_cycles == 7
-        assert len(dc._history) == 7
+        assert dc._total_cycles == 8
+        assert len(dc._history) == 8
 
-        # Verify each phase was visited exactly once
+        # Verify each phase was visited exactly once (TRIAGE first, added v15.3)
         phases_seen = [r.phase for r in reports]
         assert phases_seen == [
+            DreamPhase.TRIAGE,
             DreamPhase.CONSOLIDATION,
             DreamPhase.SERENDIPITY,
             DreamPhase.GOVERNANCE,
@@ -244,17 +245,17 @@ class TestDreamCycleE2E:
             assert r.duration_ms >= 0
             assert isinstance(r.details, dict)
             d = r.to_dict()
-            assert d["phase"] in ("consolidation", "serendipity", "governance", "narrative", "kaizen", "oracle", "decay")
+            assert d["phase"] in ("triage", "consolidation", "serendipity", "governance", "narrative", "kaizen", "oracle", "decay")
 
     def test_phase_rotation_wraps_around(self):
-        """After 7 phases, phase 8 should be CONSOLIDATION again."""
+        """After 8 phases, phase 9 should be TRIAGE again."""
         dc = DreamCycle()
-        for _ in range(8):
+        for _ in range(9):
             dc._run_phase()
 
-        assert dc._total_cycles == 8
-        # Phase 8 (index 7) should wrap to CONSOLIDATION (index 0)
-        assert dc._history[-1].phase == DreamPhase.CONSOLIDATION
+        assert dc._total_cycles == 9
+        # Phase 9 (index 8) should wrap to TRIAGE (index 0)
+        assert dc._history[-1].phase == DreamPhase.TRIAGE
 
     def test_status_reflects_history(self):
         dc = DreamCycle()
@@ -264,7 +265,7 @@ class TestDreamCycleE2E:
         status = dc.status()
         assert status["total_cycles"] == 2
         assert len(status["recent_dreams"]) == 2
-        assert status["current_phase"] == "governance"  # next phase after 2 runs (v14: governance is phase 3)
+        assert status["current_phase"] == "serendipity"  # next phase after 2 runs (v15.3: triage=0, consolidation=1, serendipity=2)
 
     def test_consolidation_with_mock_memories_and_galactic_promotion(self):
         """
@@ -273,6 +274,9 @@ class TestDreamCycleE2E:
         """
         dc = DreamCycle()
         mems = _make_memories(20)
+
+        # Skip TRIAGE (phase 0) to reach CONSOLIDATION (phase 1)
+        dc._current_phase_index = 1
 
         # Patch consolidation to use our synthetic memories
         with patch(
@@ -337,9 +341,9 @@ class TestDreamCycleE2E:
 
         dc._run_phase()
 
-        # Should have emitted DREAM_PHASE_CONSOLIDATION
+        # Should have emitted DREAM_PHASE_TRIAGE (first phase since v15.3)
         assert len(emitted) == 1
-        assert emitted[0][0] == "DREAM_PHASE_CONSOLIDATION"
+        assert emitted[0][0] == "DREAM_PHASE_TRIAGE"
         assert "phase" in emitted[0][1]
 
     def test_all_reports_json_serializable(self):

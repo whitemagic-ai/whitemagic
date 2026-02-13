@@ -208,7 +208,7 @@ def _compact_snapshot() -> dict[str, Any]:
     temporal = _safe(lambda: _temporal_portal())
     if temporal and not temporal.get("running"):
         lanes = temporal.get("lanes", {})
-        has_history = any(v > 0 for v in lanes.values()) if isinstance(lanes, dict) else False
+        has_history = any(v > 0 for v in lanes.values() if isinstance(v, (int, float))) if isinstance(lanes, dict) else False
         if has_history:
             alerts.append("temporal_scheduler_stopped")
 
