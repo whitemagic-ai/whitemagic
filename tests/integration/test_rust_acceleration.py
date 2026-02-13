@@ -1,7 +1,6 @@
 """Integration tests: Rust acceleration vs Python fallback."""
 import os
 
-import pytest
 
 from tests.conftest import assert_envelope_shape
 

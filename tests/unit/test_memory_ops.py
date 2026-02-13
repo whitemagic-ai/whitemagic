@@ -1,8 +1,6 @@
 """Tests for memory CRUD operations via call_tool."""
-import json
 from uuid import uuid4
 
-import pytest
 
 from tests.conftest import assert_envelope_shape
 

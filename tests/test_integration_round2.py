@@ -2,10 +2,6 @@
 Tests for Round 2 improvements: Gnosis portals, Agent Registry,
 Vote Outcome Tracking, Pipelines, Temporal classification, Circuit Breaker overrides.
 """
-import json
-import pytest
-from pathlib import Path
-from unittest.mock import patch
 
 
 # ---------------------------------------------------------------------------

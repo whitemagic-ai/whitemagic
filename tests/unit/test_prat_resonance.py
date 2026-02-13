@@ -15,7 +15,7 @@ Tests:
 
 import time
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from whitemagic.tools.prat_resonance import (
     ResonanceSnapshot,

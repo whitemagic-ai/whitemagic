@@ -4,7 +4,6 @@ from datetime import datetime, date
 from enum import Enum
 from pathlib import Path
 
-import pytest
 
 from whitemagic.tools.envelope import ok, err, is_enveloped, normalize_raw, coerce_jsonable
 from whitemagic.tools.contract import ENVELOPE_VERSION, TOOL_CONTRACT_VERSION

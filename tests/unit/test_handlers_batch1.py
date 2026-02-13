@@ -5,8 +5,7 @@ dharma, governor, memory, scratchpad, sandbox, knowledge_graph, grimoire, swarm.
 Uses mocks for subsystem singletons to isolate handler logic.
 """
 import unittest
-from unittest.mock import MagicMock, patch, PropertyMock
-from typing import Dict, Any
+from unittest.mock import MagicMock, patch
 
 
 # =========================================================================

@@ -14,9 +14,7 @@ Covers:
 """
 
 import json
-import time
 import unittest
-from unittest.mock import patch
 
 
 # ---------------------------------------------------------------------------

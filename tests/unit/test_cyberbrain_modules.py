@@ -7,12 +7,9 @@ Tests for CyberBrains-inspired modules:
   - BicameralReasoner (dual-hemisphere reasoning)
 """
 
-import asyncio
-import time
-import threading
 import pytest
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 
 # ---------------------------------------------------------------------------
@@ -121,7 +118,7 @@ class TestTemporalScheduler:
         assert mock_bus.emit.call_count == 8
 
     def test_stats(self):
-        from whitemagic.core.resonance.temporal_scheduler import TemporalScheduler, TemporalLane
+        from whitemagic.core.resonance.temporal_scheduler import TemporalScheduler
 
         mock_bus = MagicMock()
         scheduler = TemporalScheduler(bus=mock_bus)

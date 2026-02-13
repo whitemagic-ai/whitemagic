@@ -8,10 +8,7 @@ UPDATES:
 """
 
 import sys
-import os
-import glob
 from pathlib import Path
-from pprint import pprint
 
 # Setup paths
 ROOT_DIR = Path(__file__).resolve().parent
@@ -86,7 +83,7 @@ def run_probe():
             # Check if we can verify via the unified backend directly
             # Sometimes metadata isn't returned in the dict by default
             print("   ⚠️ No 'holographic_coords' in metadata view. Checking via backend...")
-            stored_mem = mm.unified.recall(mem_id)
+            _stored_mem = mm.unified.recall(mem_id)  # noqa: F841
             # The backend might store coords separately if index is missing?
             # Actually, our patch returns coords, so they SHOULD be in metadata if store() logic worked.
             # Let's look at store() in unified.py:

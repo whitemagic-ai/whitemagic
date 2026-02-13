@@ -49,7 +49,7 @@ class TestUnifiedArchaeology(unittest.TestCase):
 
     def test_unified_handler_routes_correctly(self):
         """Verify the dispatch dict has all expected actions."""
-        from whitemagic.tools.handlers.archaeology import handle_archaeology, _ACTIONS
+        from whitemagic.tools.handlers.archaeology import _ACTIONS
         self.assertTrue(len(_ACTIONS) >= 10)
 
     def test_backward_compat_dispatch(self):

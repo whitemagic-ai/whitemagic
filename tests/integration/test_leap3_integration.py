@@ -27,7 +27,7 @@ class TestMCPStdioRoundTrip:
     def test_mcp_import_and_tool_count(self):
         """FastMCP server imports cleanly and registers expected tool count."""
         try:
-            from whitemagic.run_mcp import mcp, register_tools
+            from whitemagic.run_mcp import mcp, register_tools  # noqa: F401
         except ImportError:
             pytest.skip("fastmcp not installed")
 
@@ -103,9 +103,6 @@ class TestPRATRouting:
     def test_prat_router_imports(self):
         """PRAT router module imports cleanly."""
         from whitemagic.tools.prat_router import (
-            route_prat_call,
-            build_prat_schema,
-            build_prat_description,
             TOOL_TO_GANA,
             GANA_TO_TOOLS,
         )

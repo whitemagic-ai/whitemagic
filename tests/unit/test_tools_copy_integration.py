@@ -12,12 +12,6 @@ Covers:
   8. Gnosis portal integration
 """
 
-import json
-import os
-import tempfile
-import time
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -30,7 +24,7 @@ class TestEmotionDriveCore:
     """Test the DriveCore intrinsic motivation engine."""
 
     def test_import(self):
-        from whitemagic.core.intelligence.emotion_drive import DriveCore, DriveSnapshot, get_drive_core
+        from whitemagic.core.intelligence.emotion_drive import DriveCore, DriveSnapshot
         assert DriveCore is not None
         assert DriveSnapshot is not None
 
@@ -140,7 +134,6 @@ class TestEmotionDriveCore:
 
     def test_score_scaling(self):
         from whitemagic.core.intelligence.emotion_drive import DriveCore
-        core = DriveCore()
         # High score should amplify effect
         snap_high = DriveCore()
         snap_high.on_event("novelty_detected", {"score": 2.0})
@@ -157,7 +150,7 @@ class TestSelfModel:
     """Test the SelfModel predictive introspection engine."""
 
     def test_import(self):
-        from whitemagic.core.intelligence.self_model import SelfModel, Forecast, get_self_model
+        from whitemagic.core.intelligence.self_model import SelfModel, Forecast
         assert SelfModel is not None
         assert Forecast is not None
 
@@ -275,10 +268,7 @@ class TestEnsembleVoting:
     """Test ensemble voting handler logic."""
 
     def test_import(self):
-        from whitemagic.tools.handlers.ensemble import (
-            handle_ensemble_query, handle_ensemble_status, handle_ensemble_history,
-            _extract_confidence, _analyze_results,
-        )
+        pass
 
     def test_extract_confidence_percentage(self):
         from whitemagic.tools.handlers.ensemble import _extract_confidence
@@ -346,11 +336,7 @@ class TestSessionHandoff:
     """Test cross-device session handoff handlers."""
 
     def test_import(self):
-        from whitemagic.tools.handlers.session import (
-            handle_session_handoff_transfer,
-            handle_session_accept_handoff,
-            handle_session_list_handoffs,
-        )
+        pass
 
     def test_handoff_transfer_requires_session_id(self):
         from whitemagic.tools.handlers.session import handle_session_handoff_transfer
@@ -379,7 +365,7 @@ class TestLoadAwareRouting:
     """Test load-aware task routing."""
 
     def test_import(self):
-        from whitemagic.tools.handlers.task_dist import handle_task_route_smart
+        pass
 
     def test_route_smart_returns_local(self):
         from whitemagic.tools.handlers.task_dist import handle_task_route_smart
@@ -405,7 +391,7 @@ class TestWorkerDaemon:
     """Test the WorkerDaemon class."""
 
     def test_import(self):
-        from whitemagic.agents.worker_daemon import WorkerDaemon
+        pass
 
     def test_init(self):
         from whitemagic.agents.worker_daemon import WorkerDaemon

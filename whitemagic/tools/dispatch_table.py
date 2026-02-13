@@ -556,6 +556,19 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "ilp.balance": LazyHandler("ilp", "handle_ilp_balance"),
     "ilp.status": LazyHandler("ilp", "handle_ilp_status"),
 
+    # --- v15.6: Cognitive Extensions ---
+    "rerank": LazyHandler("cognitive_extensions", "handle_rerank"),
+    "rerank.status": LazyHandler("cognitive_extensions", "handle_rerank_status"),
+    "working_memory.attend": LazyHandler("cognitive_extensions", "handle_working_memory_attend"),
+    "working_memory.context": LazyHandler("cognitive_extensions", "handle_working_memory_context"),
+    "working_memory.status": LazyHandler("cognitive_extensions", "handle_working_memory_status"),
+    "reconsolidation.mark": LazyHandler("cognitive_extensions", "handle_reconsolidation_mark"),
+    "reconsolidation.update": LazyHandler("cognitive_extensions", "handle_reconsolidation_update"),
+    "reconsolidation.status": LazyHandler("cognitive_extensions", "handle_reconsolidation_status"),
+    "community.propagate": LazyHandler("cognitive_extensions", "handle_community_propagate"),
+    "community.status": LazyHandler("cognitive_extensions", "handle_community_status"),
+    "community.health": LazyHandler("cognitive_extensions", "handle_community_health"),
+
     # --- v15.2: Marketplace Bridge ---
     "marketplace.publish": LazyHandler("marketplace", "handle_marketplace_publish"),
     "marketplace.discover": LazyHandler("marketplace", "handle_marketplace_discover"),

@@ -3,8 +3,6 @@ import unittest
 import sys
 import os
 import sqlite3
-import json
-from datetime import datetime
 
 # Path setup
 sys.path.append(os.path.join(os.getcwd(), "staging/core_system"))

@@ -95,7 +95,7 @@ class TestFallbackRing:
 
     def test_ring_overflow(self):
         ring = _FallbackRing(size=4)
-        cid = ring.register_consumer()
+        ring.register_consumer()  # side-effect: enables consumption tracking
         for i in range(10):
             ring.publish(i, 0, 1.0, b"")
         # Only last 4 should be in ring

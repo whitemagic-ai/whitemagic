@@ -9,10 +9,8 @@ Tests for Galactic Map v2 improvements:
 
 import pytest
 import tempfile
-import sqlite3
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 
 # ---------------------------------------------------------------------------

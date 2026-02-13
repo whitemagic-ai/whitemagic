@@ -9,10 +9,9 @@ Also verifies galactic promotion of strategy memories after consolidation.
 """
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, List, Optional, Set
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from whitemagic.core.dreaming.dream_cycle import (
     DreamCycle,

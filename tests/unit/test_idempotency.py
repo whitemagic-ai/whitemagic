@@ -1,8 +1,6 @@
 """Tests for whitemagic.tools.idempotency — idempotency ledger replay & dedup."""
-import json
 from uuid import uuid4
 
-import pytest
 
 from whitemagic.tools.idempotency import get_record, put_record, IdempotencyRecord
 

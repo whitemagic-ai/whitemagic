@@ -7,10 +7,8 @@ Tests cover:
   1c. Hybrid retrieval pipeline (search_hybrid with RRF)
 """
 
-import math
 import unittest
-from unittest.mock import MagicMock, patch, PropertyMock
-from typing import List, Dict, Any, Set, Optional
+from unittest.mock import MagicMock, patch
 
 
 # ---------------------------------------------------------------------------
@@ -36,7 +34,7 @@ class TestSemanticMining(unittest.TestCase):
             # Patch mine() to avoid needing a real DB
             with patch.object(miner, "mine") as mock_mine:
                 mock_mine.return_value = MagicMock(links_proposed=0)
-                result = miner.mine_semantic(persist=False)
+                miner.mine_semantic(persist=False)
                 mock_mine.assert_called_once()
 
     def test_mine_semantic_returns_report_on_no_pairs(self):
@@ -168,7 +166,6 @@ class TestEmbeddingDeduplication(unittest.TestCase):
         engine._vec_cache_count = len(ids)
         # Bypass DB by making _load_vec_cache return our cached data directly
         engine._get_db = MagicMock(return_value=MagicMock())
-        original_load = engine._load_vec_cache
         def patched_load():
             return ids, vectors
         engine._load_vec_cache = patched_load

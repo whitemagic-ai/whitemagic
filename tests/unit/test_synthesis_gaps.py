@@ -12,8 +12,6 @@ Covers:
   A4: Galactic Map zone distribution → Harmony Vector energy
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
 
 
 # =========================================================================
@@ -22,12 +20,12 @@ from unittest.mock import patch, MagicMock
 
 class TestRegistryDomainSplit:
     def test_tool_types_importable(self):
-        from whitemagic.tools.tool_types import ToolCategory, ToolDefinition, ToolSafety
+        from whitemagic.tools.tool_types import ToolCategory, ToolSafety
         assert ToolCategory.GANA.value == "gana"
         assert ToolSafety.READ.value == "read"
 
     def test_backward_compat_imports(self):
-        from whitemagic.tools.registry import ToolCategory, ToolDefinition, ToolSafety
+        from whitemagic.tools.registry import ToolCategory
         assert ToolCategory.GANA.value == "gana"
 
     def test_registry_defs_collect(self):
@@ -362,7 +360,7 @@ class TestGalacticHarmonyCoupling:
 
 class TestMiddlewarePipeline:
     def test_pipeline_importable(self):
-        from whitemagic.tools.middleware import DispatchPipeline, DispatchContext
+        from whitemagic.tools.middleware import DispatchPipeline
         p = DispatchPipeline()
         assert p is not None
 

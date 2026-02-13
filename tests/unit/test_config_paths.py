@@ -2,7 +2,6 @@
 import os
 import importlib
 
-import pytest
 
 
 def test_project_root_contains_pyproject(tmp_path):

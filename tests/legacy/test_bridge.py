@@ -9,7 +9,6 @@ Tests the "Parallel Magic" components:
 """
 
 import sys
-import os
 import time
 import asyncio
 import logging
@@ -40,7 +39,7 @@ def test_mojo_bridge():
     try:
         from whitemagic.core.intelligence.hologram.mojo_bridge import get_mojo_encoder
         encoder = get_mojo_encoder()
-        logger.info(f"✅ MojoEncoderBridge initialized.")
+        logger.info("✅ MojoEncoderBridge initialized.")
         logger.info(f"   Mojo available: {encoder.mojo_available}")
         logger.info(f"   Mojo binary: {encoder.mojo_bin}")
         

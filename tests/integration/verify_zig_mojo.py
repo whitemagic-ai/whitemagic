@@ -2,7 +2,6 @@
 import sys
 import os
 import time
-from datetime import datetime
 
 # Ensure we can import the router
 sys.path.append(os.getcwd())

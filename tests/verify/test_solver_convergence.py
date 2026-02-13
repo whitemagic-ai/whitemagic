@@ -4,10 +4,8 @@ Validates that the solver selects optimal nodes while respecting causal/dharmic 
 """
 
 import time
-import json
 from whitemagic.tools.unified_api import call_tool
 from rich.console import Console
-from rich.table import Table
 
 console = Console()
 

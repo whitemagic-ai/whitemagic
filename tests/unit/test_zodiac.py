@@ -2,13 +2,12 @@
 import unittest
 import sys
 import os
-from datetime import datetime
 
 # Path setup
 sys.path.append(os.path.join(os.getcwd(), "staging/core_system"))
 
-from whitemagic.gardens.metal.zodiac.zodiac_cores import get_zodiac_cores, ZodiacCore
-from whitemagic.gardens.metal.zodiac.api import get_unified_zodiac, UnifiedZodiacSystem
+from whitemagic.gardens.metal.zodiac.zodiac_cores import get_zodiac_cores
+from whitemagic.gardens.metal.zodiac.api import get_unified_zodiac
 
 class TestZodiacSystem(unittest.TestCase):
     

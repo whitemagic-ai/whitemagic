@@ -246,6 +246,78 @@ pub fn quick_infer(query: &str) -> String {
     result.answer
 }
 
+/// Cosine similarity between two vectors (passed as JSON arrays)
+#[wasm_bindgen]
+pub fn cosine_similarity(a_json: &str, b_json: &str) -> f64 {
+    let a: Vec<f64> = serde_json::from_str(a_json).unwrap_or_default();
+    let b: Vec<f64> = serde_json::from_str(b_json).unwrap_or_default();
+    if a.len() != b.len() || a.is_empty() {
+        return 0.0;
+    }
+    let dot: f64 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();
+    let norm_a: f64 = a.iter().map(|x| x * x).sum::<f64>().sqrt();
+    let norm_b: f64 = b.iter().map(|x| x * x).sum::<f64>().sqrt();
+    if norm_a == 0.0 || norm_b == 0.0 {
+        return 0.0;
+    }
+    dot / (norm_a * norm_b)
+}
+
+/// Batch cosine similarity: compare one query vector against many candidates.
+/// Returns JSON array of {index, score} sorted by score descending.
+#[wasm_bindgen]
+pub fn batch_similarity(query_json: &str, candidates_json: &str, top_k: usize) -> String {
+    let query: Vec<f64> = serde_json::from_str(query_json).unwrap_or_default();
+    let candidates: Vec<Vec<f64>> = serde_json::from_str(candidates_json).unwrap_or_default();
+
+    if query.is_empty() || candidates.is_empty() {
+        return "[]".to_string();
+    }
+
+    let norm_q: f64 = query.iter().map(|x| x * x).sum::<f64>().sqrt();
+    if norm_q == 0.0 {
+        return "[]".to_string();
+    }
+
+    let mut scores: Vec<(usize, f64)> = candidates
+        .iter()
+        .enumerate()
+        .map(|(i, c)| {
+            if c.len() != query.len() {
+                return (i, 0.0);
+            }
+            let dot: f64 = query.iter().zip(c.iter()).map(|(a, b)| a * b).sum();
+            let norm_c: f64 = c.iter().map(|x| x * x).sum::<f64>().sqrt();
+            let sim = if norm_c > 0.0 { dot / (norm_q * norm_c) } else { 0.0 };
+            (i, sim)
+        })
+        .collect();
+
+    scores.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+    scores.truncate(top_k);
+
+    serde_json::to_string(&scores.iter().map(|(i, s)| {
+        serde_json::json!({"index": i, "score": s})
+    }).collect::<Vec<_>>()).unwrap_or_else(|_| "[]".to_string())
+}
+
+/// Full-text search: find substring matches in a list of texts.
+/// Returns JSON array of matching indices.
+#[wasm_bindgen]
+pub fn text_search(query: &str, texts_json: &str) -> String {
+    let texts: Vec<String> = serde_json::from_str(texts_json).unwrap_or_default();
+    let query_lower = query.to_lowercase();
+
+    let matches: Vec<usize> = texts
+        .iter()
+        .enumerate()
+        .filter(|(_, t)| t.to_lowercase().contains(&query_lower))
+        .map(|(i, _)| i)
+        .collect();
+
+    serde_json::to_string(&matches).unwrap_or_else(|_| "[]".to_string())
+}
+
 /// Check if WASM module is loaded
 #[wasm_bindgen]
 pub fn wasm_ready() -> bool {
@@ -255,7 +327,7 @@ pub fn wasm_ready() -> bool {
 /// Get WASM version
 #[wasm_bindgen]
 pub fn wasm_version() -> String {
-    "15.0.0".to_string()
+    "15.5.0".to_string()
 }
 
 #[cfg(test)]
@@ -293,5 +365,38 @@ mod tests {
         engine.infer("gardens");
         assert_eq!(engine.stats_queries, 2);
         assert_eq!(engine.stats_local, 2);
+    }
+
+    #[test]
+    fn test_cosine_similarity_identical() {
+        let a = "[1.0, 0.0, 0.0]";
+        let b = "[1.0, 0.0, 0.0]";
+        let sim = cosine_similarity(a, b);
+        assert!((sim - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_cosine_similarity_orthogonal() {
+        let a = "[1.0, 0.0]";
+        let b = "[0.0, 1.0]";
+        let sim = cosine_similarity(a, b);
+        assert!(sim.abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_batch_similarity() {
+        let query = "[1.0, 0.0, 0.0]";
+        let candidates = "[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.5, 0.5, 0.0]]";
+        let result = batch_similarity(query, candidates, 2);
+        assert!(result.contains("\"index\":0"));  // First candidate should be best match
+    }
+
+    #[test]
+    fn test_text_search() {
+        let texts = r#"["Hello world", "Goodbye moon", "Hello again"]"#;
+        let result = text_search("hello", texts);
+        assert!(result.contains("0"));
+        assert!(result.contains("2"));
+        assert!(!result.contains("1"));
     }
 }

@@ -1,7 +1,5 @@
 """Integration tests: every tool category returns a valid envelope."""
-import json
 
-import pytest
 
 from tests.conftest import assert_envelope_shape
 

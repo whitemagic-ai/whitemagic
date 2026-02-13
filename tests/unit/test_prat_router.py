@@ -4,7 +4,6 @@ Tests for PRAT Router — Polymorphic Resonant Adaptive Tools
 Validates the 28-Gana nesting of 175+ tools.
 """
 
-import pytest
 import sys
 import os
 
@@ -12,7 +11,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 
 from whitemagic.tools.prat_router import (
     TOOL_TO_GANA,
-    GANA_TO_TOOLS,
     get_gana_for_tool,
     get_tools_for_gana,
     build_prat_description,
@@ -168,7 +166,7 @@ class TestPRATMCPIntegration:
         """PRAT mode should register exactly 28 tools."""
         os.environ["WM_MCP_PRAT"] = "1"
         try:
-            from whitemagic.run_mcp import mcp, _register_prat_tools
+            from whitemagic.run_mcp import _register_prat_tools
             count = _register_prat_tools("")
             assert count == 28
         finally:

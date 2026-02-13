@@ -255,7 +255,7 @@ class TestDreamCycle:
     def test_dream_phases_enum(self):
         from whitemagic.core.dreaming.dream_cycle import DreamPhase
         phases = list(DreamPhase)
-        assert len(phases) == 7
+        assert len(phases) == 8  # TRIAGE added in v15.3
         assert DreamPhase.CONSOLIDATION in phases
         assert DreamPhase.SERENDIPITY in phases
         assert DreamPhase.GOVERNANCE in phases
@@ -293,4 +293,4 @@ class TestDreamCycle:
         assert dc._total_cycles == 1
         assert len(dc._history) == 1
         report = dc._history[0]
-        assert report.phase.value in ["consolidation", "serendipity", "kaizen", "oracle", "decay"]
+        assert report.phase.value in ["triage", "consolidation", "serendipity", "kaizen", "oracle", "decay"]

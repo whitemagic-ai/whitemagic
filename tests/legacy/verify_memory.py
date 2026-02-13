@@ -12,8 +12,6 @@ Objectives:
 """
 
 import sys
-import os
-import json
 from pathlib import Path
 from pprint import pprint
 

@@ -1,7 +1,5 @@
 import pytest
-import os
-from unittest.mock import MagicMock, patch
-from whitemagic.core.boundaries.boundary_engine import BoundaryEngine, Boundary, BoundaryType
+from whitemagic.core.boundaries.boundary_engine import BoundaryEngine, BoundaryType
 
 class TestBoundaryEngine:
     

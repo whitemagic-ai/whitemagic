@@ -1,9 +1,7 @@
 
 import subprocess
 import json
-import sys
 import os
-import time
 
 print("🔮 WhiteMagic Grand Smoke Test 🔮")
 print("=================================")
@@ -71,8 +69,10 @@ if os.path.exists(haskell_src):
         else:
             # Maybe it needs input or arguments?
             print(f"   message: Haskell ran with code {result.returncode}")
-            if result.stdout: print(f"   stdout: {result.stdout.strip()[:100]}")
-            if result.stderr: print(f"   stderr: {result.stderr.strip()[:100]}")
+            if result.stdout:
+                print(f"   stdout: {result.stdout.strip()[:100]}")
+            if result.stderr:
+                print(f"   stderr: {result.stderr.strip()[:100]}")
     except FileNotFoundError:
         print("   ⚠️ runghc not found. Is GHC installed?")
     except Exception as e:

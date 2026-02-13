@@ -170,7 +170,7 @@ class TestG4PredictiveCircuitBreaker(unittest.TestCase):
     @patch('whitemagic.core.intelligence.self_model.get_self_model')
     def test_predictive_check_tightens_on_alert(self, mock_get_model):
         """Should tighten breakers when Self-Model forecasts threshold breach."""
-        from whitemagic.tools.circuit_breaker import BreakerRegistry, BreakerConfig
+        from whitemagic.tools.circuit_breaker import BreakerRegistry
 
         mock_model = MagicMock()
         mock_alert = MagicMock()

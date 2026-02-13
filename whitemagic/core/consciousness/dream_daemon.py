@@ -86,20 +86,61 @@ class DreamDaemon:
 
     def _consolidate_memories(self) -> None:
         """Move short-term memories to long-term or prune them."""
-        # TODO: Connect to UnifiedMemory
-        logger.info("  - Consolidating memories... (No-op in v0.1)")
+        try:
+            from whitemagic.automation.consolidator import consolidate_now
+            report = consolidate_now(minutes=self.interval // 60 or 60)
+            created = report.get("semantic_created", 0)
+            archived = report.get("episodic_archived", 0)
+            logger.info(f"  - Consolidated memories: {created} semantic created, {archived} episodic archived")
+        except Exception as e:
+            logger.warning(f"  - Memory consolidation skipped: {e}")
 
     def _maintain_logs(self) -> None:
-        """Compress old logs."""
-        # TODO: Check log folder size
-        logger.info("  - Maintaining system logs... (No-op in v0.1)")
+        """Compress old logs and prune oversized files."""
+        import gzip
+        from pathlib import Path
+
+        try:
+            from whitemagic.config.paths import get_state_root
+            log_dir = get_state_root() / "logs"
+        except Exception:
+            log_dir = Path.home() / ".whitemagic" / "logs"
+
+        if not log_dir.exists():
+            logger.info("  - No log directory found, skipping maintenance")
+            return
+
+        compressed = 0
+        for log_file in log_dir.glob("*.log"):
+            try:
+                if log_file.stat().st_size > 5_000_000:  # >5MB
+                    gz_path = log_file.with_suffix(".log.gz")
+                    with open(log_file, "rb") as f_in, gzip.open(gz_path, "wb") as f_out:
+                        f_out.writelines(f_in)
+                    log_file.unlink()
+                    compressed += 1
+            except Exception as e:
+                logger.warning(f"  - Failed to compress {log_file.name}: {e}")
+
+        logger.info(f"  - Log maintenance: {compressed} files compressed")
 
     def _generate_insights(self) -> None:
-        """Generate insights from recent activity."""
-        # TODO: Run LLM over recent memory stream
-        # v0.2: Calculate system resonance via Julia
+        """Generate insights from recent activity via bridge synthesis and resonance."""
+        # Attempt bridge synthesis for serendipitous connections
+        insights_found = 0
+        try:
+            from whitemagic.core.intelligence.synthesis.bridge_synthesizer import BridgeSynthesizer
+            synth = BridgeSynthesizer()
+            bridges = synth.find_bridges(top_k=3)
+            insights_found = len(bridges) if bridges else 0
+            if insights_found > 0:
+                logger.info(f"  - Bridge synthesis found {insights_found} cross-domain connections")
+        except Exception as e:
+            logger.debug(f"  - Bridge synthesis unavailable: {e}")
+
+        # Calculate system resonance via Julia
         resonance = self._calculate_resonance("system_state_snapshot")
-        logger.info(f"  - Generating insights... (Resonance: {resonance:.4f})")
+        logger.info(f"  - Insights: {insights_found} bridges, resonance={resonance:.4f}")
         if resonance > 0.8:
             logger.info("  🌟 HIGH RESONANCE DETECTED! Triggering deep consolidation.")
 

@@ -490,6 +490,23 @@ TOOL_TO_GANA: dict[str, str] = {
     "marketplace.remove":          "gana_chariot",
     "marketplace.status":          "gana_chariot",
 
+    # ── v15.6: Cognitive Extensions ──
+    # Reranking → Winnowing Basket (search/recall)
+    "rerank":                      "gana_winnowing_basket",
+    "rerank.status":               "gana_winnowing_basket",
+    # Working Memory → Heart (session context)
+    "working_memory.attend":       "gana_heart",
+    "working_memory.context":      "gana_heart",
+    "working_memory.status":       "gana_heart",
+    # Reconsolidation → Abundance (regeneration/lifecycle)
+    "reconsolidation.mark":        "gana_abundance",
+    "reconsolidation.update":      "gana_abundance",
+    "reconsolidation.status":      "gana_abundance",
+    # Community Maintenance → Extended Net (pattern connectivity)
+    "community.propagate":         "gana_extended_net",
+    "community.status":            "gana_extended_net",
+    "community.health":            "gana_extended_net",
+
     # ── Cross-cutting: Browser & Web Research (route to Ghost) ──
     "browser_navigate":            "gana_ghost",
     "browser_screenshot":          "gana_ghost",

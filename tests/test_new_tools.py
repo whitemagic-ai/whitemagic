@@ -4,11 +4,7 @@ Tests for new tool families: broker, task distribution, voting, ollama.
 These tests validate the handler logic and the tool contract integration
 without requiring external services (Redis, Ollama).
 """
-import json
-import os
-import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 
 # ---------------------------------------------------------------------------

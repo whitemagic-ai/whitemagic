@@ -10,7 +10,6 @@ Regression tests for v11.3 modules:
 import json
 import time
 
-import pytest
 
 from tests.conftest import assert_envelope_shape
 
@@ -382,7 +381,7 @@ class TestToolDependencyGraph:
         from whitemagic.tools.dependency_graph import ToolDependencyGraph, EdgeType
         graph = ToolDependencyGraph()
         requires = graph.next_steps("vote.create", edge_type=EdgeType.REQUIRES)
-        suggests = graph.next_steps("vote.create", edge_type=EdgeType.SUGGESTS)
+        _suggests = graph.next_steps("vote.create", edge_type=EdgeType.SUGGESTS)
         # vote.create -> vote.cast is REQUIRES
         assert any(e["target"] == "vote.cast" for e in requires)
 

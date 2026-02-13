@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
-from whitemagic.core.nurturing.nurturing_engine import NurturingEngine, UserProfile
+from whitemagic.core.nurturing.nurturing_engine import NurturingEngine
 
 class TestNurturingEngine:
     

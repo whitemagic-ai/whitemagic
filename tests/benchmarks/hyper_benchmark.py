@@ -2,10 +2,7 @@ import asyncio
 import time
 import random
 import logging
-from typing import List
 from whitemagic.core.memory.unified import get_unified_memory, MemoryType
-from whitemagic.core.resonance.gan_ying_enhanced import get_bus, EventType, ResonanceEvent
-from datetime import datetime
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -39,7 +36,7 @@ async def stress_test_indexing(count: int = 1000):
     avg_per_mem = (total_time / count) * 1000
     avg_nanosec = (total_time / count) * 1_000_000_000
     
-    logger.info(f"📊 BENCHMARK RESULTS (Indexing):")
+    logger.info("📊 BENCHMARK RESULTS (Indexing):")
     logger.info(f"   Total Time: {total_time:.4f}s")
     logger.info(f"   Average per memory: {avg_per_mem:.4f}ms")
     logger.info(f"   Average per memory: {avg_nanosec:,.0f}ns")
@@ -61,7 +58,7 @@ async def test_recall_performance(count: int = 100):
     total_time = end_time - start_time
     avg_nanosec = (total_time / count) * 1_000_000_000
     
-    logger.info(f"📊 BENCHMARK RESULTS (Recall):")
+    logger.info("📊 BENCHMARK RESULTS (Recall):")
     logger.info(f"   Average Recall Latency: {avg_nanosec:,.0f}ns")
 
 if __name__ == "__main__":

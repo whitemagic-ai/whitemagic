@@ -8,7 +8,6 @@ Tests for the Galactic Map system:
 
 import pytest
 from datetime import datetime
-from unittest.mock import MagicMock, patch
 
 
 # ---------------------------------------------------------------------------
@@ -165,7 +164,6 @@ class TestNoDeletePolicy:
     def test_delete_redirects_to_archive(self):
         """The delete() method should now redirect to archive_to_edge()."""
         from whitemagic.core.memory.sqlite_backend import SQLiteBackend
-        import sqlite3
         import tempfile
         from pathlib import Path
 
