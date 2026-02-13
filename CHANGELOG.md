@@ -7,6 +7,37 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [15.6.0] — 2026-02-13
+
+### Cognitive Extensions & Code Quality
+
+#### Added
+- **Cross-Encoder Reranking** (`whitemagic/core/intelligence/reranker.py`) — BM25 lexical fallback with optional cross-encoder model for precision search. Tools: `rerank`, `rerank.status`.
+- **Working Memory** (`whitemagic/core/intelligence/working_memory.py`) — 7±2 bounded attentional bottleneck with LRU eviction, activation decay, chunk grouping, and rehearsal. Tools: `working_memory.attend`, `working_memory.context`, `working_memory.status`.
+- **Memory Reconsolidation** (`whitemagic/core/intelligence/reconsolidation.py`) — Retrieved memories enter a 5-minute labile state for contextual update before re-persistence. Tools: `reconsolidation.mark`, `reconsolidation.update`, `reconsolidation.status`.
+- **Incremental Community Maintenance** (`whitemagic/core/intelligence/community_maintenance.py`) — Label propagation on each new memory, replacing batch-only Louvain. Tools: `community.propagate`, `community.status`, `community.health`.
+- **WASM Vector Operations** (`whitemagic-rust/src/wasm.rs`) — `cosine_similarity`, `batch_similarity`, `text_search` exported for browser-side vector and text ops.
+- **v15.2 Registry Backfill** (`registry_defs/v15_2_economy.py`) — 32 missing ToolDefinition entries for Shelter, OMS, ILP, Marketplace, and Galaxy extensions. Registry now at 100% coverage (384 definitions).
+- **Handler Layer** (`tools/handlers/cognitive_extensions.py`) — MCP handlers for all 11 new cognitive tools.
+- **43 new unit tests** — `test_reranker.py`, `test_working_memory.py`, `test_reconsolidation.py`, `test_community_maintenance.py`.
+
+#### Fixed
+- **139 ruff lint findings** in `tests/` — 127 auto-fixed, 12 manual.
+- **dream_daemon.py** — 3 TODO stubs wired to real subsystems (MemoryConsolidator, gzip log compression, bridge synthesis + resonance).
+- **DreamPhase count** — 3 test files updated for TRIAGE phase added in v15.3 (7→8 phases).
+
+#### Metrics
+| Metric | v15.5 | v15.6 |
+|--------|-------|-------|
+| Dispatch tools | 345 | 356 |
+| Registry defs | 352 | 384 |
+| Unregistered | 32 | 0 |
+| Unit tests | 1,318 | 1,362 |
+| Ruff findings (tests/) | 139 | 0 |
+| New modules | — | 4 |
+
+---
+
 ## [15.5.0] — 2026-02-13
 
 ### Context-Aware Local AI & MCP Hardening
