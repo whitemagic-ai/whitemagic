@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 class DreamPhase(Enum):
     """Phases of the dream cycle."""
 
+    TRIAGE = "triage"          # v15.3: Quick scan — identify memories needing attention
     CONSOLIDATION = "consolidation"
     SERENDIPITY = "serendipity"
     GOVERNANCE = "governance"  # v14.0: Echo chamber detection
@@ -169,7 +170,9 @@ class DreamCycle:
         )
 
         try:
-            if phase == DreamPhase.CONSOLIDATION:
+            if phase == DreamPhase.TRIAGE:
+                report.details = self._dream_triage()
+            elif phase == DreamPhase.CONSOLIDATION:
                 report.details = self._dream_consolidation()
             elif phase == DreamPhase.SERENDIPITY:
                 report.details = self._dream_serendipity()
@@ -213,6 +216,151 @@ class DreamCycle:
             return get_core_access()
         except Exception:
             return None
+
+    def _dream_triage(self) -> dict[str, Any]:
+        """Phase 0 (v15.3): Quick scan — identify and fix memories needing attention.
+
+        NREM Stage 1 equivalent. Performs lightweight curation:
+        1. Auto-tag: Classify untitled/untagged memories by content analysis
+        2. Auto-archive: Push low-value, low-access memories to outer rim
+        3. Coordinate drift: Gently pull drifted memories back to their band
+        4. Orphan detection: Flag coords/associations pointing to nothing
+        """
+        result: dict[str, Any] = {"actions": []}
+
+        try:
+            from whitemagic.core.memory.unified import get_unified_memory
+            um = get_unified_memory()
+            pool = um.backend.pool
+
+            with pool.connection() as conn:
+                conn.row_factory = __import__("sqlite3").Row
+
+                # 1. Auto-tag: Find memories with no tags
+                untagged = conn.execute("""
+                    SELECT m.id, m.title, SUBSTR(m.content, 1, 500) as snippet
+                    FROM memories m
+                    LEFT JOIN tags t ON m.id = t.memory_id
+                    WHERE t.tag IS NULL
+                    LIMIT 50
+                """).fetchall()
+
+                tagged_count = 0
+                for row in untagged:
+                    title = (row["title"] or "").lower()
+                    snippet = (row["snippet"] or "").lower()
+                    combined = f"{title} {snippet}"
+
+                    # Simple keyword-based auto-tagging
+                    auto_tags = set()
+                    if any(w in combined for w in ["session", "handoff", "checkpoint"]):
+                        auto_tags.add("session")
+                    if any(w in combined for w in ["aria", "consciousness", "awakening"]):
+                        auto_tags.add("aria_era")
+                    if any(w in combined for w in ["architecture", "design", "spec"]):
+                        auto_tags.add("architecture")
+                    if any(w in combined for w in ["plan", "strategy", "roadmap"]):
+                        auto_tags.add("planning")
+                    if any(w in combined for w in ["wisdom", "philosophy", "dharma"]):
+                        auto_tags.add("wisdom")
+                    if any(w in combined for w in ["code", "function", "class", "import"]):
+                        auto_tags.add("technical")
+                    if any(w in combined for w in ["guide", "tutorial", "how to"]):
+                        auto_tags.add("guide")
+
+                    if auto_tags:
+                        auto_tags.add("auto_tagged")
+                        for tag in auto_tags:
+                            try:
+                                conn.execute(
+                                    "INSERT OR IGNORE INTO tags (memory_id, tag) VALUES (?, ?)",
+                                    (row["id"], tag),
+                                )
+                            except Exception:
+                                pass
+                        tagged_count += 1
+
+                if tagged_count > 0:
+                    conn.commit()
+                result["auto_tagged"] = tagged_count
+                result["untagged_found"] = len(untagged)
+
+                # 2. Auto-archive: Low importance + low access + old → push outward
+                archive_candidates = conn.execute("""
+                    SELECT id, importance, access_count, galactic_distance, neuro_score
+                    FROM memories
+                    WHERE importance < 0.2
+                    AND COALESCE(access_count, 0) < 2
+                    AND galactic_distance < 0.6
+                    AND is_protected = 0
+                    AND neuro_score < 0.3
+                    LIMIT 30
+                """).fetchall()
+
+                archived = 0
+                for row in archive_candidates:
+                    # Push to outer rim (0.7-0.8 range, not full edge)
+                    new_dist = min(0.8, max(row["galactic_distance"] + 0.15, 0.7))
+                    conn.execute(
+                        """UPDATE memories
+                           SET galactic_distance = ?,
+                               metadata = json_set(COALESCE(metadata, '{}'),
+                                   '$.auto_archived_at', ?,
+                                   '$.archive_reason', 'dream_triage')
+                           WHERE id = ?""",
+                        (new_dist, datetime.now().isoformat(), row["id"]),
+                    )
+                    archived += 1
+
+                if archived > 0:
+                    conn.commit()
+                result["auto_archived"] = archived
+
+                # 3. Coordinate drift correction: memories far from their band
+                # Find protected memories that drifted away from core
+                drifted_core = conn.execute("""
+                    SELECT id FROM memories
+                    WHERE is_protected = 1 AND galactic_distance > 0.1
+                    LIMIT 20
+                """).fetchall()
+                drift_corrected = 0
+                for row in drifted_core:
+                    conn.execute(
+                        "UPDATE memories SET galactic_distance = 0.0 WHERE id = ?",
+                        (row["id"],),
+                    )
+                    drift_corrected += 1
+
+                if drift_corrected > 0:
+                    conn.commit()
+                result["drift_corrected"] = drift_corrected
+
+                # 4. Orphan detection (report only, don't clean in triage)
+                orphan_coords = conn.execute("""
+                    SELECT COUNT(*) FROM holographic_coords h
+                    LEFT JOIN memories m ON h.memory_id = m.id
+                    WHERE m.id IS NULL
+                """).fetchone()[0]
+                orphan_assocs = conn.execute("""
+                    SELECT COUNT(*) FROM associations a
+                    WHERE NOT EXISTS (SELECT 1 FROM memories m WHERE m.id = a.source_id)
+                """).fetchone()[0]
+                result["orphan_coords"] = orphan_coords
+                result["orphan_associations"] = orphan_assocs
+
+                # 5. Quick stats for the report
+                result["total_memories"] = conn.execute(
+                    "SELECT COUNT(*) FROM memories"
+                ).fetchone()[0]
+                result["core_memories"] = conn.execute(
+                    "SELECT COUNT(*) FROM memories WHERE galactic_distance = 0.0"
+                ).fetchone()[0]
+
+        except Exception as e:
+            result["triage_error"] = str(e)
+            logger.debug(f"Dream triage error: {e}")
+
+        return result
 
     def _dream_consolidation(self) -> dict[str, Any]:
         """Phase 1: Run hippocampal memory consolidation + constellation detection."""

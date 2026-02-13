@@ -230,6 +230,9 @@ TOOL_TO_GANA: dict[str, str] = {
     "galaxy.delete":           "gana_void",
     "galaxy.backup":           "gana_void",
     "galaxy.restore":          "gana_void",
+    "galaxy.transfer":         "gana_void",
+    "galaxy.merge":            "gana_void",
+    "galaxy.sync":             "gana_void",
 
     # ═══ SIMPLIFIED ALIASES ═══
     "remember":                "gana_neck",

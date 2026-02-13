@@ -290,6 +290,11 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "galaxy.backup": LazyHandler("backup", "handle_galaxy_backup"),
     "galaxy.restore": LazyHandler("backup", "handle_galaxy_restore"),
 
+    # --- v15.3 Galactic Telepathy ---
+    "galaxy.transfer": LazyHandler("galaxy", "handle_galaxy_transfer"),
+    "galaxy.merge": LazyHandler("galaxy", "handle_galaxy_merge"),
+    "galaxy.sync": LazyHandler("galaxy", "handle_galaxy_sync"),
+
     # --- Memory Aliases ---
     "read_memory": LazyHandler("misc", "handle_read_memory"),
     "list_memories": LazyHandler("misc", "handle_list_memories"),

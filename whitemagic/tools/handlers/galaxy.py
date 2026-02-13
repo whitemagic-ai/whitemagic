@@ -114,3 +114,80 @@ def handle_galaxy_delete(**kwargs: Any) -> dict[str, Any]:
         return {"status": "success", "message": f"Galaxy '{name}' removed from registry"}
     except ValueError as e:
         return {"status": "error", "error": str(e)}
+
+
+# ── v15.3 Galactic Telepathy ────────────────────────────────────
+
+
+def handle_galaxy_transfer(**kwargs: Any) -> dict[str, Any]:
+    """Transfer memories between galaxies with coordinate re-mapping and dedup."""
+    source = kwargs.get("source") or kwargs.get("source_galaxy")
+    target = kwargs.get("target") or kwargs.get("target_galaxy")
+
+    if not source:
+        return {"status": "error", "error": "source galaxy name is required"}
+    if not target:
+        return {"status": "error", "error": "target galaxy name is required"}
+
+    from whitemagic.core.memory.galaxy_manager import get_galaxy_manager
+
+    try:
+        gm = get_galaxy_manager()
+        result = gm.transfer_memories(
+            source_galaxy=source,
+            target_galaxy=target,
+            query=kwargs.get("query"),
+            tags=kwargs.get("tags"),
+            min_importance=float(kwargs.get("min_importance", 0.0)),
+            max_galactic_distance=float(kwargs.get("max_galactic_distance", 1.0)),
+            limit=int(kwargs.get("limit", 500)),
+            copy=kwargs.get("copy", True),
+        )
+        return {"status": "success", **result}
+    except ValueError as e:
+        return {"status": "error", "error": str(e)}
+
+
+def handle_galaxy_merge(**kwargs: Any) -> dict[str, Any]:
+    """Merge all memories from a source galaxy into a target galaxy."""
+    source = kwargs.get("source") or kwargs.get("source_galaxy")
+    target = kwargs.get("target") or kwargs.get("target_galaxy") or "default"
+
+    if not source:
+        return {"status": "error", "error": "source galaxy name is required"}
+
+    from whitemagic.core.memory.galaxy_manager import get_galaxy_manager
+
+    try:
+        gm = get_galaxy_manager()
+        result = gm.merge_galaxy(
+            source_galaxy=source,
+            target_galaxy=target,
+            delete_after=kwargs.get("delete_after", False),
+        )
+        return {"status": "success", **result}
+    except ValueError as e:
+        return {"status": "error", "error": str(e)}
+
+
+def handle_galaxy_sync(**kwargs: Any) -> dict[str, Any]:
+    """Bidirectional sync between two galaxies (content-hash dedup)."""
+    galaxy_a = kwargs.get("galaxy_a") or kwargs.get("source")
+    galaxy_b = kwargs.get("galaxy_b") or kwargs.get("target")
+
+    if not galaxy_a or not galaxy_b:
+        return {"status": "error", "error": "galaxy_a and galaxy_b are required"}
+
+    from whitemagic.core.memory.galaxy_manager import get_galaxy_manager
+
+    try:
+        gm = get_galaxy_manager()
+        result = gm.sync_galaxies(
+            galaxy_a=galaxy_a,
+            galaxy_b=galaxy_b,
+            tags=kwargs.get("tags"),
+            min_importance=float(kwargs.get("min_importance", 0.0)),
+        )
+        return {"status": "success", **result}
+    except ValueError as e:
+        return {"status": "error", "error": str(e)}

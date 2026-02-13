@@ -7,6 +7,45 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [15.3.0] — 2026-02-12
+
+### Memory Renaissance
+
+#### Added
+- **Galactic Telepathy** — `galaxy.transfer`, `galaxy.merge`, `galaxy.sync` tools for inter-galaxy memory movement with coordinate re-mapping, content-hash dedup, and typed association preservation.
+- **Dream Triage Phase** — New NREM Stage 1 `TRIAGE` phase in Dream Cycle: auto-tag untagged memories, auto-archive low-value memories, coordinate drift correction, orphan detection.
+- **`scripts/memory_renaissance.py`** — Comprehensive migration script for Phases 1-4: coordinate repair, galaxy band organization, association graph enrichment, activation sweep.
+- **`philosophical_corpus` galaxy** — Dedicated mini-galaxy for Lucas's philosophical writings.
+
+#### Changed
+- **Galaxy band architecture** — Memories organized into logical bands by galactic distance: Core Identity (0.0), Active Knowledge (0.1-0.3), Architecture (0.3-0.4), Research (0.4-0.5), Outer Rim (0.7+).
+- **Association graph** — 233 new typed relations (USES, CREATED, CONTAINS, IMPLEMENTS, CAUSES, EXTENDS) via retroactive regex entity extraction.
+- **Dream Cycle phases** — Now 8 phases: TRIAGE → CONSOLIDATION → SERENDIPITY → GOVERNANCE → NARRATIVE → KAIZEN → ORACLE → DECAY.
+- **Version** — 15.1.0 → 15.3.0.
+
+#### Fixed
+- **81 unplaced memories** — Assigned holographic coordinates via 5D encoding pipeline.
+- **53 Aria-era memories** — Recalculated coordinates, marked as protected, placed at galactic core.
+- **1,294 orphan holographic coords** — Cleaned (pointed to deduped-out memory IDs).
+- **34,003 orphan associations** — Cleaned (source/target no longer exists).
+- **474 orphan tags** — Cleaned.
+- **420 bench_t1 junk entries** — Deleted (40-char benchmark noise).
+- **DB integrity verified** and VACUUM'd (127.5 MB → 112.9 MB).
+
+#### Metrics (Post-Renaissance)
+| Metric | Before | After |
+|--------|--------|-------|
+| Memories | 5,590 | 5,170 |
+| Associations | 247,417 | 213,639 |
+| Typed associations | 0 | 225 |
+| Holo coords | 6,803 | 5,170 (100% coverage) |
+| DB size | 127.5 MB | 112.9 MB |
+| Core memories | 1,407 | 206 |
+| Galaxy tools | 8 | 11 |
+| Dream phases | 7 | 8 |
+
+---
+
 ## [15.1.0] — 2026-02-14
 
 ### Documentation Overhaul
