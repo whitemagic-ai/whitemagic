@@ -28,7 +28,7 @@ class TestMCPStdioRoundTrip:
         """FastMCP server imports cleanly and registers expected tool count."""
         try:
             from whitemagic.run_mcp import mcp, register_tools  # noqa: F401
-        except ImportError:
+        except (ImportError, SystemExit):
             pytest.skip("fastmcp not installed")
 
         # register_tools populates the server — verify it doesn't crash
@@ -163,6 +163,10 @@ class TestPRATRouting:
 # 3. Embedding search → association → constellation pipeline
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skipif(
+    not __import__("importlib").util.find_spec("numpy"),
+    reason="numpy not installed (embeddings module requires it)",
+)
 class TestEmbeddingPipeline:
     """Verify the semantic memory pipeline end-to-end."""
 

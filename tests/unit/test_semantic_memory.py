@@ -10,6 +10,10 @@ Tests cover:
 import unittest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+pytest.importorskip("numpy", reason="numpy not installed")
+
 
 # ---------------------------------------------------------------------------
 # 1a: Embedding-based association re-mining

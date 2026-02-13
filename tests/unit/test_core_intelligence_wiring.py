@@ -8,9 +8,12 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import datetime, timedelta
+from importlib.util import find_spec
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+_has_numpy = find_spec("numpy") is not None
 
 
 # ---------------------------------------------------------------------------
@@ -255,6 +258,7 @@ class TestCoreAccessLayer:
         assert row["last_traversed_at"] is not None
 
 
+@pytest.mark.skipif(not _has_numpy, reason="numpy not installed (embeddings module requires it)")
 class TestCoreAccessLayerHybridRecall:
     """Test hybrid recall with mocked embedding engine."""
 

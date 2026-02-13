@@ -27,8 +27,14 @@ KNOWN_REASONS_BY_PROFILE: dict[str, list[str]] = {
         "No module named 'whitemagic_rs'",
         "Live network tests are opt-in.",
         "could not import 'numpy'",
+        "No module named 'numpy'",
         "could not import 'rich'",
+        "No module named 'rich'",
         "mcp SDK not installed",
+        "numpy not installed",
+        "PyNaCl not installed",
+        "fastmcp not installed",
+        "embeddings module requires it",
     ],
     # Optional extras — tolerate their specific skip reasons.
     "optional-api": [

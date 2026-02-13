@@ -11,13 +11,18 @@ Validates:
 
 from __future__ import annotations
 
+import pytest
+from importlib.util import find_spec
 from unittest.mock import patch
+
+_has_nacl = find_spec("nacl") is not None
 
 
 # ---------------------------------------------------------------------------
 # Ed25519 Manifest Signing
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skipif(not _has_nacl, reason="PyNaCl not installed")
 class TestEd25519Signing:
     """Test Ed25519 keypair generation, signing, and verification."""
 

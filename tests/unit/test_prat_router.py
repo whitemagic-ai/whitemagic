@@ -169,6 +169,9 @@ class TestPRATMCPIntegration:
             from whitemagic.run_mcp import _register_prat_tools
             count = _register_prat_tools("")
             assert count == 28
+        except (ImportError, SystemExit):
+            import pytest
+            pytest.skip("fastmcp not installed")
         finally:
             os.environ.pop("WM_MCP_PRAT", None)
 

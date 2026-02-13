@@ -26,6 +26,12 @@ if "whitemagic.config.paths" in sys.modules:
     import importlib
     importlib.reload(sys.modules["whitemagic.config.paths"])
 
+# Ensure all subdirectories (memory/, data/, cache/, etc.) exist on disk.
+# Without this, SQLite cannot create the DB file in CI where ~/.whitemagic
+# doesn't pre-exist.
+from whitemagic.config.paths import ensure_paths
+ensure_paths()
+
 
 def _reset_singletons():
     """Reset all known singletons so each test session starts clean."""
