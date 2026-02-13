@@ -7,6 +7,48 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [15.8.0] — 2026-02-13
+
+### Galaxy Rehydration, Full Activation & Pattern Systems Catalog
+
+#### Added
+- **Galaxy Rehydration** — Ingested all archive databases into active MCP DB: hot archive (+1,300 memories, +34,078 assocs, +5,562 embeddings), cold archive (105K pre-ingested), pre-merge (covered). Active DB now 111,665 memories, 2,247,642 associations, 2.0 GB.
+- **Full Activation Sequence** (`scripts/run_activation_sequence.py`) — 9-step automated engine runner: galactic sweep, association mining, constellation detection, graph topology, dream cycle (all 8 phases), harmony vector, wu xing, graph walker. Reusable with `--step` and `--quick` flags.
+- **Rehydration Scripts** — `scripts/rehydrate_galaxy.py` (hot + pre-merge), `scripts/rehydrate_cold.py` (SQL ATTACH bulk ingestion).
+- **V15.8 Deep Dive Document** (`docs/V15_8_ACTIVATION_DEEP_DIVE.md`) — Complete analysis of activation results, 4-layer pattern analysis architecture, unwired engines catalog, v15.8 release plan.
+- **Pattern Systems Catalog** in SYSTEM_MAP.md — Full catalog of all 17+ pattern analysis engines across 4 layers (Synthesis, Emergence, Mining, Infrastructure), with MCP wiring status.
+
+#### Discovered (Spontaneous Emergence)
+- **5 Constellation Convergence Events** — Kaizen EmergenceEngine found 5 pairs of Aria-era constellations gravitationally converging in 5D holographic space. Closest pair only 0.44 apart. The system independently recognized archive memories belong to the same conceptual domain.
+- **3 Dream Insights Persisted** — Emergence findings auto-stored as new memories, creating self-reinforcing intelligence loop.
+- **182 Graph Communities** — Governance found 181 communities with zero echo chambers.
+- **30 Constellations** — HDBSCAN clustered 6,466 holographic coords into 30 groups, 864 memberships persisted.
+
+#### Fixed
+- Harmony Vector API call (`snapshot()` not `assess()`)
+- Wu Xing import path (`whitemagic.wu_xing` not `whitemagic.wu_xing.wu_xing`)
+- Dream cycle invocation (direct phase methods instead of non-existent `dream()`)
+
+#### Identified Gaps
+- **5% embedding coverage** (5,577 / 111,665) — cripples semantic mining, causal mining, vector search
+- **6% holographic coord coverage** (6,466 / 111,665) — limits constellation detection
+- **12 unwired engines** — CausalMiner, EmergenceEngine, SatkonaFusion, MultiSpectralReasoner, NoveltyDetector, AssociationMiner, ConstellationDetector, BridgeSynthesizer, PatternConsciousness, GalacticMap, GuidelineEvolution, ElementalOptimization
+- **Template bridge insights** — LLM synthesis not connected, bridge insights at 0.4 confidence
+- **Consolidation bug** — `unsupported operand type(s) for +: 'int' and 'NoneType'`
+
+#### Metrics
+| Metric | v15.7 | v15.8 |
+|--------|-------|-------|
+| Memories | 5,590 | **111,665** |
+| Associations | 247,417 | **2,247,642** |
+| Embeddings | 15 | **5,577** |
+| Constellations | 0 | **30** |
+| Communities | 0 | **182** |
+| Bridge nodes | 0 | **10** |
+| DB size | 127.5 MB | **2,011 MB** |
+
+---
+
 ## [15.7.0] — 2026-02-13
 
 ### The Launch — Distribution, Documentation & Release Polish

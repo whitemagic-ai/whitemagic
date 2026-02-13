@@ -158,6 +158,7 @@ class CoreAccessLayer:
 
     def __init__(self) -> None:
         self._conn: sqlite3.Connection | None = None
+        self._conn_injected: bool = False
         self._lock = threading.Lock()
 
     def _get_conn(self) -> sqlite3.Connection:
@@ -289,7 +290,11 @@ class CoreAccessLayer:
         no Python↔SQLite round trips per hop). Falls back to Python BFS.
         """
         # --- Rust-accelerated path ---
+        # Skip when a custom connection was injected (e.g. in-memory test DBs)
+        # because the Rust path opens DB_PATH directly, bypassing self._conn.
         try:
+            if self._conn_injected:
+                raise RuntimeError("injected conn — use Python path")
             import whitemagic_rs
             from whitemagic.config.paths import DB_PATH
             walk_nodes = whitemagic_rs.association_walk(

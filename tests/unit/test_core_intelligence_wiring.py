@@ -164,6 +164,7 @@ class TestCoreAccessLayer:
         from whitemagic.core.intelligence.core_access import CoreAccessLayer
         cal = CoreAccessLayer()
         cal._conn = db_conn
+        cal._conn_injected = True
         return cal
 
     def test_query_association_subgraph_basic(self, populated_db):
@@ -266,6 +267,7 @@ class TestCoreAccessLayerHybridRecall:
         from whitemagic.core.intelligence.core_access import CoreAccessLayer
         cal = CoreAccessLayer()
         cal._conn = db_conn
+        cal._conn_injected = True
         return cal
 
     @patch("whitemagic.core.memory.embeddings.get_embedding_engine")
