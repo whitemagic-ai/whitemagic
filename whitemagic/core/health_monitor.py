@@ -79,7 +79,7 @@ class HealthMonitor:
 
         # 3. Zig (via Rust bridge mostly, but check libs)
         # We can check for the shared library file presence as a heuristic
-        # TODO: Add direct Zig check if we expose it deeper
+        # FUTURE: Add direct Zig check if we expose it deeper
 
         return {
             "status": status,

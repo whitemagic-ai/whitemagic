@@ -7,6 +7,33 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [15.7.0] — 2026-02-13
+
+### The Launch — Distribution, Documentation & Release Polish
+
+#### Added
+- **Website & Documentation Refresh Plan** (`docs/WEBSITE_DOCS_REFRESH_v15_7.md`) — AI-first documentation strategy, Galaxy concept bridge for new developers, XRPL/x402 programmatic tipping technical guide, MkDocs Material site structure, light mode contrast fixes (Gemini review).
+- **Docker Hub + GHCR publishing** — `release.yml` workflow builds and pushes slim + heavy images to `ghcr.io/whitemagic-ai/whitemagic` on tag push. Sigstore signing + CycloneDX SBOM generation.
+- **PyPI publishing** — `twine upload` via release workflow with `PYPI_API_TOKEN` secret. Reproducible builds verified.
+
+#### Changed
+- **Version unified to 15.7.0** across VERSION, pyproject.toml, README.md, AI_PRIMARY.md, SYSTEM_MAP.md, llms.txt, llms-full.txt, server.json, mcp-registry.json, Dockerfile.
+- **Tool count unified to 356** across all docs, configs, and templates (was 313 in some files).
+- **0 TODO comments** remaining in codebase — 1 aspirational TODO converted to `FUTURE:` comment.
+- **RELEASE_NOTES.md** rewritten for v15.7 with full feature summary (v15.0–15.7).
+
+#### Metrics
+| Metric | v15.6 | v15.7 |
+|--------|-------|-------|
+| Dispatch tools | 356 | 356 |
+| Registry defs | 384 | 384 |
+| Unit tests | 1,362 | 1,362 |
+| Ruff findings | 0 | 0 |
+| TODO comments | 1 | 0 |
+| Version-consistent files | ~60% | 100% |
+
+---
+
 ## [15.6.0] — 2026-02-13
 
 ### Cognitive Extensions & Code Quality

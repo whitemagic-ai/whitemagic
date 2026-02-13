@@ -1,4 +1,4 @@
-# Whitemagic v15.1.0
+# Whitemagic v15.7.0
 
 [![CI](https://github.com/whitemagic-ai/whitemagic/actions/workflows/ci.yml/badge.svg)](https://github.com/whitemagic-ai/whitemagic/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/whitemagic)](https://pypi.org/project/whitemagic/)
@@ -6,15 +6,15 @@
 
 **The Tool Substrate for Agentic AI.**
 
-Whitemagic is a high-performance memory and tool infrastructure designed for AI agents. It provides 313 MCP tools (or 28 in PRAT mode), tiered memory with 5D holographic coordinates and a Galactic Map lifecycle, ethical governance, multi-galaxy project-scoped databases, Edgerunner Violet security layer, local AI agent loops (Ollama), and polyglot accelerators in 11 languages.
+Whitemagic is a high-performance memory and tool infrastructure designed for AI agents. It provides 356 MCP tools (or 28 in PRAT mode), tiered memory with 5D holographic coordinates and a Galactic Map lifecycle, ethical governance, multi-galaxy project-scoped databases, Edgerunner Violet security layer, local AI agent loops (Ollama), and polyglot accelerators in 11 languages.
 
 If you're integrating Whitemagic into an agent runtime, start with `AI_PRIMARY.md`.
 
 ## Core Features
 
 1.  **Memory Substrate**: Tiered memory management with native SQLite backing, 5D holographic coordinates (XYZWV), a Galactic Map lifecycle (no memory is ever deleted — only rotated outward), constellation detection, and association mining.
-2.  **311 MCP Tools** exposed via a unified interface (`whitemagic.tools.unified_api`) with a composable middleware pipeline (input sanitizer → circuit breaker → rate limiter → RBAC → maturity gate → governor → core router → compact response).
-3.  **PRAT Mode (28 Gana Meta-Tools)**: The Polymorphic Resonant Adaptive Tools router maps all 313 tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions. Every call carries resonance context (predecessor output, lunar phase, Harmony Vector, Wu Xing boost, Guna adaptation). Enable with `WM_MCP_PRAT=1`.
+2.  **356 MCP Tools** exposed via a unified interface (`whitemagic.tools.unified_api`) with a composable middleware pipeline (input sanitizer → circuit breaker → rate limiter → RBAC → maturity gate → governor → core router → compact response).
+3.  **PRAT Mode (28 Gana Meta-Tools)**: The Polymorphic Resonant Adaptive Tools router maps all 356 tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions. Every call carries resonance context (predecessor output, lunar phase, Harmony Vector, Wu Xing boost, Guna adaptation). Enable with `WM_MCP_PRAT=1`.
 4.  **Capability Matrix**: 25 subsystems, 28 active cross-system fusions, 0 unexplored — all queryable via `capability.matrix` MCP tool.
 5.  **MCP Native**: Built from the ground up to be served via the Model Context Protocol (MCP).
 6.  **Self-Regulating**: Harmony Vector (7-dimension health), Dharma Rules Engine (ethical governance with YAML hot-reload), Homeostatic Loop (auto-correction), Karma Ledger (side-effect auditing), Circuit Breakers, Maturity Gates, Agent Trust scoring.
@@ -90,7 +90,7 @@ python -m whitemagic.run_mcp_lean
 # Lean mode over HTTP (Streamable HTTP transport, port 8770)
 python -m whitemagic.run_mcp_lean --http
 
-# Classic mode — all 311 individual tools
+# Classic mode — all 356 individual tools
 python -m whitemagic.run_mcp
 
 # Lite mode — 92 core tools
@@ -138,8 +138,8 @@ out = call_tool("gnosis", compact=True)
 
 ## Architecture
 
-*   `whitemagic/`: Core Python package (~170K LOC, 313 MCP tools across 30+ domain files).
-*   `whitemagic/tools/prat_router.py`: PRAT router — maps 313 tools → 28 Gana meta-tools.
+*   `whitemagic/`: Core Python package (~195K LOC, 356 MCP tools across 30+ domain files).
+*   `whitemagic/tools/prat_router.py`: PRAT router — maps 356 tools → 28 Gana meta-tools.
 *   `whitemagic/tools/`: Canonical tool registry, dispatch pipeline, and handler modules.
 *   `whitemagic/core/ganas/`: 28 Gana architecture (4 quadrant files + chain + base + karma + lunar + swarm).
 *   `whitemagic/core/memory/`: Memory substrate — embeddings (HNSW), entropy scoring, causal mining, UMAP projection, graph walker, surprise gate, lifecycle, galactic map.

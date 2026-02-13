@@ -19,7 +19,7 @@ call_tool("search_memories", query="Lucas UI preferences")
 # → Returns the dark mode preference, ranked by relevance
 ```
 
-**This is the minimum viable product.** Everything else — the 313 tools, the 28 Gardens, the 11 languages — is built on top of this foundation.
+**This is the minimum viable product.** Everything else — the 356 tools, the 28 Gardens, the 11 languages — is built on top of this foundation.
 
 ---
 

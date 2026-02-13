@@ -2,13 +2,13 @@
 
 ## Executive Summary
 
-**All 10 compiled languages build clean. Polyglot expansion is CLOSED OUT.** Python remains the core (~170K LOC, 313 MCP tools). Ten accelerator languages provide performance-critical hot paths via FFI/PyO3/OTP/subprocess. Every polyglot module now has a Python bridge in `core/acceleration/` with graceful fallback. WhiteMagic is an **11-language polyglot** (Python, Rust, Zig, Haskell, Elixir, Mojo, Go, Julia, TypeScript, C, WASM). **v15.0.0:** Seed binary (2.4MB standalone Rust MCP server), Apache Arrow IPC bridge (32× faster than JSON), Tokio Clone Army (208× faster than Python asyncio), Iceoryx2 IPC bridge, WASM edge inference engine.
+**All 10 compiled languages build clean. Polyglot expansion is CLOSED OUT.** Python remains the core (~195K LOC, 356 MCP tools). Ten accelerator languages provide performance-critical hot paths via FFI/PyO3/OTP/subprocess. Every polyglot module now has a Python bridge in `core/acceleration/` with graceful fallback. WhiteMagic is an **11-language polyglot** (Python, Rust, Zig, Haskell, Elixir, Mojo, Go, Julia, TypeScript, C, WASM). **v15.0.0:** Seed binary (2.4MB standalone Rust MCP server), Apache Arrow IPC bridge (32× faster than JSON), Tokio Clone Army (208× faster than Python asyncio), Iceoryx2 IPC bridge, WASM edge inference engine.
 
 ## Language Census
 
 | Language | LOC | Build Status | Location | Integration |
 |----------|-----|-------------|----------|-------------|
-| **Python** | ~170K | ✅ Active | `whitemagic/` | Core (313 MCP tools, 30+ domain files) |
+| **Python** | ~195K | ✅ Active | `whitemagic/` | Core (356 MCP tools, 30+ domain files) |
 | **Rust** | ~12K | ✅ `maturin develop --release` | `whitemagic-rust/` | PyO3 — 74+ Python-callable functions (Arrow IPC, Tokio clones, IPC bridge) |
 | **Zig** | ~2.2K | ✅ `zig build` | `whitemagic-zig/` | 17 exported symbols, static + shared libs |
 | **Haskell** | ~2.8K | ✅ `cabal build` | `haskell/` | FFI — foreign-library .so, `hs_init()` bridge |
@@ -21,7 +21,7 @@
 ## Detailed Breakdown
 
 ### 1. Python (The Body) — ~168K LOC
-The core runtime: 313 MCP tools across 30+ domain files, composable dispatch pipeline, tiered memory with 5D holographic coordinates, Galactic Map lifecycle, 28 Gana architecture, ethical governance. Active code is well-separated from `_archived/` legacy.
+The core runtime: 356 MCP tools across 30+ domain files, composable dispatch pipeline, tiered memory with 5D holographic coordinates, Galactic Map lifecycle, 28 Gana architecture, ethical governance. Active code is well-separated from `_archived/` legacy.
 
 ### 2. Rust (The Muscle) — ~12K LOC
 **Build:** `cd whitemagic-rust && maturin develop --release`

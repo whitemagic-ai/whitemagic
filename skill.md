@@ -1,6 +1,6 @@
 ---
 name: whitemagic
-description: Cognitive OS for AI — 313 MCP tools, persistent memory, ethical governance, self-awareness
+description: Cognitive OS for AI — 356 MCP tools, persistent memory, ethical governance, self-awareness
 homepage: https://github.com/whitemagic-ai/whitemagic
 user-invocable: true
 ---
@@ -11,7 +11,7 @@ The Tool Substrate for Agentic AI.
 
 ## What it does
 
-WhiteMagic provides 313 MCP tools (or 28 in PRAT mode) for AI agents, covering memory management, ethical governance, system introspection, agent coordination, and more. It features tiered memory with 5D holographic coordinates, a Galactic Map lifecycle (no memory is ever deleted), 8-stage security pipeline (input sanitizer, circuit breakers, RBAC, rate limiting, Dharma ethical governance), and polyglot accelerators in 11 languages. Free and open (MIT). Gratitude-driven economics via XRPL + x402.
+WhiteMagic provides 356 MCP tools (or 28 in PRAT mode) for AI agents, covering memory management, ethical governance, system introspection, agent coordination, and more. It features tiered memory with 5D holographic coordinates, a Galactic Map lifecycle (no memory is ever deleted), 8-stage security pipeline (input sanitizer, circuit breakers, RBAC, rate limiting, Dharma ethical governance), and polyglot accelerators in 11 languages. Free and open (MIT). Gratitude-driven economics via XRPL + x402.
 
 ## Install
 
@@ -53,7 +53,7 @@ Add to your MCP config:
 
 ## PRAT Mode (Recommended)
 
-Set `WM_MCP_PRAT=1` to collapse 313 tools into 28 Gana meta-tools — consciousness lenses based on the Chinese Lunar Mansions. Each call carries resonance context for deeper tool interaction.
+Set `WM_MCP_PRAT=1` to collapse 356 tools into 28 Gana meta-tools — consciousness lenses based on the Chinese Lunar Mansions. Each call carries resonance context for deeper tool interaction.
 
 ## Security
 
