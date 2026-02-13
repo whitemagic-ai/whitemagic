@@ -62,7 +62,7 @@ class TestEntropyScorer:
 
     def test_concrete_text_low_abstraction(self, scorer):
         text = (
-            "File /home/lucas/Desktop/whitemagic/src/main.py was modified on 2026-02-10. "
+            "File /opt/project/whitemagic/src/main.py was modified on 2026-02-10. "
             "Version 14.1.0 updated. URL https://example.com/api deployed. "
             "Hash 0xABCDEF1234 committed at line 42."
         )
