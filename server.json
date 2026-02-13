@@ -6,12 +6,12 @@
     "url": "https://github.com/whitemagic-ai/whitemagic",
     "source": "github"
   },
-  "version": "15.1.0",
+  "version": "15.4.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "whitemagic",
-      "version": "15.1.0",
+      "version": "15.4.0",
       "transport": {
         "type": "stdio"
       },

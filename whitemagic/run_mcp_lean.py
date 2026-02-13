@@ -130,67 +130,46 @@ _GANA_NAMES: list[str] = [
 
 # Static short descriptions (no imports needed)
 _GANA_SHORT_DESC: dict[str, str] = {
-    "gana_horn": "Session initialisation — bootstrap, create, resume, checkpoint",
-    "gana_neck": "Core memory creation — create, update, import, delete memories",
-    "gana_root": "System health — health report, rust status, state summary",
-    "gana_room": "Resource locks & privacy — sangha lock, sandbox controls",
-    "gana_heart": "Session context — scratchpad, handoff, context pack/status",
-    "gana_tail": "Performance & acceleration — SIMD ops, cascade execution",
-    "gana_winnowing_basket": "Wisdom & search — search, vector search, hybrid recall, graph walk, read memories",
-    "gana_ghost": "Introspection & web research — gnosis, telemetry, capabilities, graph topology, surprise stats, web_search, web_fetch, web_search_and_read, research_topic, browser automation",
-    "gana_willow": "Resilience — rate limiter, grimoire spells & suggestions",
-    "gana_star": "Governance — governor validate/set-goal/drift, dharma reload/profile, forge status/reload/validate",
-    "gana_extended_net": "Pattern connectivity — pattern search, cluster stats, learning",
-    "gana_wings": "Deployment & export — export memories, audit export, mesh",
-    "gana_chariot": "Archaeology & knowledge graph — archaeology, KG extract/query/top",
-    "gana_abundance": "Regeneration — dream cycle, lifecycle, serendipity, entity resolve",
-    "gana_straddling_legs": "Ethics & balance — ethics eval, boundaries, consent, harmony vector",
-    "gana_mound": "Metrics & caching — hologram view, metric tracking, yin-yang balance",
-    "gana_stomach": "Digestion & tasks — pipeline, task distribute/status/route",
-    "gana_hairy_head": "Detail & debug — salience, anomaly, otel, karma report/trace, dharma rules, karma XRPL anchoring",
-    "gana_net": "Capture & filtering — prompt render/list/reload, karma verify",
+    "gana_horn": "Session initialisation — bootstrap, create, resume, checkpoint, handoff",
+    "gana_neck": "Core memory creation — create, update, import, delete, clone memories",
+    "gana_root": "System health — health report, rust status/audit, state summary, ship check",
+    "gana_room": "Resource locks & privacy — sangha lock, sandbox, hermit crab mode, MCP integrity, security monitor",
+    "gana_heart": "Session context — scratchpad (create/update/finalize/analyze), handoff, context pack/status",
+    "gana_tail": "Performance & acceleration — SIMD ops (cosine/batch), cascade execution",
+    "gana_winnowing_basket": "Wisdom & search — search, vector search, hybrid recall, graph walk, JIT research, batch read",
+    "gana_ghost": "Introspection & web research — gnosis, telemetry, capabilities, graph topology, surprise stats, web search/fetch, browser automation, watchers, self-model forecast",
+    "gana_willow": "Resilience — rate limiter, grimoire spells/suggest/cast/walkthrough, oracle",
+    "gana_star": "Governance — governor validate/set-goal/drift/budget/dharma, forge status/reload/validate",
+    "gana_extended_net": "Pattern connectivity — pattern search, cluster stats, learning, coherence boost, resonance trace",
+    "gana_wings": "Deployment & export — export memories, audit export, mesh broadcast/status",
+    "gana_chariot": "Archaeology & knowledge graph — archaeology (search/stats/digest), KG extract/query/top, marketplace, Windsurf conversations",
+    "gana_abundance": "Regeneration — dream cycle (start/stop/now/status), lifecycle, serendipity, entity resolve, narrative compress, ILP payments, gratitude",
+    "gana_straddling_legs": "Ethics & balance — ethics eval, boundaries, consent, harmony vector, wu xing balance, verification",
+    "gana_mound": "Metrics & caching — hologram view, metric tracking, yin-yang balance, green score",
+    "gana_stomach": "Digestion & tasks — pipeline (create/list/status), task distribute/status/route/complete",
+    "gana_hairy_head": "Detail & debug — salience, anomaly (check/history/status), otel (metrics/spans), karma report/trace/anchor/verify, dharma rules",
+    "gana_net": "Capture & filtering — prompt render/list/reload, karma verify chain",
     "gana_turtle_beak": "Precision — edge/bitnet inference, edge batch, stats",
-    "gana_three_stars": "Judgment & synthesis — bicameral reasoning, ensemble, optimization, kaizen, sabha convene/status",
-    "gana_dipper": "Strategy — homeostasis, maturity assess, starter packs",
-    "gana_ox": "Endurance — swarm decompose/route/complete/vote/plan/status, worker",
+    "gana_three_stars": "Judgment & synthesis — bicameral reasoning, ensemble (query/history/status), optimization, kaizen analyze/apply, sabha convene/status",
+    "gana_dipper": "Strategy — homeostasis (check/status), maturity assess, starter packs (get/list/suggest), cognitive modes",
+    "gana_ox": "Endurance — swarm decompose/route/complete/vote/plan/resolve/status, worker",
     "gana_girl": "Nurture — agent register/heartbeat/list/capabilities/deregister/trust",
-    "gana_void": "Stillness — galactic dashboard, garden activate/status/health",
-    "gana_roof": "Shelter — ollama models/generate/chat, model signing/verify",
-    "gana_encampment": "Community — sangha chat, broker publish/history/status",
-    "gana_wall": "Boundaries — vote create/cast/analyze/list/record_outcome, engagement tokens",
+    "gana_void": "Stillness & galaxies — galactic dashboard, gardens, galaxy CRUD/transfer/merge/sync/lineage/taxonomy, OMS export/import/inspect",
+    "gana_roof": "Shelter — ollama models/generate/chat/agent, model signing/verify, sovereign sandbox (shelter create/execute/inspect/destroy)",
+    "gana_encampment": "Community — sangha chat, broker publish/history/status, gan ying emit/history/listeners",
+    "gana_wall": "Boundaries — vote create/cast/analyze/list/record_outcome, engagement tokens (issue/validate/revoke/list/status)",
 }
 
-# Static per-Gana tool lists (no heavy imports needed at startup).
-_GANA_TOOLS: dict[str, list[str]] = {
-    "gana_horn": ["checkpoint_session", "create_session", "resume_session", "session_bootstrap", "session_status", "focus_session"],
-    "gana_neck": ["create_memory", "delete_memory", "import_memories", "update_memory", "thought_clone"],
-    "gana_root": ["health_report", "rust_audit", "rust_compress", "rust_similarity", "rust_status", "ship.check", "state.paths", "state.summary"],
-    "gana_room": ["hermit.assess", "hermit.check_access", "hermit.mediate", "hermit.resolve", "hermit.status", "hermit.verify_ledger", "hermit.withdraw", "immune_heal", "immune_scan", "mcp_integrity.snapshot", "mcp_integrity.status", "mcp_integrity.verify", "sandbox.set_limits", "sandbox.status", "sandbox.violations", "sangha_lock", "security.alerts", "security.monitor_status"],
-    "gana_heart": ["analyze_scratchpad", "context.pack", "context.status", "scratchpad", "scratchpad_create", "scratchpad_finalize", "scratchpad_update", "session.handoff"],
-    "gana_tail": ["execute_cascade", "list_cascade_patterns", "simd.batch", "simd.cosine", "simd.status"],
-    "gana_winnowing_basket": ["batch_read_memories", "fast_read_memory", "graph_walk", "hybrid_recall", "jit_research", "jit_research.stats", "list_memories", "read_memory", "search_memories", "vector.index", "vector.search", "vector.status"],
-    "gana_ghost": ["capabilities", "capability.matrix", "capability.status", "capability.suggest", "drive.event", "drive.snapshot", "explain_this", "get_telemetry_summary", "gnosis", "graph_topology", "manifest", "repo.summary", "selfmodel.alerts", "selfmodel.forecast", "surprise_stats", "watcher_add", "watcher_list", "watcher_recent_events", "watcher_status", "web_fetch", "web_search", "web_search_and_read", "research_topic", "browser_navigate", "browser_click", "browser_type", "browser_extract_dom", "browser_screenshot", "browser_get_interactables", "browser_session_status"],
-    "gana_willow": ["cast_oracle", "grimoire_auto_status", "grimoire_cast", "grimoire_list", "grimoire_read", "grimoire_recommend", "grimoire_suggest", "grimoire_walkthrough", "rate_limiter.stats"],
-    "gana_star": ["dharma.reload", "forge.reload", "forge.status", "forge.validate", "governor_check_budget", "governor_check_dharma", "governor_check_drift", "governor_set_goal", "governor_stats", "governor_validate", "governor_validate_path", "set_dharma_profile"],
-    "gana_extended_net": ["cluster_stats", "coherence_boost", "learning.patterns", "learning.status", "learning.suggest", "pattern_search", "resonance_trace", "tool.graph", "tool.graph_full"],
-    "gana_wings": ["audit.export", "export_memories", "mesh.broadcast", "mesh.status"],
-    "gana_chariot": ["archaeology", "archaeology_daily_digest", "archaeology_search", "archaeology_stats", "kg.extract", "kg.query", "kg.status", "kg.top", "windsurf_list_conversations", "windsurf_search_conversations"],
-    "gana_abundance": ["dream", "dream_now", "dream_start", "dream_status", "dream_stop", "entity_resolve", "gratitude.benefits", "gratitude.stats", "memory.consolidate", "memory.consolidation_stats", "memory.lifecycle", "memory.lifecycle_stats", "memory.lifecycle_sweep", "memory.retention_sweep", "narrative.compress", "narrative.stats", "serendipity_mark_accessed", "serendipity_surface", "whitemagic.tip"],
-    "gana_straddling_legs": ["check_boundaries", "evaluate_ethics", "get_dharma_guidance", "get_ethical_score", "harmony_vector", "verify_consent", "wu_xing_balance"],
-    "gana_mound": ["get_metrics_summary", "get_yin_yang_balance", "green.record", "green.report", "record_yin_yang_activity", "track_metric", "view_hologram"],
-    "gana_stomach": ["pipeline", "pipeline.create", "pipeline.list", "pipeline.status", "task.complete", "task.distribute", "task.list", "task.route_smart", "task.status"],
-    "gana_hairy_head": ["anomaly", "anomaly.check", "anomaly.history", "anomaly.status", "dharma_rules", "karma.anchor", "karma.anchor_status", "karma.verify_anchor", "karma_report", "karmic_trace", "otel", "otel.metrics", "otel.spans", "otel.status", "salience.spotlight"],
-    "gana_net": ["karma.verify_chain", "prompt.list", "prompt.reload", "prompt.render"],
-    "gana_turtle_beak": ["bitnet_infer", "bitnet_status", "edge_batch_infer", "edge_infer", "edge_stats"],
-    "gana_three_stars": ["ensemble", "ensemble.history", "ensemble.query", "ensemble.status", "kaizen_analyze", "kaizen_apply_fixes", "reasoning.bicameral", "sabha.convene", "sabha.status", "solve_optimization"],
-    "gana_dipper": ["cognitive.hints", "cognitive.mode", "cognitive.set", "cognitive.stats", "homeostasis", "homeostasis.check", "homeostasis.status", "maturity.assess", "starter_packs", "starter_packs.get", "starter_packs.list", "starter_packs.suggest"],
-    "gana_ox": ["swarm.complete", "swarm.decompose", "swarm.plan", "swarm.resolve", "swarm.route", "swarm.status", "swarm.vote", "worker.status"],
-    "gana_girl": ["agent.capabilities", "agent.deregister", "agent.heartbeat", "agent.list", "agent.register", "agent.trust"],
-    "gana_void": ["galactic.dashboard", "galaxy.create", "galaxy.delete", "galaxy.ingest", "galaxy.list", "galaxy.status", "galaxy.switch", "galaxy.backup", "galaxy.restore", "garden_activate", "garden_health", "garden_status", "garden_synergy"],
-    "gana_roof": ["model.hash", "model.list", "model.register", "model.signing_status", "model.verify", "ollama.agent", "ollama.chat", "ollama.generate", "ollama.models"],
-    "gana_encampment": ["broker.history", "broker.publish", "broker.status", "ganying_emit", "ganying_history", "ganying_listeners", "sangha_chat_read", "sangha_chat_send"],
-    "gana_wall": ["engagement.issue", "engagement.list", "engagement.revoke", "engagement.status", "engagement.validate", "vote.analyze", "vote.cast", "vote.create", "vote.list", "vote.record_outcome"],
-}
+# Dynamic per-Gana tool lists — generated from the PRAT router's TOOL_TO_GANA
+# dict which is the single source of truth for tool→Gana mapping.
+# This import is cheap (just a module-level dict, no subsystem init).
+_GANA_TOOLS: dict[str, list[str]] = {}
+try:
+    from whitemagic.tools.prat_router import GANA_TO_TOOLS as _G2T
+    _GANA_TOOLS = {gana: sorted(tools) for gana, tools in _G2T.items()}
+except ImportError:
+    # Fallback: will be populated on first _load_gana_metadata() call
+    pass
 
 
 def _schema_for_gana(name: str) -> dict:
