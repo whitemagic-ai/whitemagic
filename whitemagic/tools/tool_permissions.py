@@ -77,10 +77,13 @@ _ALWAYS_ALLOWED: set[str] = {
 def _rbac_path() -> Path:
     """Resolve the persistent RBAC storage path."""
     try:
-        from whitemagic.config.paths import get_state_root
-        return get_state_root() / "rbac_roles.json"
+        from whitemagic.config.paths import WM_ROOT
+        return WM_ROOT / "rbac_roles.json"
     except Exception:
-        return Path(os.environ.get("WM_STATE_ROOT", Path.home() / ".whitemagic")) / "rbac_roles.json"
+        state_root = os.environ.get("WM_STATE_ROOT")
+        if state_root:
+            return Path(state_root) / "rbac_roles.json"
+        return (Path.home() / ".whitemagic") / "rbac_roles.json"
 
 
 class AgentRoleRegistry:

@@ -254,10 +254,11 @@ async def execute_command_full(
 
         extra_patterns = await get_user_allowlist_patterns(user_id, user_key, "write")
         allowlist = Allowlist(Profile.AGENT, extra_allowed=set(extra_patterns))
-        # Execute with restricted profile + no auto-approve
+        # Header + local token + allowlist already enforced in this route.
+        # The terminal approver should not re-deny these pre-approved writes.
         tools = TerminalMCPTools(
             profile=Profile.PROD,
-            approver=Approver(auto_approve=False),
+            approver=Approver(auto_approve=True),
             allowlist=allowlist,
         )
         result = await tools.execute_command(

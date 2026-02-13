@@ -190,9 +190,12 @@ def _get_container_runtime() -> str:
 def _execute_thread(shelter: Shelter, code: str) -> tuple[str, str, int]:
     """Tier 0: Execute in a sandboxed thread with resource limits."""
     try:
-        from whitemagic.execution.sandbox import safe_exec
-        result = safe_exec(code, timeout=shelter.limits.timeout_s)
-        return str(result), "", 0
+        from whitemagic.execution.sandbox import SafeSandbox
+        sandbox = SafeSandbox(timeout_seconds=shelter.limits.timeout_s)
+        result = sandbox.execute(code)
+        if result.success:
+            return result.output, "", 0
+        return result.output, result.error or "Sandbox execution failed", 1
     except Exception as e:
         return "", str(e), 1
 

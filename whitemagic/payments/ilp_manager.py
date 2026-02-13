@@ -114,7 +114,10 @@ def _resolve_spsp(pointer: str, timeout_s: int = 10) -> dict[str, Any]:
             "Accept": "application/spsp4+json",
         })
         with urllib.request.urlopen(req, timeout=timeout_s) as resp:
-            return json.loads(resp.read().decode())
+            payload = json.loads(resp.read().decode())
+            if isinstance(payload, dict):
+                return payload
+            return {"error": "Invalid SPSP response payload"}
     except Exception as e:
         return {"error": str(e)}
 

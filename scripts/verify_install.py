@@ -15,6 +15,12 @@ import os
 import sys
 import time
 
+# Allow direct execution (`python scripts/verify_install.py`) from repo root.
+if __package__ in (None, ""):
+    _repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if _repo_root not in sys.path:
+        sys.path.insert(0, _repo_root)
+
 os.environ.setdefault("WM_SILENT_INIT", "1")
 os.environ.setdefault("WM_SKIP_HOLO_INDEX", "1")
 
@@ -240,7 +246,7 @@ def main():
     print(f"  {passed} passed, {failed} failed, {skipped} skipped ({total_ms:.0f}ms)")
 
     if failed == 0:
-        print(f"  \033[92m🎉 WhiteMagic is working correctly!\033[0m")
+        print("  \033[92m🎉 WhiteMagic is working correctly!\033[0m")
     else:
         print(f"  \033[91m⚠ {failed} check(s) failed — see above for details\033[0m")
 

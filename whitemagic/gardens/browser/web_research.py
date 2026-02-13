@@ -202,7 +202,7 @@ def _html_to_text(html: str, max_chars: int = 50_000) -> str:
         h.unicode_snob = True
         text = h.handle(html)
     elif HAS_BS4:
-        soup = BeautifulSoup(html, "lxml")
+        soup = BeautifulSoup(html, "html.parser")
         # Remove script/style
         for tag in soup(["script", "style", "nav", "footer", "header"]):
             tag.decompose()

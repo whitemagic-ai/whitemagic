@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import logging
 import time
-from collections import Counter
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -72,7 +72,7 @@ class PropagationResult:
     assigned_community: str | None
     action: str  # "assigned", "created_new", "no_neighbors", "below_threshold"
     neighbor_count: int = 0
-    label_distribution: dict[str, int] = field(default_factory=dict)
+    label_distribution: dict[str, float] = field(default_factory=dict)
     confidence: float = 0.0
 
 
@@ -141,7 +141,7 @@ class CommunityMaintainer:
             )
 
         # Collect community labels from neighbors, weighted by association strength
-        label_votes: Counter[str] = Counter()
+        label_votes: dict[str, float] = defaultdict(float)
         for nid, weight in strong_neighbors:
             community_id = self._member_to_community.get(nid)
             if community_id:
@@ -153,7 +153,7 @@ class CommunityMaintainer:
 
         # Find majority label
         total_weight = sum(label_votes.values())
-        best_label, best_weight = label_votes.most_common(1)[0]
+        best_label, best_weight = max(label_votes.items(), key=lambda item: item[1])
         confidence = best_weight / total_weight if total_weight > 0 else 0.0
 
         if confidence < MAJORITY_THRESHOLD:

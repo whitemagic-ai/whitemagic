@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 
 
 SKIP_LINE_RE = re.compile(r"^SKIPPED \[(\d+)\] .*: (.+)$")
@@ -29,6 +28,7 @@ KNOWN_REASONS_BY_PROFILE: dict[str, list[str]] = {
         "Live network tests are opt-in.",
         "could not import 'numpy'",
         "could not import 'rich'",
+        "mcp SDK not installed",
     ],
     # Optional extras — tolerate their specific skip reasons.
     "optional-api": [

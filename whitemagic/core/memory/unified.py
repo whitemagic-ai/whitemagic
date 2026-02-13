@@ -168,8 +168,10 @@ class UnifiedMemory:
         try:
             from whitemagic.core.memory.embeddings import get_embedding_engine
             engine = get_embedding_engine()
-            if engine and engine.model_available:
-                engine.index_single(memory.id, memory.content)
+            if engine and engine.available():
+                embedding = engine.encode(str(memory.content))
+                if embedding:
+                    engine.cache_embedding(memory.id, embedding)
         except Exception:
             pass  # Embedding unavailable — skip silently
 

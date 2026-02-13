@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 
 def handle_galaxy_backup(**kwargs: Any) -> dict[str, Any]:
     """Backup a galaxy (or all memories) to a .tar.gz archive."""
-    from whitemagic.config.paths import get_state_root
+    from whitemagic.config.paths import WM_ROOT
 
     galaxy = kwargs.get("galaxy")
     output_path = kwargs.get("output_path")
 
-    state_root = get_state_root()
+    state_root = WM_ROOT
     memory_dir = state_root / "memory"
 
     if not memory_dir.exists():
@@ -61,7 +61,7 @@ def handle_galaxy_backup(**kwargs: Any) -> dict[str, Any]:
 
 def handle_galaxy_restore(**kwargs: Any) -> dict[str, Any]:
     """Restore a galaxy from a .tar.gz backup archive."""
-    from whitemagic.config.paths import get_state_root
+    from whitemagic.config.paths import WM_ROOT
 
     archive_path = kwargs.get("archive_path", "")
     force = kwargs.get("force", False)
@@ -73,7 +73,7 @@ def handle_galaxy_restore(**kwargs: Any) -> dict[str, Any]:
     if not archive.exists():
         return {"status": "error", "error": f"Archive not found: {archive}"}
 
-    state_root = get_state_root()
+    state_root = WM_ROOT
     memory_dir = state_root / "memory"
 
     if memory_dir.exists() and not force:

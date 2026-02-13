@@ -7,6 +7,7 @@ import sqlite3
 import threading
 from collections.abc import Generator
 from contextlib import contextmanager
+from typing import cast
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class ConnectionPool:
         passphrase = os.environ.get("WM_DB_PASSPHRASE", "")
         if passphrase and _SQLCIPHER_AVAILABLE:
             import sqlcipher3  # type: ignore[import-untyped]
-            conn = sqlcipher3.connect(self.db_path, check_same_thread=False)
+            conn = cast("sqlite3.Connection", sqlcipher3.connect(self.db_path, check_same_thread=False))
             conn.execute(f"PRAGMA key='{passphrase}'")
             logger.debug("SQLCipher encryption active for %s", self.db_path)
         else:

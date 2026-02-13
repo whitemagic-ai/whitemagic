@@ -120,17 +120,22 @@ def _inject_context(
         if not safe_query:
             return prompt, []
 
+        results: list[Any] = []
         if strategy == "hybrid":
             try:
-                results = um.hybrid_recall(safe_query, limit=max_memories)
+                results = um.hybrid_recall(safe_query, final_limit=max_memories)
             except Exception:
                 results = um.search(safe_query, limit=max_memories)
         else:
             results = um.search(safe_query, limit=max_memories)
 
         for m in results:
-            d = m.to_dict() if hasattr(m, "to_dict") else {"content": str(m)}
-            memories.append(d)
+            if isinstance(m, dict):
+                memories.append(dict(m))
+            elif hasattr(m, "to_dict"):
+                memories.append(m.to_dict())
+            else:
+                memories.append({"content": str(m)})
     except Exception as e:
         logger.debug(f"Context injection failed (non-fatal): {e}")
         return prompt, []
