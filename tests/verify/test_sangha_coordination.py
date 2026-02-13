@@ -3,6 +3,9 @@ Verification - Sangha Coordination
 Tests distributed locking and heartbeating between multiple simulated agents.
 """
 
+import pytest
+rich = pytest.importorskip("rich")
+
 from whitemagic.gardens.sangha.resources import get_resources
 from rich.console import Console
 import time

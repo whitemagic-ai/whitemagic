@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-import numpy as np
+np = __import__("pytest").importorskip("numpy")
 
 from whitemagic.core.memory.umap_projection import (
     ProjectionPoint,

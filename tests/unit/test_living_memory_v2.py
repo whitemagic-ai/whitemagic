@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
-import numpy as np
+np = __import__("pytest").importorskip("numpy")
 
 
 # ============================================================================

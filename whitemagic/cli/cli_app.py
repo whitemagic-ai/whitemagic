@@ -208,6 +208,16 @@ def main(
     ctx.obj["json_output"] = bool(json_output)
     ctx.obj["now"] = now
 
+    # Non-blocking update check (cached 24h, opt-out via WM_NO_UPDATE_CHECK=1)
+    if not json_output:
+        try:
+            from whitemagic.core.update_checker import check_for_update
+            update_msg = check_for_update()
+            if update_msg:
+                click.echo(update_msg, err=True)
+        except Exception:
+            pass
+
 # --- Enhanced Commands (Rich Enabled) ---
 
 @main.command(name="status")

@@ -41,12 +41,45 @@ class SQLiteBackend:
         self._cold_pool = False  # Sentinel: checked but unavailable
         return None
 
+    def _auto_backup(self) -> None:
+        """Create a pre-migration backup of the database if it has data.
+
+        Keeps at most 3 backups (rotated by suffix).  Backups are named
+        ``<db>.bak.1`` through ``<db>.bak.3`` with ``.bak.1`` being the
+        most recent.  Only runs when the DB file already exists and is
+        non-empty, to avoid creating empty backup files on first launch.
+        """
+        import shutil
+
+        src = Path(self.db_path)
+        if not src.exists() or src.stat().st_size == 0:
+            return
+
+        # Rotate: .bak.2 → .bak.3, .bak.1 → .bak.2, current → .bak.1
+        for i in (2, 1):
+            old = src.with_suffix(f"{src.suffix}.bak.{i}")
+            new = src.with_suffix(f"{src.suffix}.bak.{i + 1}")
+            if old.exists():
+                try:
+                    shutil.move(str(old), str(new))
+                except OSError:
+                    pass
+
+        dst = src.with_suffix(f"{src.suffix}.bak.1")
+        try:
+            shutil.copy2(str(src), str(dst))
+            logger.debug("Pre-migration backup: %s", dst)
+        except OSError as exc:
+            logger.warning("Could not create backup %s: %s", dst, exc)
+
     def _init_db(self) -> None:
         """Initialize database schema and handle migrations.
 
-        Note: PRAGMAs (WAL, mmap_size, cache_size, temp_store, etc.) are
+        Creates a rotated backup before applying any schema changes.
+        PRAGMAs (WAL, mmap_size, cache_size, temp_store, etc.) are
         set centrally in db_manager.ConnectionPool._create_connection().
         """
+        self._auto_backup()
         with self.pool.connection() as conn:
 
             # 1. Memories table

@@ -3,6 +3,9 @@ Verification - Universal Solver Convergence (Frank-Wolfe)
 Validates that the solver selects optimal nodes while respecting causal/dharmic constraints.
 """
 
+import pytest
+rich = pytest.importorskip("rich")
+
 import time
 from whitemagic.tools.unified_api import call_tool
 from rich.console import Console

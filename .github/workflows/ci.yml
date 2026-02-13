@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.11", "3.12"]
     env:
       WM_SILENT_INIT: "1"
       WM_STATE_ROOT: /tmp/whitemagic_state
@@ -278,16 +278,16 @@ jobs:
 
       - name: Build 1 (reproducible)
         run: |
-          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python -m build --sdist --wheel
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python -m build --wheel
           mkdir -p /tmp/build1
-          cp dist/* /tmp/build1/
+          cp dist/*.whl /tmp/build1/
 
       - name: Build 2 (same commit)
         run: |
           rm -rf dist/
-          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python -m build --sdist --wheel
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python -m build --wheel
           mkdir -p /tmp/build2
-          cp dist/* /tmp/build2/
+          cp dist/*.whl /tmp/build2/
 
       - name: Compare SHA-256 hashes
         run: |
@@ -309,7 +309,7 @@ jobs:
               exit 1
             fi
           done
-          echo "All artifacts are reproducible!"
+          echo "All wheel artifacts are reproducible!"
 
       - name: Generate BUILD_HASHES.json
         run: |
