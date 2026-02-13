@@ -7,6 +7,38 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [15.5.0] — 2026-02-13
+
+### Context-Aware Local AI & MCP Hardening
+
+#### Added
+- **Context Injection Pipeline** (`whitemagic/tools/handlers/ollama.py`) — `ollama.generate` and `ollama.chat` now auto-inject relevant WhiteMagic memories via hybrid search (FTS + vector + graph walk). Configurable via `context`, `context_strategy`, and `max_context` parameters.
+- **Memory-Augmented Generation (MAG)** — Pass `store=true` to any Ollama call to persist useful responses back into WhiteMagic with typed tags (`ollama`, `generated`, `model:<name>`). Creates a learning flywheel.
+- **Dynamic PRAT Tool Lists** — `_GANA_TOOLS` in `run_mcp_lean.py` now auto-generates from `TOOL_TO_GANA` source of truth. Never goes stale again.
+- **FTS5 Query Sanitization** — Both `ollama.py` and `ollama_agent.py` now strip special characters before FTS5 searches, preventing syntax errors.
+
+#### Fixed
+- **MCP path in Windsurf** — Config pointed to non-existent `/home/lucas/Desktop/whitemagic/` instead of `whitemagicdev/`.
+- **Stale `_GANA_TOOLS` dict** — Was frozen at v15.1 (missing 35+ tools from v15.2-15.4). Now dynamic.
+- **Stale `_GANA_SHORT_DESC`** — Updated all 28 descriptions to reflect current capabilities.
+- **Version drift** — `server.json` and `mcp-registry.json` updated from 15.1.0 → 15.5.0.
+- **`_chat` timeout** — Increased from 60s to 300s for CPU-mode Ollama with large context.
+- **(Review team)** Compact gnosis `TypeError` on dict temporal stats.
+- **(Review team)** `get_state_root()` missing — added compatibility accessor.
+- **(Review team)** Embedding `model_available`/`index_single` back-compat APIs.
+- **(Review team)** Shelter thread backend `safe_exec` import → `SafeSandbox.execute()`.
+- **(Review team)** JIT researcher Rust keyword import path corrected.
+- **(Review team)** DreamCycle test assertions updated for TRIAGE phase.
+
+#### Verified
+- Full MCP round-trip: 28 Gana tools, 341 nested tools, health score 1.0.
+- Context injection: 5 memories pulled, 3B model accurately describes WhiteMagic concepts.
+- MAG store-back: Ollama responses persisted and retrievable.
+- Agent loop: 3B model autonomously calls `pattern_search`, synthesizes results.
+- 1318 unit tests passing.
+
+---
+
 ## [15.4.0] — 2026-02-12
 
 ### Digital Genetics & Overnight Dreams

@@ -2,7 +2,7 @@
   "name": "whitemagic",
   "display_name": "WhiteMagic Core",
   "description": "Cognitive operating system for AI — persistent memory, associative recall, ethical governance, and self-awareness across sessions. 28 Gana meta-tools covering 313 capabilities.",
-  "version": "15.4.0",
+  "version": "15.5.0",
   "protocol_version": "2025-11-25",
   "homepage": "https://github.com/whitemagic-ai/whitemagic",
   "license": "MIT",

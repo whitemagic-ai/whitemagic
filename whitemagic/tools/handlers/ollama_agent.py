@@ -119,7 +119,11 @@ def _get_context_memories(task: str) -> list[dict]:
     try:
         from whitemagic.core.memory.unified import get_unified_memory
         um = get_unified_memory()
-        results = um.search(task, limit=5)
+        # Sanitize for FTS5 — strip special chars that break syntax
+        safe_query = re.sub(r'[^\w\s]', ' ', task).strip()
+        if not safe_query:
+            return []
+        results = um.search(safe_query, limit=5)
         return [m.to_dict() if hasattr(m, 'to_dict') else {"content": str(m)} for m in results]
     except Exception:
         return []
