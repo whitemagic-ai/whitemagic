@@ -152,10 +152,10 @@ class GalacticMap:
         """
         # Weighted average of available signals
         signals = [
-            (mem.importance, 1.0),
-            (mem.neuro_score, 0.9),
-            (abs(mem.emotional_valence), 0.6),
-            (min(1.0, mem.recall_count / 20.0), 0.5),
+            (mem.importance or 0.5, 1.0),
+            (mem.neuro_score or 0.5, 0.9),
+            (abs(mem.emotional_valence or 0.0), 0.6),
+            (min(1.0, (mem.recall_count or 0) / 20.0), 0.5),
         ]
 
         total_weight = sum(w for _, w in signals)

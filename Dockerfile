@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# WhiteMagic v15.7.0 — Multi-stage Dockerfile
+# WhiteMagic v15.8.0 — Multi-stage Dockerfile
 # ═══════════════════════════════════════════════════════════════════════
 #
 # Targets:
@@ -8,7 +8,7 @@
 #
 # Run:
 #   docker run --rm -i whitemagic:heavy                   # MCP stdio (PRAT mode)
-#   docker run --rm -i -e WM_MCP_PRAT=0 whitemagic:heavy # MCP classic (356 tools)
+#   docker run --rm -i -e WM_MCP_PRAT=0 whitemagic:heavy # MCP classic (374 tools)
 #   docker run --rm -p 8765:8765 whitemagic:heavy \
 #     python -m whitemagic.interfaces.nexus_api           # REST API
 #   docker run --rm whitemagic:heavy wm status            # CLI
@@ -48,8 +48,8 @@ RUN go build -o /build/whitemagic-mesh .
 FROM python:3.12-slim AS slim
 
 LABEL org.opencontainers.image.title="WhiteMagic" \
-      org.opencontainers.image.description="The Tool Substrate for Agentic AI — 356 MCP tools" \
-      org.opencontainers.image.version="15.7.0" \
+      org.opencontainers.image.description="The Tool Substrate for Agentic AI — 374 MCP tools" \
+      org.opencontainers.image.version="15.8.0" \
       org.opencontainers.image.source="https://github.com/whitemagic-ai/whitemagic" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.vendor="whitemagic-ai"

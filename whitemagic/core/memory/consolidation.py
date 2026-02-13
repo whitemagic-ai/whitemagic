@@ -307,8 +307,8 @@ class MemoryConsolidator:
             result["duplicates_found"] += 1
 
             # Determine canonical (higher importance, more accessed)
-            score_a = mem_a.importance * 10 + mem_a.access_count
-            score_b = mem_b.importance * 10 + mem_b.access_count
+            score_a = (mem_a.importance or 0.5) * 10 + (mem_a.access_count or 0)
+            score_b = (mem_b.importance or 0.5) * 10 + (mem_b.access_count or 0)
             canonical, duplicate = (mem_a, mem_b) if score_a >= score_b else (mem_b, mem_a)
 
             # Merge tags from duplicate into canonical
@@ -316,7 +316,7 @@ class MemoryConsolidator:
                 canonical.tags = canonical.tags | duplicate.tags
 
             # Reinforce canonical
-            canonical.importance = min(1.0, canonical.importance + 0.03)
+            canonical.importance = min(1.0, (canonical.importance or 0.5) + 0.03)
             canonical.access_count += 1
             canonical.metadata["entity_resolution"] = {
                 "merged_from": duplicate.id,
@@ -378,9 +378,9 @@ class MemoryConsolidator:
 
             # Build the cluster
             mem_ids = [m.id for m in unvisited]
-            avg_imp = sum(m.importance for m in unvisited) / len(unvisited)
-            total_access = sum(m.access_count for m in unvisited)
-            avg_valence = sum(m.emotional_valence for m in unvisited) / len(unvisited)
+            avg_imp = sum((m.importance or 0.5) for m in unvisited) / len(unvisited)
+            total_access = sum((m.access_count or 0) for m in unvisited)
+            avg_valence = sum((m.emotional_valence or 0.0) for m in unvisited) / len(unvisited)
 
             cluster_id = hashlib.md5(
                 "|".join(sorted(mem_ids)[:5]).encode(),
@@ -458,7 +458,7 @@ class MemoryConsolidator:
                     memory_type=MemoryType.LONG_TERM,
                     title=f"Strategy: {cluster.theme} (consolidated)",
                     tags=cluster.shared_tags | {"strategy", "consolidated"},
-                    importance=min(1.0, cluster.avg_importance + self._importance_boost),
+                    importance=min(1.0, (cluster.avg_importance or 0.5) + self._importance_boost),
                 )
                 strategies.append(strategy_content)
             except Exception as e:
@@ -569,10 +569,10 @@ class MemoryConsolidator:
             if mem.memory_type != MemoryType.SHORT_TERM:
                 continue
             # Promotion criteria: high importance + accessed multiple times
-            if mem.importance >= 0.6 and mem.access_count >= 3:
+            if (mem.importance or 0.5) >= 0.6 and (mem.access_count or 0) >= 3:
                 try:
                     mem.memory_type = MemoryType.LONG_TERM
-                    mem.importance = min(1.0, mem.importance + 0.05)
+                    mem.importance = min(1.0, (mem.importance or 0.5) + 0.05)
                     promotions += 1
                 except Exception:
                     pass

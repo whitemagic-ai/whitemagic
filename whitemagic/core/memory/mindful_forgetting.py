@@ -102,11 +102,11 @@ def _semantic_signal(mem: Memory) -> RetentionSignal:
 def _emotional_signal(mem: Memory) -> RetentionSignal:
     """Emotional salience — strong feelings (positive or negative) anchor memories."""
     # Absolute valence: both very positive and very negative memories are salient
-    abs_valence = abs(mem.emotional_valence)
+    abs_valence = abs(mem.emotional_valence or 0.0)
     emotional_weight = mem.emotional_weight if hasattr(mem, "emotional_weight") else 0.5
 
     score = max(abs_valence, emotional_weight)
-    reason = f"valence={mem.emotional_valence:.2f}, weight={emotional_weight:.2f}"
+    reason = f"valence={mem.emotional_valence or 0.0:.2f}, weight={emotional_weight:.2f}"
 
     return RetentionSignal(name="emotional", score=score, weight=0.8, reason=reason)
 

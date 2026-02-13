@@ -1,11 +1,11 @@
 # WhiteMagic
 
-> The Tool Substrate for Agentic AI — 356 MCP tools, tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance, and polyglot accelerators in 11 languages.
+> The Tool Substrate for Agentic AI — 374 MCP tools, tiered memory with 5D holographic coordinates, HNSW semantic search, ethical governance, and polyglot accelerators in 11 languages.
 
 ## Overview
 
 WhiteMagic is a high-performance memory and tool infrastructure for AI agents. It provides:
-- 356 MCP tools (or 28 PRAT Gana meta-tools) via unified dispatch
+- 374 MCP tools (or 28 PRAT Gana meta-tools) via unified dispatch
 - Tiered memory with SQLite backing, 5D holographic coordinates (XYZWV), Galactic Map lifecycle
 - Ethical governance: Dharma Rules Engine, Karma Ledger, Harmony Vector, Homeostatic Loop
 - Polyglot accelerators: Rust (PyO3), Zig (SIMD), Haskell (FFI), Elixir (OTP), Mojo, Go, Julia, TypeScript

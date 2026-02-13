@@ -28,13 +28,20 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Harmony Vector API call (`snapshot()` not `assess()`)
 - Wu Xing import path (`whitemagic.wu_xing` not `whitemagic.wu_xing.wu_xing`)
 - Dream cycle invocation (direct phase methods instead of non-existent `dream()`)
+- **Consolidation `int + NoneType` bug** — Null guards added for `importance`, `access_count`, `emotional_valence` throughout `consolidation.py` (6 locations)
+- **Retention evaluator `None` emotional_valence** — Guard in `mindful_forgetting.py` `_emotional_signal()`
+- **Galactic map `None` field crash** — Null guards for `importance`, `neuro_score`, `emotional_valence`, `recall_count` in `galactic_map.py` `_quick_retention_estimate()`
 
-#### Identified Gaps
-- **5% embedding coverage** (5,577 / 111,665) — cripples semantic mining, causal mining, vector search
+#### Wired (12 Hidden Engines → MCP)
+- **18 new tools** via `tools/handlers/pattern_engines.py`: `causal.mine`, `causal.stats`, `emergence.scan`, `emergence.status`, `association.mine`, `association.mine_semantic`, `constellation.detect`, `constellation.stats`, `satkona.fuse`, `reasoning.multispectral`, `novelty.detect`, `novelty.stats`, `bridge.synthesize`, `galactic.sweep`, `galactic.stats`, `guideline.evolve`, `elemental.optimize`, `pattern_consciousness.status`
+- All 18 added to `dispatch_table.py` and `prat_router.py` (Extended Net, Three Stars, Abundance, Star)
+- **Total MCP tools: 374** (was 356), **28 Ganas** unchanged
+
+#### Remaining Gaps
+- **5% embedding coverage** (5,577 / 111,665) — batch embed needed for full semantic mining
 - **6% holographic coord coverage** (6,466 / 111,665) — limits constellation detection
-- **12 unwired engines** — CausalMiner, EmergenceEngine, SatkonaFusion, MultiSpectralReasoner, NoveltyDetector, AssociationMiner, ConstellationDetector, BridgeSynthesizer, PatternConsciousness, GalacticMap, GuidelineEvolution, ElementalOptimization
 - **Template bridge insights** — LLM synthesis not connected, bridge insights at 0.4 confidence
-- **Consolidation bug** — `unsupported operand type(s) for +: 'int' and 'NoneType'`
+- **Galactic sweep pagination** — Currently capped at 50K of 111K memories
 
 #### Metrics
 | Metric | v15.7 | v15.8 |
@@ -45,6 +52,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 | Constellations | 0 | **30** |
 | Communities | 0 | **182** |
 | Bridge nodes | 0 | **10** |
+| MCP tools | 356 | **374** |
 | DB size | 127.5 MB | **2,011 MB** |
 
 ---

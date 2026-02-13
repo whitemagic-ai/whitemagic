@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "whitemagic"
-version = "15.7.0"
-description = "The Tool Substrate for Agentic AI — 356 MCP tools (28 PRAT Ganas), tiered memory, ethical governance, polyglot accelerators"
+version = "15.8.0"
+description = "The Tool Substrate for Agentic AI — 374 MCP tools (28 PRAT Ganas), tiered memory, ethical governance, polyglot accelerators"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

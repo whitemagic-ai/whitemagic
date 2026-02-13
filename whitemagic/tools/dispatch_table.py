@@ -577,6 +577,26 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "marketplace.my_listings": LazyHandler("marketplace", "handle_marketplace_my_listings"),
     "marketplace.remove": LazyHandler("marketplace", "handle_marketplace_remove"),
     "marketplace.status": LazyHandler("marketplace", "handle_marketplace_status"),
+
+    # --- v15.8: Pattern Analysis Engines (previously unwired) ---
+    "causal.mine": LazyHandler("pattern_engines", "handle_causal_mine"),
+    "causal.stats": LazyHandler("pattern_engines", "handle_causal_stats"),
+    "emergence.scan": LazyHandler("pattern_engines", "handle_emergence_scan"),
+    "emergence.status": LazyHandler("pattern_engines", "handle_emergence_status"),
+    "association.mine": LazyHandler("pattern_engines", "handle_association_mine"),
+    "association.mine_semantic": LazyHandler("pattern_engines", "handle_association_mine_semantic"),
+    "constellation.detect": LazyHandler("pattern_engines", "handle_constellation_detect"),
+    "constellation.stats": LazyHandler("pattern_engines", "handle_constellation_stats"),
+    "satkona.fuse": LazyHandler("pattern_engines", "handle_satkona_fuse"),
+    "reasoning.multispectral": LazyHandler("pattern_engines", "handle_reasoning_multispectral"),
+    "novelty.detect": LazyHandler("pattern_engines", "handle_novelty_detect"),
+    "novelty.stats": LazyHandler("pattern_engines", "handle_novelty_stats"),
+    "bridge.synthesize": LazyHandler("pattern_engines", "handle_bridge_synthesize"),
+    "galactic.sweep": LazyHandler("pattern_engines", "handle_galactic_sweep"),
+    "galactic.stats": LazyHandler("pattern_engines", "handle_galactic_stats"),
+    "guideline.evolve": LazyHandler("pattern_engines", "handle_guideline_evolve"),
+    "elemental.optimize": LazyHandler("pattern_engines", "handle_elemental_optimize"),
+    "pattern_consciousness.status": LazyHandler("pattern_engines", "handle_pattern_consciousness_status"),
 }
 
 

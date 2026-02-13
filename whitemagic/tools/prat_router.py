@@ -519,6 +519,31 @@ TOOL_TO_GANA: dict[str, str] = {
     "web_search_and_read":         "gana_ghost",
     "research_topic":              "gana_ghost",
     "browser_session_status":      "gana_ghost",
+
+    # ── v15.8: Pattern Analysis Engines (previously hidden) ──
+    # Mining engines → Extended Net (pattern connectivity)
+    "causal.mine":                 "gana_extended_net",
+    "causal.stats":                "gana_extended_net",
+    "association.mine":            "gana_extended_net",
+    "association.mine_semantic":   "gana_extended_net",
+    "constellation.detect":        "gana_extended_net",
+    "constellation.stats":         "gana_extended_net",
+    "novelty.detect":              "gana_extended_net",
+    "novelty.stats":               "gana_extended_net",
+    "pattern_consciousness.status": "gana_extended_net",
+    # Emergence → Extended Net
+    "emergence.scan":              "gana_extended_net",
+    "emergence.status":            "gana_extended_net",
+    # Synthesis → Three Stars (judgment & synthesis)
+    "satkona.fuse":                "gana_three_stars",
+    "reasoning.multispectral":     "gana_three_stars",
+    "elemental.optimize":          "gana_three_stars",
+    # Bridge + Galactic → Abundance (regeneration)
+    "bridge.synthesize":           "gana_abundance",
+    "galactic.sweep":              "gana_abundance",
+    "galactic.stats":              "gana_abundance",
+    # Guideline Evolution → Star (governance)
+    "guideline.evolve":            "gana_star",
 }
 
 # Reverse: Gana → list of nested tools
