@@ -48,6 +48,9 @@ pub enum CloneStrategy {
     Synthesis,
     /// Memory-grounded reasoning
     MemoryGrounded,
+    /// Stateless burn — Ralph Wiggum / Dare-to-Die Corps (Pu 朴)
+    /// Zero context, zero history, pure execution. Performance or death.
+    StatelessBurn,
     /// Custom strategy with description
     Custom(String),
 }
@@ -62,6 +65,7 @@ impl CloneStrategy {
             "analytical" => Self::Analytical,
             "synthesis" => Self::Synthesis,
             "memory_grounded" | "memory" => Self::MemoryGrounded,
+            "stateless_burn" | "ralph" | "dare_to_die" | "pu" => Self::StatelessBurn,
             other => Self::Custom(other.to_string()),
         }
     }
@@ -75,6 +79,7 @@ impl CloneStrategy {
             Self::Analytical => "analytical",
             Self::Synthesis => "synthesis",
             Self::MemoryGrounded => "memory_grounded",
+            Self::StatelessBurn => "stateless_burn",
             Self::Custom(s) => s.as_str(),
         }
     }
@@ -90,6 +95,8 @@ impl CloneStrategy {
             Self::Analytical => 0.8 + (clone_id as f64 * 0.001).sin().abs() * 0.15,
             Self::Synthesis => 0.85 + (clone_id as f64 * 0.002).cos().abs() * 0.1,
             Self::MemoryGrounded => 0.7 + (clone_id as f64 * 0.005).sin().abs() * 0.25,
+            // StatelessBurn: high variance, no memory bias — pure Pu (朴)
+            Self::StatelessBurn => 0.4 + (clone_id as f64 * 0.007).sin().abs() * 0.5,
             Self::Custom(_) => 0.6 + (clone_id as f64 * 0.006).cos().abs() * 0.3,
         };
 
