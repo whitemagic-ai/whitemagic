@@ -587,6 +587,7 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "association.mine_semantic": LazyHandler("pattern_engines", "handle_association_mine_semantic"),
     "constellation.detect": LazyHandler("pattern_engines", "handle_constellation_detect"),
     "constellation.stats": LazyHandler("pattern_engines", "handle_constellation_stats"),
+    "constellation.merge": LazyHandler("pattern_engines", "handle_constellation_merge"),
     "satkona.fuse": LazyHandler("pattern_engines", "handle_satkona_fuse"),
     "reasoning.multispectral": LazyHandler("pattern_engines", "handle_reasoning_multispectral"),
     "novelty.detect": LazyHandler("pattern_engines", "handle_novelty_detect"),
@@ -597,6 +598,30 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "guideline.evolve": LazyHandler("pattern_engines", "handle_guideline_evolve"),
     "elemental.optimize": LazyHandler("pattern_engines", "handle_elemental_optimize"),
     "pattern_consciousness.status": LazyHandler("pattern_engines", "handle_pattern_consciousness_status"),
+
+    # --- v15.9: War Room & Shadow Clone Army ---
+    "war_room.status": LazyHandler("war_room", "handle_war_room_status"),
+    "war_room.plan": LazyHandler("war_room", "handle_war_room_plan"),
+    "war_room.execute": LazyHandler("war_room", "handle_war_room_execute"),
+    "war_room.hierarchy": LazyHandler("war_room", "handle_war_room_hierarchy"),
+    "war_room.campaigns": LazyHandler("war_room", "handle_war_room_campaigns"),
+    "war_room.phase": LazyHandler("war_room", "handle_war_room_phase"),
+
+    # --- v15.9: Imperial Doctrine (36 Stratagems) ---
+    "doctrine.summary": LazyHandler("war_room", "handle_doctrine_summary"),
+    "doctrine.stratagems": LazyHandler("war_room", "handle_doctrine_stratagems"),
+    "doctrine.force": LazyHandler("war_room", "handle_doctrine_force"),
+
+    # --- v15.9: Art of War Engine ---
+    "art_of_war.wisdom": LazyHandler("war_room", "handle_art_of_war_wisdom"),
+    "art_of_war.terrain": LazyHandler("war_room", "handle_art_of_war_terrain"),
+    "art_of_war.campaign": LazyHandler("war_room", "handle_art_of_war_campaign"),
+    "art_of_war.chapter": LazyHandler("war_room", "handle_art_of_war_chapter"),
+
+    # --- v15.9: Fool's Guard / Ralph Wiggum ---
+    "fool_guard.status": LazyHandler("war_room", "handle_fool_guard_status"),
+    "fool_guard.dare_to_die": LazyHandler("war_room", "handle_fool_guard_dare_to_die"),
+    "fool_guard.ralph": LazyHandler("war_room", "handle_fool_guard_ralph"),
 }
 
 

@@ -520,6 +520,30 @@ TOOL_TO_GANA: dict[str, str] = {
     "research_topic":              "gana_ghost",
     "browser_session_status":      "gana_ghost",
 
+    # ── v15.9: War Room & Shadow Clone Army (Ox — Endurance & Swarm) ──
+    "war_room.status":             "gana_ox",
+    "war_room.plan":               "gana_ox",
+    "war_room.execute":            "gana_ox",
+    "war_room.hierarchy":          "gana_ox",
+    "war_room.campaigns":          "gana_ox",
+    "war_room.phase":              "gana_ox",
+
+    # ── v15.9: Imperial Doctrine (Dipper — Strategy) ──
+    "doctrine.summary":            "gana_dipper",
+    "doctrine.stratagems":         "gana_dipper",
+    "doctrine.force":              "gana_dipper",
+
+    # ── v15.9: Art of War Engine (Three Stars — Judgment & Synthesis) ──
+    "art_of_war.wisdom":           "gana_three_stars",
+    "art_of_war.terrain":          "gana_three_stars",
+    "art_of_war.campaign":         "gana_three_stars",
+    "art_of_war.chapter":          "gana_three_stars",
+
+    # ── v15.9: Fool's Guard / Ralph Wiggum (Willow — Resilience) ──
+    "fool_guard.status":           "gana_willow",
+    "fool_guard.dare_to_die":      "gana_willow",
+    "fool_guard.ralph":            "gana_willow",
+
     # ── v15.8: Pattern Analysis Engines (previously hidden) ──
     # Mining engines → Extended Net (pattern connectivity)
     "causal.mine":                 "gana_extended_net",
@@ -528,6 +552,7 @@ TOOL_TO_GANA: dict[str, str] = {
     "association.mine_semantic":   "gana_extended_net",
     "constellation.detect":        "gana_extended_net",
     "constellation.stats":         "gana_extended_net",
+    "constellation.merge":         "gana_extended_net",
     "novelty.detect":              "gana_extended_net",
     "novelty.stats":               "gana_extended_net",
     "pattern_consciousness.status": "gana_extended_net",

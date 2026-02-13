@@ -357,11 +357,146 @@ class AsyncThoughtCloneArmy:
             "deployment_time_ms": 0,
         }
 
-# Utility functions for common use cases
+# ---------------------------------------------------------------------------
+# Doctrine-Aware Deployment Functions
+# ---------------------------------------------------------------------------
+
 async def quick_explore(prompt: str, clones: int = 1000) -> AsyncThoughtPath:
     """Quick exploration with default configuration."""
     army = AsyncThoughtCloneArmy()
     return await army.parallel_explore(prompt, clones)
+
+
+async def doctrine_deploy(
+    objective: str,
+    num_clones: int = 5000,
+    tactic: str | None = None,
+) -> dict[str, Any]:
+    """Deploy clones using Imperial Doctrine strategy selection.
+
+    Integrates with the War Room for strategic force composition.
+    Falls back to standard deployment if doctrine is unavailable.
+
+    Args:
+        objective: Natural language objective
+        num_clones: Total clones to deploy
+        tactic: Optional named tactic to use
+
+    Returns:
+        Dict with deployment results including doctrine metadata
+    """
+    # Try doctrine-aware deployment
+    try:
+        from whitemagic.agents.doctrine import get_doctrine
+        doctrine = get_doctrine()
+        force_specs = doctrine.recommend_force(
+            objective, constraints={"max_clones": num_clones},
+        )
+
+        # Deploy per force spec
+        results = []
+        army = AsyncThoughtCloneArmy()
+        for spec in force_specs:
+            if spec.force_type.value == "light_infantry":
+                # Tokio fast-path for infantry
+                path = await army.parallel_explore(
+                    objective, spec.clone_count, use_tokio=True,
+                )
+                results.append({
+                    "force": spec.force_type.value,
+                    "clones": spec.clone_count,
+                    "strategy": path.strategy,
+                    "confidence": path.confidence,
+                    "nature": spec.nature.value,
+                    "wu_xing_phase": spec.wu_xing_phase.value,
+                })
+            elif spec.force_type.value == "dare_to_die":
+                # Ralph Wiggum stateless mode
+                try:
+                    from whitemagic.core.intelligence.agentic.fool_guard import (
+                        deploy_dare_to_die,
+                    )
+                    dtd = await deploy_dare_to_die(
+                        mission=objective,
+                        max_attempts=min(spec.clone_count, 20),
+                    )
+                    results.append({
+                        "force": "dare_to_die",
+                        "attempts": dtd.total_attempts,
+                        "verdict": dtd.verdict,
+                        "nature": "qi",
+                        "wu_xing_phase": spec.wu_xing_phase.value,
+                    })
+                except Exception:
+                    pass
+
+        return {
+            "objective": objective,
+            "doctrine_used": True,
+            "tactic": tactic,
+            "force_count": len(force_specs),
+            "total_clones": sum(s.clone_count for s in force_specs),
+            "results": results,
+        }
+
+    except ImportError:
+        # Fallback: standard deployment
+        army = AsyncThoughtCloneArmy()
+        path = await army.parallel_explore(objective, num_clones)
+        return {
+            "objective": objective,
+            "doctrine_used": False,
+            "strategy": path.strategy,
+            "confidence": path.confidence,
+            "clones": num_clones,
+        }
+
+
+async def cast_brick_to_attract_jade(
+    objective: str,
+    scout_clones: int = 10000,
+    strike_clones: int = 50,
+) -> dict[str, Any]:
+    """Execute the "Cast a Brick to Attract Jade" tactic.
+
+    Phase 1 (Brick): Mass Tokio scouts narrow the search space
+    Phase 2 (Jade): Precision Python cavalry strikes the identified targets
+
+    Args:
+        objective: What to find/fix
+        scout_clones: Number of Tokio scouts (Phase 1)
+        strike_clones: Number of precision clones (Phase 2)
+
+    Returns:
+        Combined results from both phases
+    """
+    army = AsyncThoughtCloneArmy()
+
+    # Phase 1: The Brick — mass scouting
+    scout_result = await army.parallel_explore(objective, scout_clones, use_tokio=True)
+
+    # Phase 2: The Jade — precision strike using scout intelligence
+    refined_prompt = (
+        f"Based on initial analysis (strategy={scout_result.strategy}, "
+        f"confidence={scout_result.confidence:.2f}): {objective}"
+    )
+    strike_result = await army.parallel_explore(refined_prompt, strike_clones, use_tokio=False)
+
+    return {
+        "tactic": "Cast a Brick to Attract Jade",
+        "phase1_scouts": {
+            "clones": scout_clones,
+            "strategy": scout_result.strategy,
+            "confidence": scout_result.confidence,
+        },
+        "phase2_strike": {
+            "clones": strike_clones,
+            "strategy": strike_result.strategy,
+            "confidence": strike_result.confidence,
+        },
+        "combined_confidence": (scout_result.confidence + strike_result.confidence) / 2,
+    }
+
 
 async def diverse_explore(
     prompt: str,
@@ -381,7 +516,7 @@ async def diverse_explore(
 
     return results
 
-# Performance benchmark
+
 async def benchmark_performance(max_clones: int = 16000) -> dict[str, float]:
     """Benchmark clone army performance."""
     prompts = [
