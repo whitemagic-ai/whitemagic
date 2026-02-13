@@ -348,7 +348,39 @@ class DreamCycle:
                 result["orphan_coords"] = orphan_coords
                 result["orphan_associations"] = orphan_assocs
 
-                # 5. Quick stats for the report
+                # 5. Auto-merge near-duplicates (embedding-based)
+                try:
+                    from whitemagic.core.memory.consolidation import get_consolidator
+                    consolidator = get_consolidator()
+                    merge_result = consolidator.resolve_entities(
+                        similarity_threshold=0.92, batch_limit=100,
+                    )
+                    result["auto_merge"] = {
+                        "duplicates_found": merge_result.get("duplicates_found", 0),
+                        "duplicates_resolved": merge_result.get("duplicates_resolved", 0),
+                        "status": merge_result.get("status", "unknown"),
+                    }
+                except Exception as e:
+                    result["auto_merge"] = {"status": "skipped", "reason": str(e)}
+
+                # 6. Orphan cleanup (clean if count is small, report if large)
+                if orphan_coords > 0 and orphan_coords < 500:
+                    conn.execute("""
+                        DELETE FROM holographic_coords
+                        WHERE memory_id NOT IN (SELECT id FROM memories)
+                    """)
+                    conn.commit()
+                    result["orphan_coords_cleaned"] = orphan_coords
+                if orphan_assocs > 0 and orphan_assocs < 500:
+                    conn.execute("""
+                        DELETE FROM associations
+                        WHERE source_id NOT IN (SELECT id FROM memories)
+                           OR target_id NOT IN (SELECT id FROM memories)
+                    """)
+                    conn.commit()
+                    result["orphan_assocs_cleaned"] = orphan_assocs
+
+                # 7. Quick stats for the report
                 result["total_memories"] = conn.execute(
                     "SELECT COUNT(*) FROM memories"
                 ).fetchone()[0]

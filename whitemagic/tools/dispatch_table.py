@@ -295,6 +295,11 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "galaxy.merge": LazyHandler("galaxy", "handle_galaxy_merge"),
     "galaxy.sync": LazyHandler("galaxy", "handle_galaxy_sync"),
 
+    # --- v15.4 Phylogenetic Lineage ---
+    "galaxy.lineage": LazyHandler("galaxy", "handle_galaxy_lineage"),
+    "galaxy.taxonomy": LazyHandler("galaxy", "handle_galaxy_taxonomy"),
+    "galaxy.lineage_stats": LazyHandler("galaxy", "handle_galaxy_lineage_stats"),
+
     # --- Memory Aliases ---
     "read_memory": LazyHandler("misc", "handle_read_memory"),
     "list_memories": LazyHandler("misc", "handle_list_memories"),

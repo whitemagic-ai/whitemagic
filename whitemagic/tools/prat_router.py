@@ -233,6 +233,9 @@ TOOL_TO_GANA: dict[str, str] = {
     "galaxy.transfer":         "gana_void",
     "galaxy.merge":            "gana_void",
     "galaxy.sync":             "gana_void",
+    "galaxy.lineage":          "gana_void",
+    "galaxy.taxonomy":         "gana_void",
+    "galaxy.lineage_stats":    "gana_void",
 
     # ═══ SIMPLIFIED ALIASES ═══
     "remember":                "gana_neck",

@@ -7,6 +7,39 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [15.4.0] — 2026-02-12
+
+### Digital Genetics & Overnight Dreams
+
+#### Added
+- **Phylogenetic Memory Lineage** (`whitemagic/core/memory/phylogenetics.py`) — Cross-galaxy bridge edges tracking memory descent, horizontal gene transfer, dream spawning, and merges. Taxonomic classification (species/genus/family/order/kingdom) for every memory.
+- **`galaxy.lineage`** tool — Build full lineage tree (ancestors + descendants) for any memory.
+- **`galaxy.taxonomy`** tool — Classify a memory using binomial nomenclature (e.g., "Default session_checkpoint").
+- **`galaxy.lineage_stats`** tool — Statistics on the phylogenetic graph (edge counts by type, galaxies connected).
+- **Overnight Dream Runner** (`scripts/dream_overnight.py`) — Standalone CLI that runs dream cycles continuously. Configurable interval, cycle count, Dream Galaxy persistence, JSONL logging. Designed for overnight laptop runs.
+- **Batch Association Classifier** (`scripts/batch_classify_associations.py`) — Reclassifies `associated_with` edges into typed relations using tag-based heuristics (SIBLING_OF, EXPLORES, PART_OF, IMPLEMENTS, DESCENDS_FROM, etc.).
+- **Auto-merge in Dream Triage** — Wired `resolve_entities()` (embedding-based dedup, cosine ≥0.92) into the TRIAGE dream phase for automatic near-duplicate merging.
+- **Orphan cleanup in Dream Triage** — TRIAGE phase now auto-cleans orphan coords and associations (when count < 500).
+
+#### Changed
+- **Association graph** — 28,875 edges reclassified from `associated_with` into typed relations (27,900 SIBLING_OF, 972 EXPLORES, plus existing typed edges).
+- **Galaxy transfer** — Now automatically records phylogenetic lineage edges on every transfer, enabling cross-galaxy ancestry tracking.
+- **Dream Triage phase** — Enhanced from 5 steps to 7 steps (added auto-merge + orphan cleanup).
+- **Galaxy tools** — 14 total (was 11): added `galaxy.lineage`, `galaxy.taxonomy`, `galaxy.lineage_stats`.
+- **Version** — 15.3.0 → 15.4.0.
+
+#### Metrics (Post v15.4)
+| Metric | v15.3 | v15.4 |
+|--------|-------|-------|
+| Typed associations | 225 | 29,100 |
+| `associated_with` | 213,414 | 184,539 |
+| Galaxy tools | 11 | 14 |
+| Dream triage steps | 5 | 7 |
+| Lineage edges | 0 | table created |
+| Relation types | 6 | 12 |
+
+---
+
 ## [15.3.0] — 2026-02-12
 
 ### Memory Renaissance

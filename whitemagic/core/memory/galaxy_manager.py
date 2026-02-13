@@ -347,6 +347,20 @@ class GalaxyManager:
                 except Exception:
                     pass  # Association copy is best-effort
 
+                # Record phylogenetic lineage edge (cross-galaxy bridge)
+                try:
+                    from whitemagic.core.memory.phylogenetics import get_phylogenetics
+                    pg = get_phylogenetics()
+                    pg.record_transfer(
+                        source_id=mem.id,
+                        source_galaxy=source_galaxy,
+                        target_galaxy=target_galaxy,
+                        target_id=new_mem.id,
+                        mechanism="galaxy.transfer",
+                    )
+                except Exception:
+                    pass  # Lineage tracking is best-effort
+
                 # If move (not copy), archive the original
                 if not copy:
                     src_um.backend.archive_to_edge(mem.id, galactic_distance=0.95)

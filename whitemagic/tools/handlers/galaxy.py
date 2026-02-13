@@ -191,3 +191,56 @@ def handle_galaxy_sync(**kwargs: Any) -> dict[str, Any]:
         return {"status": "success", **result}
     except ValueError as e:
         return {"status": "error", "error": str(e)}
+
+
+# ── v15.4 Phylogenetic Lineage ──────────────────────────────────────
+
+
+def handle_galaxy_lineage(**kwargs: Any) -> dict[str, Any]:
+    """Build the phylogenetic lineage tree for a memory (ancestors + descendants)."""
+    memory_id = kwargs.get("memory_id")
+    if not memory_id:
+        return {"status": "error", "error": "memory_id is required"}
+
+    from whitemagic.core.memory.phylogenetics import get_phylogenetics
+
+    try:
+        pg = get_phylogenetics()
+        tree = pg.build_lineage_tree(
+            memory_id=memory_id,
+            max_depth=int(kwargs.get("max_depth", 10)),
+        )
+        return {"status": "success", **tree}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+def handle_galaxy_taxonomy(**kwargs: Any) -> dict[str, Any]:
+    """Classify a memory using taxonomic ranks (species, genus, family, order, kingdom)."""
+    memory_id = kwargs.get("memory_id")
+    if not memory_id:
+        return {"status": "error", "error": "memory_id is required"}
+
+    from whitemagic.core.memory.phylogenetics import get_phylogenetics
+
+    try:
+        pg = get_phylogenetics()
+        rank = pg.classify_memory(
+            memory_id=memory_id,
+            galaxy_name=kwargs.get("galaxy", "default"),
+        )
+        return {"status": "success", "full_name": rank.full_name, **rank.to_dict()}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+def handle_galaxy_lineage_stats(**kwargs: Any) -> dict[str, Any]:
+    """Return statistics about the phylogenetic lineage graph."""
+    from whitemagic.core.memory.phylogenetics import get_phylogenetics
+
+    try:
+        pg = get_phylogenetics()
+        stats = pg.get_stats()
+        return {"status": "success", **stats}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
