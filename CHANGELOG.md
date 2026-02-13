@@ -7,54 +7,30 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [15.1.0] — 2026-02-12
+## [15.1.0] — 2026-02-14
 
-### Documentation Overhaul, Security Hardening & Public Release
-
-#### Added — Security & Encryption
-- **`encrypted_db.py`** — Unified encryption manager: OS keychain integration (macOS Keychain, GNOME Keyring, KDE Wallet), passphrase strength validation (Shannon entropy ≥ 2.5), database migration tools (encrypt/decrypt/rekey), status reporting, secure memory clearing via `ctypes.memset`.
-- **Vault CLI** — 4 new commands: `wm vault status` (encryption audit), `wm vault encrypt-db` (SQLCipher migration), `wm vault decrypt-db` (plaintext restore), `wm vault lock` (clear keychain passphrase).
-- **Rosetta Mode** — `WM_TERMINOLOGY=standard` env var aliases esoteric names (Gana → Tool Group, Dharma → Ethics Policy, etc.) in CLI/logs for enterprise adoption.
-- **Federated Galaxy Protocol** — `mesh/federation.go`: remote galaxy mounting (read-only) via libp2p mesh for multi-device memory sharing without DB merging.
-
-#### Added — Go Mesh Improvements
-- **Multi-transport** — TCP + QUIC + WebSocket (was TCP-only).
-- **PSK peer authentication** — `--psk` flag or `WM_MESH_PSK` env var for private mesh networks.
-- **NAT traversal** — UPnP/NAT-PMP port mapping + AutoRelay + hole punching for cross-network connectivity.
-
-#### Added — System Audit Fixes
-- **`mcp` SDK** added to base `pip install whitemagic` dependencies (was optional-only).
-- **`--help`/`--version`** flags for both `run_mcp_lean.py` and `run_mcp.py` (no longer hangs).
-- **WAL checkpoint** after memory store for immediate search visibility across pooled connections.
-- **Arrow IPC tags extraction** — implemented `List<Utf8>` column decoding (was TODO).
-- **TypeScript SDK** tool count updated 302→313.
-- **WASM/Rust** versions synchronized to 15.1.0.
+### Documentation Overhaul
 
 #### Changed
-- **AI_PRIMARY.md rewritten** — Trimmed from 653 to ~400 lines. Now a pure tool contract spec for AI agents.
-- **RELEASE_NOTES.md → ABOUT.md** — Expanded into a comprehensive project description covering history, capabilities, philosophy, and gratitude.
-- **Version unified to 15.1.0** across all documentation, configs, and metadata files.
-- **Tool count unified to 313** across all documentation (was inconsistently 178/208/311/341 in older docs).
-- **Documentation reorganized** into `docs/guides/`, `docs/reference/`, `docs/design/`, `docs/community/` subfolders.
-- **SYSTEM_MAP.md** trimmed to public-facing essentials (quick start, repo layout, key subsystems).
-- **Contact emails consolidated** to `whitemagicdev@proton.me` across all legal and policy docs.
+- **AI_PRIMARY.md rewritten** — Trimmed from 653 to 408 lines. Now a pure contract spec. Strategic context (ecosystem, economics, security posture) moved to `docs/STRATEGY.md`.
+- **Version unified to 15.1.0** across README.md, AI_PRIMARY.md, llms.txt, llms-full.txt, pyproject.toml, mcp-registry.json, VERSION.
+- **Tool count unified to 313** across llms.txt, llms-full.txt (was 341 due to different counting methodology).
 
 #### Added
-- **`ABOUT.md`** — Full project description: what WhiteMagic is, its history, capabilities, architecture, philosophy, and gratitude.
-- **`docs/design/BENCHMARK_COMPARISON.md`** — Head-to-head vs mem0, live gauntlet v3 results, polyglot accelerator benchmarks.
-- **`docs/design/USE_CASES.md`** — 10 detailed use cases with code examples.
-- **`docs/design/TYPESCRIPT_SDK_DESIGN.md`** — TypeScript SDK architecture for `@whitemagic/sdk`.
-- **Gratitude sections** added to key root docs and guides.
-
-#### Removed
-- Internal development documents (strategy, planning, chronicles) moved to private dev repository.
-- `ARCHIVE_AUDIT_REPORT.md` (internal audit, not public-facing).
+- **`docs/STRATEGY.md`** — Ecosystem landscape, Gratitude Architecture, security posture, PRAT economic metrics, Autonomous Horizon roadmap. Content extracted from AI_PRIMARY.md.
+- **`docs/STRATEGIC_ROADMAP.md`** — Leap-by-leap roadmap (Leaps 1-12, v0.2 through v17.0). Moved from archive.
+- **`docs/BENCHMARK_COMPARISON.md`** — Head-to-head vs mem0, live gauntlet v3 results, polyglot accelerator benchmarks. Moved from archive.
+- **`docs/AGENT_COMPANY_BLUEPRINT.md`** — Agent-first company operating model. Moved from archive.
+- **`docs/PHYSICAL_TRUTH_ORACLE.md`** — Physical truth verification / oracle concept design. Moved from archive.
+- **`docs/COMPLETE_PROJECT_CHRONICLE.md`** — Full project history Oct 2024 → Feb 2026. Moved from archive.
+- **`docs/ECONOMIC_STRATEGY.md`** — Detailed economic model with x402, XRPL, Proof of Gratitude. Moved from archive.
+- **`docs/TYPESCRIPT_SDK_DESIGN.md`** — TypeScript SDK architecture for `@whitemagic/sdk`. Moved from archive.
+- **`ARCHIVE_AUDIT_REPORT.md`** — Comprehensive audit of wm_archive contents, forgotten ideas, and gap analysis.
 
 #### Fixed
 - **README.md** version header v15.0.0 → v15.1.0
 - **llms.txt** tool count 341 → 313
 - **llms-full.txt** tool count 341 → 313, version 15.0.0 → 15.1.0
-- Broken cross-references to removed/moved documentation files
 
 ---
 

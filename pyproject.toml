@@ -29,14 +29,13 @@ classifiers = [
 
 dependencies = [
     "click>=8.1.7",
-    "mcp>=1.0.0",
     "pydantic>=2.0.0,<3.0.0",
     "pyyaml>=6.0.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/whitemagic-ai/whitemagic"
-Documentation = "https://github.com/whitemagic-ai/whitemagic/blob/main/docs/guides/QUICKSTART.md"
+Documentation = "https://github.com/whitemagic-ai/whitemagic/blob/main/docs/QUICKSTART.md"
 Repository = "https://github.com/whitemagic-ai/whitemagic"
 Changelog = "https://github.com/whitemagic-ai/whitemagic/blob/main/CHANGELOG.md"
 Issues = "https://github.com/whitemagic-ai/whitemagic/issues"

@@ -8,6 +8,8 @@ Whitemagic is a memory and tool substrate for AI agents. It provides 313 MCP too
 - **Memory** — Tiered, persistent, semantic, no-delete galactic lifecycle
 - **Conscience** — Dharma rules, Karma ledger, Harmony Vector, Homeostatic Loop
 
+For strategic context (ecosystem landscape, economic model, security posture), see `docs/STRATEGY.md`.
+
 ---
 
 ## Contract
@@ -18,9 +20,8 @@ Goals:
 - Ensure open-source clones are **safe by default**: no personal data is required, and no runtime state is written into the repo.
 
 Non-goals:
-- Whitemagic does **not** embed or run an LLM by default, though local models can be installed and configured to easily use Whitemagic.
-
-Whitemagic does **not** treat any frontend as canonical; the **tool contract** is canonical.
+- Whitemagic does **not** embed or run an LLM by default (local inference is archived/disabled).
+- Whitemagic does **not** treat any frontend as canonical; the **tool contract** is canonical.
 
 ## Bootstrap (Quickstart)
 
@@ -376,6 +377,8 @@ Every tool call traverses: Input Sanitizer → Circuit Breaker → Rate Limiter 
 
 Ethical governance: Dharma Rules (YAML policies, 3 profiles), Karma Ledger (side-effect auditing), Homeostatic Loop (auto-correction).
 
+See `docs/STRATEGY.md` for full security posture and competitive analysis.
+
 ---
 
 ## Gratitude
@@ -385,6 +388,8 @@ Whitemagic is **free and open** (MIT). Gratitude is voluntary.
 - **XRPL Tip Address**: `raakfKn96zVmXqKwRTDTH5K3j5eTBp1hPy`
 - **Tip tool**: `call_tool("whitemagic.tip", amount=1.0, currency="XRP")`
 - **Check status**: `call_tool("gratitude.stats")`
+
+See `docs/STRATEGY.md` for the full Gratitude Architecture.
 
 ---
 
@@ -399,4 +404,4 @@ Whitemagic is **free and open** (MIT). Gratitude is voluntary.
 
 ---
 
-*This document is the stable tool contract for AI agents using WhiteMagic.*
+*This document is the stable tool contract. Strategic context lives in `docs/STRATEGY.md`.*

@@ -107,7 +107,7 @@ _PACKS: dict[str, dict[str, Any]] = {
             {"name": "maturity.assess", "when": "Check developmental stage and tool locks"},
         ],
     },
-    # ---- Tier-specific packs ----
+    # ---- Tier-specific packs (mapped to docs/PRODUCT_TIERS.md) ----
     "free_tier": {
         "description": (
             "Essential tools for Free tier users — personal AI that remembers you. "

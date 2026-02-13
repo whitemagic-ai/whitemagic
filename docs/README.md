@@ -30,6 +30,7 @@
 | [Use Cases](./design/USE_CASES.md) | Real-world usage patterns |
 | [TypeScript SDK Design](./design/TYPESCRIPT_SDK_DESIGN.md) | `@whitemagic/sdk` architecture |
 | [WASM Strategy](./design/WASM_STRATEGY.md) | WebAssembly deployment path |
+| [v15.2 Agent Economy](./design/V15_2_AGENT_ECONOMY.md) | Sovereign Sandbox, OMS trading, Karma Transparency, ILP streaming, Marketplace Bridge |
 
 ## Community
 

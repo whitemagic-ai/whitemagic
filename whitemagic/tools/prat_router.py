@@ -450,6 +450,40 @@ TOOL_TO_GANA: dict[str, str] = {
     "verification.attest":         "gana_straddling_legs",
     "verification.status":         "gana_straddling_legs",
 
+    # ── v15.2: Sovereign Sandbox (Roof — Shelter & Protection) ──
+    "shelter.create":              "gana_roof",
+    "shelter.execute":             "gana_roof",
+    "shelter.inspect":             "gana_roof",
+    "shelter.destroy":             "gana_roof",
+    "shelter.status":              "gana_roof",
+    "shelter.policy":              "gana_roof",
+
+    # ── v15.2: Optimized Memory States (Void — Export/Import) ──
+    "oms.export":                  "gana_void",
+    "oms.import":                  "gana_void",
+    "oms.inspect":                 "gana_void",
+    "oms.verify":                  "gana_void",
+    "oms.price":                   "gana_void",
+    "oms.list":                    "gana_void",
+    "oms.status":                  "gana_void",
+
+    # ── v15.2: ILP Streaming Payments (Abundance — Regeneration) ──
+    "ilp.configure":               "gana_abundance",
+    "ilp.send":                    "gana_abundance",
+    "ilp.receipt":                 "gana_abundance",
+    "ilp.history":                 "gana_abundance",
+    "ilp.balance":                 "gana_abundance",
+    "ilp.status":                  "gana_abundance",
+
+    # ── v15.2: Marketplace Bridge (Chariot — Mobility & Exchange) ──
+    "marketplace.publish":         "gana_chariot",
+    "marketplace.discover":        "gana_chariot",
+    "marketplace.negotiate":       "gana_chariot",
+    "marketplace.complete":        "gana_chariot",
+    "marketplace.my_listings":     "gana_chariot",
+    "marketplace.remove":          "gana_chariot",
+    "marketplace.status":          "gana_chariot",
+
     # ── Cross-cutting: Browser & Web Research (route to Ghost) ──
     "browser_navigate":            "gana_ghost",
     "browser_screenshot":          "gana_ghost",

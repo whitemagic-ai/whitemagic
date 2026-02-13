@@ -2252,7 +2252,7 @@ dependencies = [
 
 [[package]]
 name = "whitemagic"
-version = "15.1.0"
+version = "15.0.0"
 dependencies = [
  "aho-corasick",
  "arrow",

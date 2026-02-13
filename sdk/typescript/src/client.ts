@@ -2,7 +2,7 @@
  * WhiteMagic SDK — MCP Client.
  *
  * Connects to a WhiteMagic MCP server via stdio or HTTP and provides
- * a typed `callTool()` interface for all 313 tools.
+ * a typed `callTool()` interface for all 302+ tools.
  */
 
 import { spawn, type ChildProcess } from "child_process";

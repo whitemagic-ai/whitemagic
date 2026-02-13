@@ -1,8 +1,8 @@
 # WhiteMagic Terms of Service
 
 **Effective Date**: November 2, 2025  
-**Last Updated**: February 12, 2026  
-**Version**: 15.1.0
+**Last Updated**: February 9, 2026  
+**Version**: 13.0.0
 
 ---
 
@@ -14,7 +14,7 @@ By accessing or using WhiteMagic ("Service"), you agree to be bound by these Ter
 
 WhiteMagic provides a local-first AI memory and context management system. Features include:
 - Memory storage and retrieval (local SQLite + holographic 5D)
-- MCP server with 313 tools (28 Gana meta-tools in PRAT mode)
+- MCP server with 178 tools (28 Gana meta-tools in PRAT mode)
 - Contextual search and memory consolidation
 - Polyglot acceleration (Rust, Haskell, Mojo, Elixir, Zig, Go)
 - Optional cloud sync and hosted API
@@ -89,7 +89,7 @@ WhiteMagic provides a local-first AI memory and context management system. Featu
 - Free tier: Subject to inactivity deletion after 180 days
 
 ### 6.4 Data Deletion
-- Request deletion via email: whitemagicdev@proton.me
+- Request deletion via email: support@whitemagic.dev
 - Deletion within 30 days of request
 - Backups may retain data up to 90 days
 
@@ -164,14 +164,14 @@ We may terminate or suspend accounts for:
 ### 11.3 API Changes
 - Versioned API endpoints (/api/v1)
 - Deprecations announced 90 days in advance
-- Documentation at GitHub repository
+- Documentation at docs.whitemagic.dev
 
 ## 12. Support
 
 ### 12.1 Support Channels
-- Email: whitemagicdev@proton.me
-- GitHub: [whitemagic-ai/whitemagic](https://github.com/whitemagic-ai/whitemagic)
-- Discord: _(coming soon)_
+- Email: support@whitemagic.dev
+- Documentation: docs.whitemagic.dev
+- Discord: discord.gg/whitemagic (coming soon)
 
 ### 12.2 Response Times
 - Free: Best effort
@@ -187,13 +187,13 @@ We may terminate or suspend accounts for:
 
 ## 14. Governing Law
 
-These Terms are governed by applicable law.
+These Terms are governed by the laws of [Your Jurisdiction].
 
 ## 15. Contact
 
 **WhiteMagic**  
-Email: whitemagicdev@proton.me  
-GitHub: [whitemagic-ai/whitemagic](https://github.com/whitemagic-ai/whitemagic)
+Email: legal@whitemagic.dev  
+Website: whitemagic.dev
 
 ---
 

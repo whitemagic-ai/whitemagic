@@ -155,7 +155,7 @@ pub mod ipc_bridge;
 #[cfg(feature = "python")]
 #[pymodule]
 fn whitemagic_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add("__version__", "15.1.0")?;
+    m.add("__version__", "14.5.0")?;
     // Audit utilities for fast parallel reads
     m.add_function(wrap_pyfunction!(audit::audit_directory, m)?)?;
     m.add_function(wrap_pyfunction!(audit::read_files_fast, m)?)?;

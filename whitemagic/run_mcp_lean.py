@@ -507,7 +507,7 @@ async def main_http(host: str = "127.0.0.1", port: int = 8770) -> None:
     logger.warning(f"WhiteMagic MCP HTTP server starting on http://{host}:{port}/mcp")
     print(f"\n  WhiteMagic MCP Server v{_VERSION}", file=sys.stderr)
     print(f"  HTTP endpoint: http://{host}:{port}/mcp", file=sys.stderr)
-    print("  28 Gana tools | 313 nested tools\n", file=sys.stderr)
+    print("  28 Gana tools | 311 nested tools\n", file=sys.stderr)
 
     config = uvicorn.Config(app, host=host, port=port, log_level="warning")
     uv_server = uvicorn.Server(config)
@@ -525,32 +525,6 @@ async def main_http(host: str = "127.0.0.1", port: int = 8770) -> None:
 
 def main() -> None:
     """CLI entry point with --http flag support."""
-    if "--help" in sys.argv or "-h" in sys.argv:
-        print(f"WhiteMagic MCP Server — Lean Edition v{_VERSION}")
-        print()
-        print("Usage:")
-        print("  python -m whitemagic.run_mcp_lean          # stdio transport (default)")
-        print("  python -m whitemagic.run_mcp_lean --http    # HTTP transport")
-        print()
-        print("Options:")
-        print("  --http              Use Streamable HTTP transport instead of stdio")
-        print("  --host HOST         HTTP bind address (default: 127.0.0.1)")
-        print("  --port PORT         HTTP port (default: 8770)")
-        print("  -h, --help          Show this help and exit")
-        print("  --version           Show version and exit")
-        print()
-        print("Environment Variables:")
-        print("  WM_STATE_ROOT       Runtime state directory (default: ~/.whitemagic)")
-        print("  WM_SILENT_INIT      Suppress startup messages")
-        print("  WM_DB_PASSPHRASE    Enable SQLCipher encryption")
-        print()
-        print("28 Gana meta-tools | 313 nested tools")
-        return
-
-    if "--version" in sys.argv:
-        print(f"whitemagic {_VERSION}")
-        return
-
     if "--http" in sys.argv:
         host = "127.0.0.1"
         port = 8770

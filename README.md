@@ -13,7 +13,7 @@ If you're integrating Whitemagic into an agent runtime, start with `AI_PRIMARY.m
 ## Core Features
 
 1.  **Memory Substrate**: Tiered memory management with native SQLite backing, 5D holographic coordinates (XYZWV), a Galactic Map lifecycle (no memory is ever deleted — only rotated outward), constellation detection, and association mining.
-2.  **313 MCP Tools** exposed via a unified interface (`whitemagic.tools.unified_api`) with a composable middleware pipeline (input sanitizer → circuit breaker → rate limiter → RBAC → maturity gate → governor → core router → compact response).
+2.  **311 MCP Tools** exposed via a unified interface (`whitemagic.tools.unified_api`) with a composable middleware pipeline (input sanitizer → circuit breaker → rate limiter → RBAC → maturity gate → governor → core router → compact response).
 3.  **PRAT Mode (28 Gana Meta-Tools)**: The Polymorphic Resonant Adaptive Tools router maps all 313 tools into 28 Ganas — consciousness lenses based on the Chinese Lunar Mansions. Every call carries resonance context (predecessor output, lunar phase, Harmony Vector, Wu Xing boost, Guna adaptation). Enable with `WM_MCP_PRAT=1`.
 4.  **Capability Matrix**: 25 subsystems, 28 active cross-system fusions, 0 unexplored — all queryable via `capability.matrix` MCP tool.
 5.  **MCP Native**: Built from the ground up to be served via the Model Context Protocol (MCP).
@@ -23,9 +23,6 @@ If you're integrating Whitemagic into an agent runtime, start with `AI_PRIMARY.m
 ## Installation
 
 ### From Source (Recommended For This Repo)
-
-> **Note**: On modern Linux systems (PEP 668), use a virtual environment to avoid `externally-managed-environment` errors.
-
 ```bash
 # A pre-configured venv exists at .venv/ with all deps + Mojo 0.26.1
 source .venv/bin/activate
@@ -93,7 +90,7 @@ python -m whitemagic.run_mcp_lean
 # Lean mode over HTTP (Streamable HTTP transport, port 8770)
 python -m whitemagic.run_mcp_lean --http
 
-# Classic mode — all 313 individual tools
+# Classic mode — all 311 individual tools
 python -m whitemagic.run_mcp
 
 # Lite mode — 92 core tools
@@ -101,7 +98,7 @@ WM_MCP_LITE=1 python -m whitemagic.run_mcp
 ```
 
 If your MCP client supports per-repo server configs, see `.mcp.json.example`.
-Additional client examples: `docs/guides/MCP_CONFIG_EXAMPLES.md`.
+Additional client examples: `docs/MCP_CONFIG_EXAMPLES.md`.
 
 #### MCP Quickstart for AI Clients
 
@@ -149,7 +146,7 @@ out = call_tool("gnosis", compact=True)
 *   `whitemagic-rust/`: Rust accelerator (~8.5K LOC) — galactic batch scoring, association mining, 5D KD-tree, SIMD search.
 *   `haskell/`: Haskell accelerator (~1.7K LOC) — algebraic Dharma rules, dependency graph planner, FFI bridge.
 *   `elixir/`: Elixir OTP (~1.4K LOC) — actor-model Gan Ying event bus, dream scheduler, supervision trees.
-*   `whitemagic-go/` + `mesh/`: Go (~1.3K LOC) — libp2p mesh (TCP+QUIC+WebSocket), PSK peer auth, NAT traversal, gossip protocol, federated galaxies.
+*   `whitemagic-go/` + `mesh/`: Go (~913 LOC) — libp2p P2P mesh, mDNS discovery, protobuf messaging.
 *   `whitemagic-zig/`: Zig (~795 LOC) — SIMD cosine similarity, holographic projection, memory management.
 *   `whitemagic-mojo/`: Mojo (~1.2K LOC) — batch coordinate encoding, neuro scoring, satkona yang.
 
@@ -162,9 +159,6 @@ out = call_tool("gnosis", compact=True)
 | Variable | Purpose | Default |
 |----------|---------|---------|
 | `WM_STATE_ROOT` | Runtime state directory | `~/.whitemagic` |
-| `WM_DB_PASSPHRASE` | Enable SQLCipher AES-256 encryption for all memory DBs | unset |
-| `WM_MESH_PSK` | Pre-shared key for private mesh network (min 32 chars) | unset |
-| `WM_TERMINOLOGY` | `esoteric` (default) or `standard` (Rosetta mode for enterprise) | `esoteric` |
 | `WM_MCP_PRAT` | Enable 28-tool PRAT mode | unset |
 | `WM_MCP_LITE` | Enable 92-tool lite mode | unset |
 | `WM_MCP_CLIENT` | Schema adaptation (gemini/deepseek/qwen) | unset |
@@ -177,16 +171,10 @@ python -m pytest tests/unit/ -q --no-header
 ```
 
 ## Contributing
-See `docs/community/CONTRIBUTING.md`.
-
-## Gratitude
-
-WhiteMagic is **free and open-source** under the MIT license. It will always be free. If WhiteMagic has been useful to you, gratitude is welcome but never expected.
-
-- **XRPL Tip Address**: `raakfKn96zVmXqKwRTDTH5K3j5eTBp1hPy`
-- **Tip via tool**: `call_tool("whitemagic.tip", amount=1.0, currency="XRP")`
+See `docs/CONTRIBUTING.md`.
 
 ## Contact & Support
 - **Email**: whitemagicdev@proton.me
 - **GitHub**: [whitemagic-ai/whitemagic](https://github.com/whitemagic-ai/whitemagic)
+- **XRP Tips**: `raakfKn96zVmXqKwRTDTH5K3j5eTBp1hPy` (gratitude-driven, always free)
 - **License**: MIT

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -16,11 +15,7 @@ import (
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
-	"github.com/libp2p/go-libp2p/core/pnet"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
-	libp2pquic "github.com/libp2p/go-libp2p/p2p/transport/quic"
-	"github.com/libp2p/go-libp2p/p2p/transport/tcp"
-	"github.com/libp2p/go-libp2p/p2p/transport/websocket"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
 
@@ -54,16 +49,13 @@ func setupDiscovery(h host.Host) error {
 
 func main() {
 	msgFlag := flag.String("msg", "", "Message content to broadcast as a HolographicSignal")
-	pskFlag := flag.String("psk", "", "Pre-shared key for private mesh network (min 32 chars)")
 	redisUrl := os.Getenv("REDIS_URL")
-	pskEnv := os.Getenv("WM_MESH_PSK")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	fmt.Println("🌐 WhiteMagic v15.1 Nervous System — Holographic Mesh Active")
-	fmt.Println("   Transports: TCP + QUIC + WebSocket | Encryption: Noise + TLS")
+	fmt.Println("🌐 WhiteMagic v12.3 Nervous System - Holographic Mesh Active")
 
 	// Setup Redis
 	var rdb *redis.Client
@@ -92,50 +84,11 @@ func main() {
 		}
 	}
 
-	// Build libp2p host with multi-transport, encryption, and optional PSK
-	opts := []libp2p.Option{
-		// Multi-transport: TCP + QUIC + WebSocket for maximum connectivity
-		libp2p.Transport(tcp.NewTCPTransport),
-		libp2p.Transport(libp2pquic.NewTransport),
-		libp2p.Transport(websocket.New),
-		libp2p.ListenAddrStrings(
-			"/ip4/0.0.0.0/tcp/0",
-			"/ip4/0.0.0.0/udp/0/quic-v1",
-			"/ip4/0.0.0.0/tcp/0/ws",
-		),
-		// NAT traversal: UPnP + NAT-PMP for automatic port forwarding
-		libp2p.NATPortMap(),
-		// Enable AutoRelay for peers behind strict NATs
-		libp2p.EnableRelay(),
-		libp2p.EnableHolePunching(),
-	}
-
-	// Optional: Private network with pre-shared key
-	psk := *pskFlag
-	if psk == "" {
-		psk = pskEnv
-	}
-	if psk != "" {
-		if len(psk) < 32 {
-			log.Fatal("PSK must be at least 32 characters")
-		}
-		// Derive 32-byte key from PSK via SHA-256
-		hash := sha256.Sum256([]byte(psk))
-		pnetKey := pnet.PSK(hash[:])
-		opts = append(opts, libp2p.PrivateNetwork(pnetKey))
-		fmt.Println("🔒 Private network mode: PSK authentication enabled")
-	}
-
-	h, err := libp2p.New(opts...)
+	h, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/0.0.0.0/tcp/0"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer h.Close()
-
-	fmt.Printf("[MESH] Listening on:\n")
-	for _, addr := range h.Addrs() {
-		fmt.Printf("   %s/p2p/%s\n", addr, h.ID())
-	}
 
 	fmt.Printf("[MESH] My Peer ID: %s\n", h.ID().String())
 

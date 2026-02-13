@@ -1,8 +1,8 @@
 # WhiteMagic Privacy Policy
 
 **Effective Date**: November 2, 2025  
-**Last Updated**: February 12, 2026  
-**Version**: 15.1.0
+**Last Updated**: February 9, 2026  
+**Version**: 13.0.0
 
 ---
 
@@ -119,7 +119,7 @@ If you choose to use optional cloud features (sync, hosted API):
 
 ### 7.3 Deletion
 - Delete individual memories via API
-- Request full account deletion: whitemagicdev@proton.me
+- Request full account deletion: support@whitemagic.dev
 - Deletion completed within 30 days
 
 ### 7.4 Export
@@ -173,14 +173,14 @@ California residents have additional rights:
 - **Right to opt-out**: From data sales (we don't sell)
 - **Non-discrimination**: Equal service regardless of privacy choices
 
-Contact: whitemagicdev@proton.me
+Contact: privacy@whitemagic.dev
 
 ## 13. GDPR Compliance (EU)
 
 For EU residents:
 - **Legal basis**: Contract performance, legitimate interests
 - **Data controller**: WhiteMagic
-- **Data protection officer**: whitemagicdev@proton.me
+- **Data protection officer**: dpo@whitemagic.dev
 - **Right to lodge complaint**: With supervisory authority
 
 ## 14. Changes to Privacy Policy
@@ -193,17 +193,17 @@ For EU residents:
 ## 15. Contact Us
 
 **Privacy Inquiries**:  
-Email: whitemagicdev@proton.me
+Email: privacy@whitemagic.dev
 
 **Data Deletion Requests**:  
-Email: whitemagicdev@proton.me
+Email: support@whitemagic.dev
 
 **General Support**:  
-GitHub: [whitemagic-ai/whitemagic](https://github.com/whitemagic-ai/whitemagic)  
-Email: whitemagicdev@proton.me
+Website: whitemagic.dev  
+Email: support@whitemagic.dev
 
 ---
 
-**Last Updated**: February 12, 2026
+**Last Updated**: November 2, 2025
 
 **By using WhiteMagic, you acknowledge that you have read and understood this Privacy Policy.**

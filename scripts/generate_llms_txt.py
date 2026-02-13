@@ -230,10 +230,10 @@ _DOCS = """
 ## Documentation
 
 - AI Primary Spec: AI_PRIMARY.md (start here if you're an AI)
-- API Reference: docs/reference/API_REFERENCE.md
-- Architecture: docs/reference/ARCHITECTURE.md
+- API Reference: docs/API_REFERENCE.md
+- Architecture: docs/ARCHITECTURE.md
 - Contributing: CONTRIBUTING.md
-- MCP Configs: docs/guides/MCP_CONFIG_EXAMPLES.md
+- MCP Configs: docs/MCP_CONFIG_EXAMPLES.md
 - Changelog: CHANGELOG.md
 """
 

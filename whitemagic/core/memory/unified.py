@@ -173,6 +173,17 @@ class UnifiedMemory:
         except Exception:
             pass  # Embedding unavailable — skip silently
 
+        # v15.2: Auto-extract entities and relations into knowledge graph
+        try:
+            from whitemagic.core.intelligence.entity_extractor import get_entity_extractor
+            extractor = get_entity_extractor()
+            content_for_extraction = str(content)[:4000]
+            if title:
+                content_for_extraction = f"{title}\n{content_for_extraction}"
+            extractor.extract_and_store(memory.id, content_for_extraction)
+        except Exception:
+            pass  # Entity extraction unavailable — skip silently
+
         return memory
 
     def recall(self, memory_id: str) -> Memory | None:

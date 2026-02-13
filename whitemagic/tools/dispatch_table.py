@@ -520,6 +520,40 @@ DISPATCH_TABLE: dict[str, Callable[..., dict[str, Any]]] = {
     "verification.request": LazyHandler("verification", "handle_verification_request"),
     "verification.attest": LazyHandler("verification", "handle_verification_attest"),
     "verification.status": LazyHandler("verification", "handle_verification_status"),
+
+    # --- v15.2: Sovereign Sandbox (Shelter) ---
+    "shelter.create": LazyHandler("shelter", "handle_shelter_create"),
+    "shelter.execute": LazyHandler("shelter", "handle_shelter_execute"),
+    "shelter.inspect": LazyHandler("shelter", "handle_shelter_inspect"),
+    "shelter.destroy": LazyHandler("shelter", "handle_shelter_destroy"),
+    "shelter.status": LazyHandler("shelter", "handle_shelter_status"),
+    "shelter.policy": LazyHandler("shelter", "handle_shelter_policy"),
+
+    # --- v15.2: Optimized Memory States (OMS) ---
+    "oms.export": LazyHandler("oms", "handle_oms_export"),
+    "oms.import": LazyHandler("oms", "handle_oms_import"),
+    "oms.inspect": LazyHandler("oms", "handle_oms_inspect"),
+    "oms.verify": LazyHandler("oms", "handle_oms_verify"),
+    "oms.price": LazyHandler("oms", "handle_oms_price"),
+    "oms.list": LazyHandler("oms", "handle_oms_list"),
+    "oms.status": LazyHandler("oms", "handle_oms_status"),
+
+    # --- v15.2: ILP Streaming Payments ---
+    "ilp.configure": LazyHandler("ilp", "handle_ilp_configure"),
+    "ilp.send": LazyHandler("ilp", "handle_ilp_send"),
+    "ilp.receipt": LazyHandler("ilp", "handle_ilp_receipt"),
+    "ilp.history": LazyHandler("ilp", "handle_ilp_history"),
+    "ilp.balance": LazyHandler("ilp", "handle_ilp_balance"),
+    "ilp.status": LazyHandler("ilp", "handle_ilp_status"),
+
+    # --- v15.2: Marketplace Bridge ---
+    "marketplace.publish": LazyHandler("marketplace", "handle_marketplace_publish"),
+    "marketplace.discover": LazyHandler("marketplace", "handle_marketplace_discover"),
+    "marketplace.negotiate": LazyHandler("marketplace", "handle_marketplace_negotiate"),
+    "marketplace.complete": LazyHandler("marketplace", "handle_marketplace_complete"),
+    "marketplace.my_listings": LazyHandler("marketplace", "handle_marketplace_my_listings"),
+    "marketplace.remove": LazyHandler("marketplace", "handle_marketplace_remove"),
+    "marketplace.status": LazyHandler("marketplace", "handle_marketplace_status"),
 }
 
 

@@ -1,6 +1,6 @@
 # Contributing to WhiteMagic
 
-Thank you for your interest in contributing to WhiteMagic! This document provides guidelines for the v15+ codebase.
+Thank you for your interest in contributing to WhiteMagic! This document provides guidelines for the v13+ codebase.
 
 ---
 
@@ -122,7 +122,7 @@ tests/
 └── conftest.py        # Shared fixtures
 ```
 
-**Current baseline**: ~1,955 passed, 12 skipped (optional deps: cvxpy, FastAPI)
+**Current baseline**: 837 passed, 9 skipped (optional deps: cvxpy, FastAPI)
 
 ---
 
@@ -150,16 +150,17 @@ test: add 38 tests for v12.8 fusions
 
 ---
 
-## Project Structure (v15)
+## Project Structure (v13)
 
 ```
 whitemagic/
-├── autonomous/         # Autonomous daemon + executor
-├── benchmarks/         # Performance benchmarks
+├── autonomous/         # Autonomous daemon + executor (merged in v13)
+├── benchmarks/         # Performance benchmarks (restored in v13)
 ├── bridges/            # Polyglot accelerator interfaces
 ├── cascade/            # Meta-orchestration (tools calling tools)
 ├── cli/                # CLI subcommand modules
 ├── core/               # Core subsystems (memory, resonance, ganas, ...)
+│   ├── bridge/         # DEPRECATED — legacy tool dispatch
 │   ├── fusions.py      # 28 cross-system fusion wiring functions
 │   ├── ganas/          # 28 Lunar Mansion Gana implementations
 │   ├── memory/         # Unified memory (SQLite + holographic 5D)
@@ -175,18 +176,12 @@ whitemagic/
 │   ├── registry_defs/  # ToolDefinition declarations
 │   └── unified_api.py  # Central call_tool() entry point
 ├── cli/cli_app.py      # CLI entrypoint (Click)
-├── run_mcp.py          # MCP server entrypoint (FastMCP)
-└── run_mcp_lean.py     # Lean MCP server (28 Gana meta-tools, MCP 3.0)
+└── run_mcp.py          # MCP server entrypoint (FastMCP)
 ```
 
 ---
 
-## Gratitude
-
-WhiteMagic is **free and open-source** (MIT). Gratitude is voluntary but appreciated.
-
-- **XRPL Tip Address**: `raakfKn96zVmXqKwRTDTH5K3j5eTBp1hPy`
-- **Contact**: whitemagicdev@proton.me
+## Recognition
 
 Contributors are recognized in release notes and the README.
 

@@ -274,9 +274,22 @@ class GraphWalker:
                 pass
 
         # Semantic similarity: steer walk toward query-relevant neighbors
+        # v15.2: HRR look-ahead projection — if relation type is known, project
+        # the query embedding through that relation for a more targeted comparison.
+        # "What should the next hop look like if we follow this relation?"
         semantic_sim = 1.0
         if query_embedding and neighbor_embedding:
-            raw_sim = self._cosine_similarity(query_embedding, neighbor_embedding)
+            effective_query = query_embedding
+            # HRR projection: use relation-aware look-ahead when possible
+            if neighbor.relation_type and neighbor.relation_type != "associated_with":
+                try:
+                    from whitemagic.core.memory.hrr import get_hrr_engine
+                    hrr = get_hrr_engine(dim=len(query_embedding))
+                    projected = hrr.project(query_embedding, neighbor.relation_type)
+                    effective_query = projected.tolist()
+                except Exception:
+                    pass  # HRR unavailable — use raw query embedding
+            raw_sim = self._cosine_similarity(effective_query, neighbor_embedding)
             # Map from [-1, 1] to [0.1, 2.0] — never zero, reward alignment
             semantic_sim = max(0.1, 0.5 + raw_sim * 1.5)
 
@@ -666,6 +679,7 @@ class GraphWalker:
                     "semantic_projection": True,
                     "fused_gravity": True,
                     "causality_enforcement": True,
+                    "hrr_look_ahead": True,
                 },
             }
 
